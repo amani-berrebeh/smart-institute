@@ -9,7 +9,7 @@ import dummyImg from "../../assets/images/users/user-dummy-img.jpg"
 import { Link } from 'react-router-dom';
 
 const ListeAvisPersonnel = () => {
-    document.title = "Demande Enseignant| Smart Institute";
+    document.title = "Avis Personnel | Smart Institute";
     const [modal_AddUserModals, setmodal_AddUserModals] = useState<boolean>(false);
     const [isMultiDeleteButton, setIsMultiDeleteButton] = useState<boolean>(false)
     function tog_AddUserModals() {
@@ -40,22 +40,22 @@ const ListeAvisPersonnel = () => {
 
     const columns = useMemo(
         () => [
-            {
-                Header: (<div className="form-check">
-                    <input className="form-check-input" type="checkbox" id="checkAll" onClick={() => checkedAll()} />
-                </div>),
-                Cell: (cellProps: any) => {
-                    return (
-                        <div className="form-check">
-                            <input className="userCheckBox form-check-input" type="checkbox" name="chk_child" value={cellProps.row.original.id} onChange={() => checkedbox()} />
-                        </div>
-                    );
-                },
-                id: '#',
-            },
+            // {
+            //     Header: (<div className="form-check">
+            //         <input className="form-check-input" type="checkbox" id="checkAll" onClick={() => checkedAll()} />
+            //     </div>),
+            //     Cell: (cellProps: any) => {
+            //         return (
+            //             <div className="form-check">
+            //                 <input className="userCheckBox form-check-input" type="checkbox" name="chk_child" value={cellProps.row.original.id} onChange={() => checkedbox()} />
+            //             </div>
+            //         );
+            //     },
+            //     id: '#',
+            // },
             {
                 Header: "ID",
-                accessor: "email_id",
+                accessor: "id",
                 disableFilters: true,
                 filterable: true,
             },
@@ -68,7 +68,7 @@ const ListeAvisPersonnel = () => {
                         <div className="flex-shrink-0">
                             <img src={cellProps.user_img} alt="" className="avatar-xs rounded-circle user-profile-img" />
                         </div>
-                        <div className="flex-grow-1 ms-2 user_name">{cellProps.user_name}</div>
+                        {/* <div className="flex-grow-1 ms-2 user_name">{cellProps.user_name}</div> */}
                     </div>)
                 }
             },
@@ -76,7 +76,7 @@ const ListeAvisPersonnel = () => {
            
             {
                 Header: "Titre",
-                accessor: "date",
+                accessor: "title",
                 disableFilters: true,
                 filterable: true,
             },
@@ -86,41 +86,101 @@ const ListeAvisPersonnel = () => {
                 disableFilters: true,
                 filterable: true,
             },
-            {
-                Header: "Date",
-                accessor: "",
-                disableFilters: true,
-                filterable: true,
-            },
-            {
-                Header: "Account Status",
-                disableFilters: true,
-                filterable: true,
-                accessor: (cellProps: any) => {
-                    switch (cellProps.status) {
-                        case "Active":
-                            return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
-                        case "Inactive":
-                            return (<span className="badge bg-danger-subtle text-danger"> {cellProps.status}</span>)
-                        default:
-                            return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
-                    }
-                },
-            },
+            // {
+            //     Header: "Date",
+            //     accessor: "",
+            //     disableFilters: true,
+            //     filterable: true,
+            // },
+            // {
+            //     Header: "Account Status",
+            //     disableFilters: true,
+            //     filterable: true,
+            //     accessor: (cellProps: any) => {
+            //         switch (cellProps.status) {
+            //             case "Active":
+            //                 return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
+            //             case "Inactive":
+            //                 return (<span className="badge bg-danger-subtle text-danger"> {cellProps.status}</span>)
+            //             default:
+            //                 return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
+            //         }
+            //     },
+            // },
             {
                 Header: "Action",
                 disableFilters: true,
                 filterable: true,
                 accessor: (cellProps: any) => {
                     return (
-                        <div className="d-flex gap-2">
-                            <div className="edit">
-                                <Button variant="ghost-info" size="sm" className="btn-ghost-info btn-icon edit-item-btn"><i className="ph-pencil-line"></i></Button>
-                            </div>
-                            <div className="remove">
-                                <Button variant="ghost-danger" size="sm" className="btn-ghost-danger btn-icon remove-item-btn"><i className="ph-trash"></i></Button>
-                            </div>
-                        </div>
+                        <ul className="hstack gap-2 list-unstyled mb-0">
+              <li>
+                <Link
+                  to="/SingleAvisEtudiant"
+                  state={cellProps}
+                  className="badge bg-info-subtle text-info view-item-btn"
+                  data-bs-toggle="offcanvas"
+                >
+                  <i
+                    className="ph ph-eye"
+                    style={{
+                      transition: "transform 0.3s ease-in-out",
+                      cursor: "pointer",
+                      fontSize: "1.5em",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.4)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  ></i>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="#GroupDetails"
+                  className="badge bg-success-subtle text-success edit-item-btn"
+                >
+                  <i
+                    className="ph ph-pencil-line"
+                    style={{
+                      transition: "transform 0.3s ease-in-out",
+                      cursor: "pointer",
+                      fontSize: "1.5em",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.4)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  ></i>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="#"
+                  className="badge bg-danger-subtle text-danger remove-item-btn"
+                 
+                >
+                  <i
+                    className="ph ph-trash"
+                    style={{
+                      transition: "transform 0.3s ease-in-out",
+                      cursor: "pointer",
+                      fontSize: "1.5em",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.4)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  ></i>
+                </Link>
+              </li>
+            </ul>
                     )
                 },
             },
@@ -132,7 +192,7 @@ const ListeAvisPersonnel = () => {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumb title="Liste des Avis" pageTitle="More" />
+                    <Breadcrumb title="Liste des Avis" pageTitle="Avis Personnel" />
 
                     {/* <Row>
                         <Col xxl={3} md={6}>
@@ -410,6 +470,7 @@ const ListeAvisPersonnel = () => {
                     </Modal>
 
                 </Container >
+                
             </div >
         </React.Fragment >
     );

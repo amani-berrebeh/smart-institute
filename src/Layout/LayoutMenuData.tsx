@@ -7,6 +7,7 @@ const Navdata = () => {
     const [isAvisEtudiant, setIsAvisEtudiant] = useState(false);
     const [isAvisEnseignant, setIsAvisEnseignant] = useState(false);
     const [isAvisPersonnel, setIsAvisPersonnel] = useState(false);
+    const [isActualite, setIsActualite] = useState(false);
     const [isSellers, setIsSellers] = useState(false);
     const [isInvoice, setIsInvoice] = useState(false);
     const [isParametre, setIsParametre] = useState(false);
@@ -67,6 +68,9 @@ const Navdata = () => {
         if (iscurrentState !== 'AvisPersonnel') {
             setIsAvisPersonnel(false);
         }
+        if (iscurrentState !== 'Actualite') {
+            setIsActualite(false);
+        }
     }, [
         iscurrentState,
         isEcommerce,
@@ -118,7 +122,7 @@ const Navdata = () => {
                 },
                 {
                     id: "GestionAvisEtudiant",
-                    label: "Liste Des avis",
+                    label: "Liste des avis",
                     link: "/ListeAvisEtudiant",
                     parentId: "Gestion-des-Avis",
                     icon: "bi bi-list-ul"
@@ -149,7 +153,7 @@ const Navdata = () => {
                 },
                 {
                     id: "GestionAvisEnseignant",
-                    label: "Liste Des avis",
+                    label: "Liste des avis",
                     link: "/ListeAvisEnseignant",
                     parentId: "Avis-enseignant",
                     icon: "bi bi-list-ul"
@@ -173,14 +177,14 @@ const Navdata = () => {
             subItems: [
                 {
                     id: "AjouterAvisPersonnel",
-                    label: "Ajouter un Avis",
+                    label: "Ajouter un avis",
                     link: "/AjouterAvisPersonnel",
                     parentId: "Avis-Personnel",
                     icon: "bi bi-file-earmark-plus"
                 },
                 {
                     id: "GestionAvisPersonnel",
-                    label: "Liste Des avis",
+                    label: "Liste des avis",
                     link: "/ListeAvisPersonnel",
                     parentId: "Avis-Personnel",
                     icon: "bi bi-list-ul"
@@ -188,6 +192,60 @@ const Navdata = () => {
             ],
            
         },
+        // actualite
+        {
+            id: "Actualite",
+            label: "Actualités",
+            link: "/#",
+            icon: "bi bi-chat-quote",
+            click: function (e: any) {
+                e.preventDefault();
+                setIsActualite(!isActualite);
+                setIscurrentState('ctualite');
+                updateIconSidebar(e);
+            },
+            stateVariables: isActualite,
+            subItems: [
+                {
+                    id: "Ajouterctualite",
+                    label: "Ajouter une actualité",
+                    link: "/AjouterActualite",
+                    parentId: "Actualite",
+                    icon: "bi bi-file-earmark-plus"
+                },
+                {
+                    id: "listeActualite",
+                    label: "Liste des actualités",
+                    link: "/ListeActualite",
+                    parentId: "Actualite",
+                    icon: "bi bi-list-ul"
+                },
+            ],
+           
+        },
+        // demande etudiant
+        {
+            id: "Demande-etudiant",
+            label: "Demande Etudiant",
+            link: "/ListeDemandeEtudiant",
+            icon: "bi bi-telephone-forward",
+           
+        },
+        {
+            id: "Demande-enseignant",
+            label: "Demande Enseignant",
+            link: "/ListeDemandeEnseignant",
+            icon: "bi bi-telephone-forward",
+           
+        },
+        {
+            id: "Demande-personnel",
+            label: "Demande Personnel",
+            link: "/ListeDemandePersonnel",
+            icon: "bi bi-telephone-forward",
+           
+        },
+
         {
             id: "Gestion-des-avis-Enseignants",
             label: "Gestion des Enseignants",
@@ -196,13 +254,7 @@ const Navdata = () => {
            
         },
        
-        {
-            id: "Demande-enseignants",
-            label: "Demande Enseignants",
-            link: "/DemandeEnseignant",
-            icon: "bi bi-telephone-forward-fill",
-           
-        },
+        
         {
             id: "Réclamation-enseignants",
             label: "Réclamation Enseignants",

@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import TableContainer from "Common/TableContainer";
-import { profile } from "Common/data";
+import { account } from "Common/data";
 import { Dropdown } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
-const ProductTable = () => {
+const RecentOrdersTable = () => {
     const columns = useMemo(
         () => [
             {
@@ -18,7 +18,7 @@ const ProductTable = () => {
                 Header: "Order ID",
                 accessor: (cellProps: any) => {
                     return (
-                        <Link to="#" className="fw-medium">{cellProps.id}</Link>
+                        <Link to="#" className="fw-medium">{cellProps.OrderID}</Link>
                     )
                 },
                 disableFilters: true,
@@ -26,63 +26,50 @@ const ProductTable = () => {
             },
             {
                 Header: "Product Name",
-                Cell: (product: any) => (
-                    <>
-                        <div className="d-flex align-items-center">
-                            <div className="flex-shrink-0 me-3">
-                            <div className="avatar-title bg-light rounded">
-                                <img
-                                    src={product.row.original.img}
-                                    alt=""
-                                    className="avatar-xs"
-                                />
-                            </div>
-                            </div>
-                            <div className="flex-grow-1">
-                            <h5 className="fs-14 mb-1">
-                                <Link
-                                to="/apps-ecommerce-product-details"
-                                className="d-block text-reset"
-                                >
-                                {" "}
-                                {product.row.original.title}
-                                </Link>
-                            </h5>
-                            <p className="text-muted mb-0">
-                                Category :{" "}
-                                <span className="fw-medium">
-                                {" "}
-                                {product.row.original.type}
-                                </span>
-                            </p>
-                            </div>
-                        </div>
-                    </>
-                ),
-            },
-            {
-                Header: "Stock",
-                accessor: "stock",
+                accessor: "ProductName",
                 disableFilters: true,
                 filterable: true,
             },
             {
-                Header: "Rate",
-                accessor: "rating",
+                Header: "Amount",
+                accessor: "Amount",
                 disableFilters: true,
                 filterable: true,
             },
             {
-                Header: "Price",
-                accessor: "price",
+                Header: "Order Date",
+                accessor: "OrderDate",
                 disableFilters: true,
                 filterable: true,
             },
             {
-                Header: "Orders",
-                accessor: "orders",
+                Header: "Payment Method",
+                accessor: "PaymentMethod",
                 disableFilters: true,
                 filterable: true,
+            },
+            {
+                Header: "Delivery Status",
+                disableFilters: true,
+                filterable: true,
+                accessor: (cellProps: any) => {
+                    switch (cellProps.DeliveryStatus) {
+                        case "Delivered":
+                            return (<span className="badge bg-success-subtle text-success text-uppercase"> {cellProps.DeliveryStatus}</span>)
+                        case "Pickups":
+                            return (<span className="badge bg-info-subtle text-info text-uppercase"> {cellProps.DeliveryStatus}</span>)
+                        case "Pending":
+                            return (<span className="badge bg-warning-subtle text-warning text-uppercase"> {cellProps.DeliveryStatus}</span>)
+                        case "Inprogress":
+                            return (<span className="badge bg-secondary-subtle text-secondary text-uppercase"> {cellProps.DeliveryStatus}</span>)
+                        case "Returns":
+                            return (<span className="badge bg-primary-subtle text-primary text-uppercase"> {cellProps.DeliveryStatus}</span>)
+                        case "Cancelled":
+                            return (<span className="badge bg-danger-subtle text-danger text-uppercase"> {cellProps.DeliveryStatus}</span>)
+                        default:
+                            return (<span className="badge bg-success-subtle text-success text-uppercase"> {cellProps.DeliveryStatus}</span>)
+                    }
+                },
             },
             {
                 Header: "Action",
@@ -120,7 +107,7 @@ const ProductTable = () => {
         <React.Fragment>
             <TableContainer
                 columns={(columns || [])}
-                data={(profile || [])}
+                data={(account || [])}
                 // isGlobalFilter={false}
                 iscustomPageSize={false}
                 isBordered={false}
@@ -134,4 +121,4 @@ const ProductTable = () => {
     );
 };
 
-export default ProductTable;
+export default RecentOrdersTable;

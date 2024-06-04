@@ -2,6 +2,7 @@ import React from 'react';
 import { Container } from 'react-bootstrap';
 import Breadcrumb from 'Common/BreadCrumb';
 import Profile from './Profile';
+import RecentOrders from './ProfilEtudiant';
 
 const MyAccount = () => {
 
@@ -11,8 +12,8 @@ const MyAccount = () => {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumb title="My Account" pageTitle="Accounts" />
-                    <Profile />
+                    <Breadcrumb title="Profil étudiant" pageTitle="Profils" />
+                    <RecentOrders />
                 </Container>
             </div>
         </React.Fragment>

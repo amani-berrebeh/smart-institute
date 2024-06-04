@@ -22,11 +22,12 @@ import Swal from "sweetalert2";
 
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
-import Select from "react-select";
-import { useSelector } from "react-redux";
 
-const AjouterAvisEnseignant = () => {
-  document.title = "Nouvel Avis Enseignant | Smart Institute";
+import { useSelector } from "react-redux";
+import Select from "react-select";
+
+const AjouterActualite = () => {
+  document.title = "Ajouter Actualité | Smart Institute";
   const navigate = useNavigate();
 
   // description editor
@@ -44,46 +45,9 @@ const AjouterAvisEnseignant = () => {
 
   const [data, setData] = useState("");
   // end description editor
-  // departement select
-  const options = [
-    { value: "LGM1 G1", label: "LGM1 G1" },
-    { value: "LGM1 G2", label: "LGM1 G2" },
-    { value: "LTIC1 G1", label: "LTIC1 G1" },
-    { value: "LTIC1 G2", label: "LTIC1 G2" },
-    { value: "LGM2 G1", label: "LGM2 G1" },
-    { value: "LGM2 G2", label: "LGM2 G2" },
-    { value: "LTIC2 G1", label: "LTIC2 G1" },
-    { value: "LTIC2 G2", label: "LTIC2 G2" },
-    { value: "LGM3 G1", label: "LGM3 G1" },
-    { value: "LGM3 G2", label: "LGM3 G2" },
-    { value: "LTIC3 G1", label: "LTIC3 G1" },
-    { value: "LTIC3 G2", label: "LTIC3 G2" },
-  ];
-  const customStyles = {
-    multiValue: (styles: any, { data }: any) => {
-      return {
-        ...styles,
-        backgroundColor: "#4b93ff",
-      };
-    },
-    multiValueLabel: (styles: any, { data }: any) => ({
-      ...styles,
-      backgroundColor: "#4b93ff",
-      color: "white",
-      //    borderRadius: "50px"
-    }),
-    multiValueRemove: (styles: any, { data }: any) => ({
-      ...styles,
-      color: "white",
-      backgroundColor: "#4b93ff",
-      ":hover": {
-        backgroundColor: "#4b93ff",
-        color: "white",
-      },
-    }),
-  };
-  // end departement select
-  //dropZone // dropZone
+
+ 
+  // dropZone
   const [selectedFiles, setSelectedFiles] = useState([]);
 
   function handleAcceptedFiles(files: any) {
@@ -155,7 +119,7 @@ const AjouterAvisEnseignant = () => {
                         </div>
                       </div>
                       <div className="flex-grow-1">
-                        <h5 className="card-title">Nouvel Avis Enseignant</h5>
+                        <h5 className="card-title">Nouvelle Actualité</h5>
                       </div>
                     </div>
                   </Card.Header>
@@ -166,7 +130,7 @@ const AjouterAvisEnseignant = () => {
                       <Row>
                         <Row>
                           {/* First Name  == Done */}
-                          <Col lg={4}>
+                          <Col lg={5}>
                             <div className="mb-3">
                               <Form.Label htmlFor="titre">
                                 <h4 className="card-title mb-0">Titre</h4>
@@ -180,6 +144,19 @@ const AjouterAvisEnseignant = () => {
                             </div>
                           </Col>
                           <Col lg={4}>
+                            <div className="mb-3">
+                              <Form.Label htmlFor="titre">
+                                <h4 className="card-title mb-0">Adresse</h4>
+                              </Form.Label>
+                              <Form.Control
+                                type="text"
+                                id="Titre"
+                                placeholder="Titre"
+                                // required
+                              />
+                            </div>
+                          </Col>
+                          <Col lg={3}>
                             <div className="mb-3">
                               <Form.Label htmlFor="dateOfBirth">
                                 <h4 className="card-title mb-0">Date</h4>
@@ -196,21 +173,7 @@ const AjouterAvisEnseignant = () => {
                               />
                             </div>
                           </Col>
-                          <Col lg={4} md={6}>
-                            <div className="mb-3">
-                              <Form.Label htmlFor="choices-multiple-remove-button">
-                                <h4 className="card-title mb-0">Département</h4>
-                              </Form.Label>
-
-                              <Select
-                                closeMenuOnSelect={false}
-                                defaultValue={[options[1]]}
-                                isMulti
-                                options={options}
-                                styles={customStyles}
-                              />
-                            </div>
-                          </Col>
+                         
                         </Row>
                         <Row>
                           <Col lg={12}>
@@ -254,7 +217,9 @@ const AjouterAvisEnseignant = () => {
                                 htmlFor="legalcardBase64String"
                                 className="form-label"
                               >
-                                Fichier (pdf)
+                                <h4 className="card-title mb-0">
+                                  Fichier (pdf)
+                                </h4>
                               </label>
                               <Form.Control
                                 name="legalcardBase64String"
@@ -280,7 +245,7 @@ const AjouterAvisEnseignant = () => {
                                 className="input-group-text"
                                 id="basic-addon3"
                               >
-                               Insérer un lien
+                                Insérer un lien
                               </span>
                               <Form.Control
                                 type="text"
@@ -290,7 +255,6 @@ const AjouterAvisEnseignant = () => {
                             </InputGroup>
                           </Col>
                         </Row>
-
                         <Row>
                           <Col lg={12}>
                             <Card>
@@ -308,7 +272,7 @@ const AjouterAvisEnseignant = () => {
                                       Gallerie de Photos
                                     </h5>
                                     <p className="text-muted mb-0">
-                                      Ajouter des images à l'avis
+                                      Ajouter des images à l'actualité
                                     </p>
                                   </div>
                                 </div>
@@ -330,7 +294,8 @@ const AjouterAvisEnseignant = () => {
                                             <i className="display-4 text-muted ri-upload-cloud-2-fill" />
                                           </div>
                                           <h5>
-                                          Déposez des photos ici ou cliquez pour télécharger.
+                                            Déposez des photos ici ou cliquez
+                                            pour télécharger.
                                           </h5>
                                         </div>
                                       </div>
@@ -379,7 +344,7 @@ const AjouterAvisEnseignant = () => {
                                                     handleDeleteFile(i)
                                                   }
                                                 >
-                                                  Delete
+                                                  Supprimer
                                                 </button>
                                               </Col>
                                             </Row>
@@ -404,7 +369,7 @@ const AjouterAvisEnseignant = () => {
                               id="add-btn"
                               type="submit"
                             >
-                              Ajouter Avis Enseignant
+                              Ajouter l'Actualité
                             </Button>
                           </div>
                         </Col>
@@ -421,4 +386,4 @@ const AjouterAvisEnseignant = () => {
   );
 };
 
-export default AjouterAvisEnseignant;
+export default AjouterActualite;

@@ -1,87 +1,73 @@
 import React, { useMemo } from 'react';
 import TableContainer from "Common/TableContainer";
-
-import { ordersList } from "Common/data";
-import { Link } from 'react-router-dom';
+import { account } from "Common/data";
 import { Dropdown } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
-const ListViewTable = () => {
-
+const RecentOrdersTable = () => {
     const columns = useMemo(
         () => [
             {
-                Header: (<div className="form-check">
-                    <input className="form-check-input" type="checkbox" id="checkAll" value="option" />
-                </div>),
+                Header: (<div className="form-check"> <input className="form-check-input" type="checkbox" id="checkAll" value="option" /> </div>),
                 Cell: (cellProps: any) => {
-                    return (<div className="form-check">
-                        <input className="form-check-input" type="checkbox" name="chk_child" defaultValue="option1" />
-                    </div>);
+                    return (<div className="form-check"> <input className="form-check-input" type="checkbox" name="chk_child" defaultValue="option1" /> </div>);
                 },
                 id: '#',
             },
             {
                 Header: "Order ID",
-                disableFilters: true,
-                filterable: true,
                 accessor: (cellProps: any) => {
-                    return <Link to="#" className="fw-medium link-primary">{cellProps.orderId}</Link>;
+                    return (
+                        <Link to="#" className="fw-medium">{cellProps.OrderID}</Link>
+                    )
                 },
-            },
-            {
-                Header: "Customer",
-                accessor: "customer_name",
                 disableFilters: true,
                 filterable: true,
             },
             {
                 Header: "Product Name",
-                accessor: "product_name",
+                accessor: "ProductName",
                 disableFilters: true,
                 filterable: true,
             },
             {
                 Header: "Amount",
-                accessor: "amount",
+                accessor: "Amount",
                 disableFilters: true,
                 filterable: true,
             },
             {
                 Header: "Order Date",
-                accessor: "order_date",
-                disableFilters: true,
-                filterable: true,
-            },
-            {
-                Header: "Delivery Date",
-                accessor: "delivery_date",
+                accessor: "OrderDate",
                 disableFilters: true,
                 filterable: true,
             },
             {
                 Header: "Payment Method",
-                accessor: "payment_method",
+                accessor: "PaymentMethod",
                 disableFilters: true,
                 filterable: true,
             },
             {
-                Header: "Status",
+                Header: "Delivery Status",
                 disableFilters: true,
                 filterable: true,
                 accessor: (cellProps: any) => {
-                    switch (cellProps.status) {
+                    switch (cellProps.DeliveryStatus) {
                         case "Delivered":
-                            return (<span className="badge bg-success-subtle text-success text-uppercase"> {cellProps.status}</span>)
-                        case "Cancelled":
-                            return (<span className="badge bg-danger-subtle text-danger text-uppercase"> {cellProps.status}</span>)
+                            return (<span className="badge bg-success-subtle text-success text-uppercase"> {cellProps.DeliveryStatus}</span>)
+                        case "Pickups":
+                            return (<span className="badge bg-info-subtle text-info text-uppercase"> {cellProps.DeliveryStatus}</span>)
                         case "Pending":
-                            return (<span className="badge bg-warning-subtle text-warning text-uppercase"> {cellProps.status}</span>)
+                            return (<span className="badge bg-warning-subtle text-warning text-uppercase"> {cellProps.DeliveryStatus}</span>)
                         case "Inprogress":
-                            return (<span className="badge bg-secondary-subtle text-secondary text-uppercase"> {cellProps.status}</span>)
+                            return (<span className="badge bg-secondary-subtle text-secondary text-uppercase"> {cellProps.DeliveryStatus}</span>)
                         case "Returns":
-                            return (<span className="badge bg-primary-subtle text-primary text-uppercase"> {cellProps.status}</span>)
+                            return (<span className="badge bg-primary-subtle text-primary text-uppercase"> {cellProps.DeliveryStatus}</span>)
+                        case "Cancelled":
+                            return (<span className="badge bg-danger-subtle text-danger text-uppercase"> {cellProps.DeliveryStatus}</span>)
                         default:
-                            return (<span className="badge bg-success-subtle text-success text-uppercase"> {cellProps.status}</span>)
+                            return (<span className="badge bg-success-subtle text-success text-uppercase"> {cellProps.DeliveryStatus}</span>)
                     }
                 },
             },
@@ -121,18 +107,18 @@ const ListViewTable = () => {
         <React.Fragment>
             <TableContainer
                 columns={(columns || [])}
-                data={(ordersList || [])}
+                data={(account || [])}
                 // isGlobalFilter={false}
                 iscustomPageSize={false}
                 isBordered={false}
                 customPageSize={10}
-                className="custom-header-css"
+                className="custom-header-css table align-middle table-nowrap"
                 tableClass="table-centered align-middle table-nowrap mb-0"
                 theadClass="text-muted table-light"
                 SearchPlaceholder='Search Products...'
             />
         </React.Fragment>
     );
-}
+};
 
-export default ListViewTable;
+export default RecentOrdersTable;

@@ -94,7 +94,7 @@ const Header = () => {
                             </Button>
 
                             {/* SearchModal */}
-                            <SearchModal />
+                            {/* <SearchModal /> */}
                         </div>
 
                         <div className="d-flex align-items-center">

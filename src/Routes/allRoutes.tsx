@@ -56,7 +56,7 @@ import Transactions from "pages/Localization/Transactions";
 import CurrencyRates from "pages/Localization/CurrencyRates";
 
 // Accounts
-import MyAccount from "pages/Accounts/MyAccount";
+import MyAccount from "pages/Accounts/AccountEtudiant";
 import Settings from "pages/Accounts/Settings";
 import SignUp from "pages/Accounts/AuthenticationInner/SignUp";
 import SignIn from "pages/Accounts/AuthenticationInner/SignIn";
@@ -84,8 +84,23 @@ import AjouterAvisEtudiant from "pages/avis-etudiant/AjouterAvisEtudiant";
 import ListeAvisEtudiant from "pages/avis-etudiant/ListeAvisEtudiant";
 import ListeAvisEnseignant from "pages/avis-enseignant/ListeAvisEnseignant";
 import AjouterAvisEnseignant from "pages/avis-enseignant/AjouterAvisEnseignant";
-import AjouterAvisPersonnel from "pages/avis-personnel/AjouterAvisEtudiant";
-import ListeAvisPersonnel from "pages/avis-personnel/ListeAvisEtudiant";
+import AjouterAvisPersonnel from "pages/avis-personnel/AjouterAvisPersonnel";
+import ListeAvisPersonnel from "pages/avis-personnel/ListeAvisPersonnel";
+import ListeActualite from "pages/actualite/ListeActualite";
+import AjouterActualite from "pages/actualite/AjouterActualite";
+import SingleAvisEtudiant from "pages/avis-etudiant/SingleAvisEtudiant";
+import SingleAvisEnseignant from "pages/avis-enseignant/SingleAvisEnseignant";
+import SingleAvisPersonnel from "pages/avis-personnel/SingleAvisPersonnel";
+import ListeDemandeEtudiant from "pages/Demande-etudiant/ListeDemandeEtudiant";
+import SingleDemandeEtudiant from "pages/Demande-etudiant/SingleDemandeEtudiant";
+import EditDemandeEtudiant from "pages/Demande-etudiant/EditDemandeEtudiant";
+import SingleActualite from "pages/actualite/SingleActualite";
+import ListeDemandeEnseignant from "pages/Demande-enseignant/DemandeEnseignant";
+import SingleDemandeEnseignant from "pages/Demande-enseignant/SingleDemandeEnseignant";
+import EditDemandeEnseignant from "pages/Demande-enseignant/EditDemandeEnseignant";
+import ListeDemandePersonnel from "pages/Demande-personnel/ListeDemandePersonnel";
+import SingleDemandePersonnel from "pages/Demande-personnel/SingleDemandePersonnel";
+import EditDemandePersonnel from "pages/Demande-personnel/EditDemandePersonnel";
 
 const authProtectedRoutes = [
     { path: "/dashboard", component: <Dashboard /> },
@@ -98,18 +113,40 @@ const authProtectedRoutes = [
     //avis etudiant
     { path: "/ListeAvisEtudiant", component: <ListeAvisEtudiant /> },
     { path: "/AjouterAvisEtudiant", component: <AjouterAvisEtudiant /> },
+    { path: "/SingleAvisEtudiant", component: <SingleAvisEtudiant /> },
     //avis enseignant
     { path: "/ListeAvisEnseignant", component: <ListeAvisEnseignant /> },
     { path: "/AjouterAvisEnseignant", component: <AjouterAvisEnseignant /> },
+    { path: "/SingleAvisEnseignant", component: <SingleAvisEnseignant /> },
     // avis personnel
     { path: "/ListeAvisPersonnel", component: <ListeAvisPersonnel /> },
     { path: "/AjouterAvisPersonnel", component: <AjouterAvisPersonnel /> },
-
+    { path: "/SingleAvisPersonnel", component: <SingleAvisPersonnel /> },
+    // actualite 
+    { path: "/ListeActualite", component: <ListeActualite /> },
+    { path: "/AjouterActualite", component: <AjouterActualite /> },
+    { path: "/DetailsActualite", component: <SingleActualite /> },
 
     { path: "/DemandeEnseignant", component: <DemandeEnseignant /> },
     { path: "/ReclamationEnseignant", component: <ReclamationEnseignant /> },
     { path: "/AvisRattrapage", component: <ReclamationEnseignant /> },
     { path: "/GestionEnseignant/AjouterEnseignant", component: <AjouterEnseignant /> },
+    
+    //demande etudiant
+    { path: "/ListeDemandeEtudiant", component: <ListeDemandeEtudiant /> },
+    { path: "/SingleDemandeEtudiant", component: <SingleDemandeEtudiant /> },
+    { path: "/EditDemandeEtudiant", component: <EditDemandeEtudiant /> },
+    { path: "/accountEtudiant", component: <MyAccount /> },
+
+    //demande enseignant
+    { path: "/ListeDemandeEnseignant", component: <ListeDemandeEnseignant /> },
+    { path: "/SingleDemandeEnseignant", component: <SingleDemandeEnseignant /> },
+    { path: "/EditDemandeEnseignant", component: <EditDemandeEnseignant /> },
+
+    //demande personnel
+    { path: "/ListeDemandePersonnel", component: <ListeDemandePersonnel /> },
+    { path: "/SingleDemandePersonnel", component: <SingleDemandePersonnel /> },
+    { path: "/EditDemandePersonnel", component: <EditDemandePersonnel /> },
 
 
 

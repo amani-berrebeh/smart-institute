@@ -100,7 +100,7 @@ const Layout = ({ children }: LayoutProps) => {
     return (
         <React.Fragment>
             <div id="layout-wrapper">
-                <TopBar />
+                {/* <TopBar /> */}
                 <Header />
                 <Sidebar layoutType={layoutType} />
                 <div className="main-content">
