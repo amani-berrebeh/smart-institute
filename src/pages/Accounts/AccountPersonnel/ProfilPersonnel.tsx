@@ -14,7 +14,6 @@ import {
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import DemandeTable from "./DemandeTable";
-import RecentOrdersTable from "./RecentOrdersTable";
 import ReclamationTable from "./ReclamationTable";
 import img1 from "assets/images/users/avatar-1.jpg";
 import paiement from "assets/images/paiement.png";
@@ -91,8 +90,8 @@ const MyAccount = () => {
                 <Col md={9}>
                   <Card.Header>
                     <div className="flex-grow-1 card-title mb-0">
-                      <h5>Raquel Murillo</h5>
-                      <p className="text-muted mb-0">راكيل موريو</p>
+                      <h5>Besma Miraoui</h5>
+                      <p className="text-muted mb-0">بسمة ميراوي</p>
                     </div>
                   </Card.Header>
                   <Card.Body>
@@ -102,27 +101,14 @@ const MyAccount = () => {
                           <Table className="table-borderless table-sm m-0 p-0 ">
                             <tbody>
                               <tr>
-                                <td>Groupe</td>
+                                <td>Matricule</td>
                                 <td className="fw-medium">LISI2Rx-G1</td>
                               </tr>
                               <tr>
                                 <td>Cin</td>
                                 <td className="fw-medium">04957698</td>
                               </tr>
-                              <tr>
-                                <td>Téléphone</td>
-                                <td className="fw-medium">54570866</td>
-                              </tr>
-                              <tr>
-                                <td>Compte Verifié</td>
-                                <td className="fw-medium">
-                                  {" "}
-                                  <span className="badge badge-label bg-primary">
-                                    <i className="mdi mdi-circle-medium"></i>{" "}
-                                    Non
-                                  </span>
-                                </td>
-                              </tr>
+                             
                             </tbody>
                           </Table>
                         </div>
@@ -131,6 +117,12 @@ const MyAccount = () => {
                         <div className="table-responsive">
                           <Table className="table-borderless table-sm m-0 p-0 ">
                             <tbody>
+                            <tr>
+                                <td>Email</td>
+                                <td className="fw-medium">
+                                miraoui.besma@gmail.com
+                                </td>
+                              </tr>
                               <tr>
                                 <td>Etat de Compte</td>
                                 <td className="fw-medium">
@@ -140,25 +132,9 @@ const MyAccount = () => {
                                   </span>
                                 </td>
                               </tr>
-                              <tr>
-                                <td>Type d'inscription</td>
-                                <td className="fw-medium">
-                                  <span className="badge badge-label bg-secondary fs-6">
-                                    <i className="mdi mdi-circle-medium"></i>{" "}
-                                    جديد
-                                  </span>
-                                </td>
-                              </tr>
-                              <tr>
-                                <td>Niveau</td>
-                                <td className="fw-medium">سنة أولى إجازة</td>
-                              </tr>
-                              <tr>
-                                <td>Filière</td>
-                                <td className="fw-medium">
-                                  Ingénierie des systèmes informatiques
-                                </td>
-                              </tr>
+                             
+                             
+                             
                             </tbody>
                           </Table>
                         </div>
@@ -181,60 +157,54 @@ const MyAccount = () => {
                         </tr>
 
                         <tr>
-                          <td>Etat civil</td>
+                          <td>Nationnalité</td>
                           <td className="fw-medium">أعزب / عزباء</td>
                         </tr>
                         <tr>
-                          <td>Date naissance </td>
+                          <td>Téléphone 1</td>
                           <td className="fw-medium">2002-01-08</td>
                         </tr>
                         <tr>
-                          <td>Lieu de naissance</td>
+                          <td>Téléphone 2</td>
                           <td className="fw-medium">kebili</td>
                         </tr>
                         <tr>
-                          <td>Téléphone Etudiant</td>
+                          <td>RIB</td>
                           <td className="fw-medium">54570866</td>
                         </tr>
-                        <tr>
-                          <td>Email</td>
-                          <td className="fw-medium">arwabenaoun21@gmail.com</td>
-                        </tr>
+                       
                       </tbody>
                     </Table>
                   </div>
                 </Col>
                 <Col lg={6}>
-                  <h5 className="text-muted "> Adresse de l'etudiant</h5>
+                  <h5 className="text-muted "> Adresse du personnel</h5>
                   <div className="table-responsive">
                     <Table className="table-borderless table-sm m-0 p-0 ">
                       <tbody>
                         <tr>
-                          <td>Nationalité </td>
+                          <td>Adresse (FR) : </td>
                           <td className="fw-medium">تونسية</td>
                         </tr>
                         <tr>
-                          <td>Gouvernorat</td>
+                          <td>Adresse (AR) :</td>
                           <td className="fw-medium">قبلي</td>
                         </tr>
                         <tr>
-                          <td>Municipalité </td>
+                          <td>Nom Garant :</td>
                           <td className="fw-medium">قبلي الشمالية</td>
                         </tr>
                         <tr>
-                          <td>Adresse Domicile FR</td>
+                          <td>Profession garant:</td>
                           <td className="fw-medium">
                             citée du stade municipal
                           </td>
                         </tr>
                         <tr>
-                          <td>Adresse Domicile AR</td>
+                          <td>Nombre des enfants:</td>
                           <td className="fw-medium"> حي الملعب البلدي</td>
                         </tr>
-                        <tr>
-                          <td>Code Postal</td>
-                          <td className="fw-medium"> 4200</td>
-                        </tr>
+                      
                       </tbody>
                     </Table>
                   </div>
@@ -242,32 +212,36 @@ const MyAccount = () => {
               </Row>
               <Row className="p-2">
                 <Col lg={6} className="border-end ">
-                  <h5 className="text-muted pb-1 pt-2 "> Parents</h5>
+                  <h5 className="text-muted pb-1 pt-2 "> Service</h5>
                   <div className="table-responsive">
                     <Table className="table-borderless table-sm m-0 p-0 ">
                       <tbody>
                         <tr>
-                          <td>Nom et prénom père</td>
+                          <td>Catégorie :</td>
                           <td className="fw-medium">ابراهيم بن عون</td>
                         </tr>
 
                         <tr>
-                          <td>Profession de père </td>
+                          <td>Fonction : </td>
                           <td className="fw-medium">متقاعد</td>
                         </tr>
                         <tr>
-                          <td>Nom et prénom mère </td>
+                          <td>Grade : </td>
                           <td className="fw-medium">سلوى عباس</td>
                         </tr>
                         <tr>
-                          <td>Téléphone famille</td>
+                          <td>Date Grade :</td>
+                          <td className="fw-medium">98280462</td>
+                        </tr>
+                        <tr>
+                          <td>Date récrutement :</td>
                           <td className="fw-medium">98280462</td>
                         </tr>
                       </tbody>
                     </Table>
                   </div>
                 </Col>
-                <Col lg={6}>
+                {/* <Col lg={6}>
                   <h5 className="text-muted pb-1 pt-2"> Baccalauréat</h5>
                   <div className="table-responsive">
                     <Table className="table-borderless table-sm m-0 p-0">
@@ -291,7 +265,7 @@ const MyAccount = () => {
                       </tbody>
                     </Table>
                   </div>
-                </Col>
+                </Col> */}
               </Row>
             </Card>
 

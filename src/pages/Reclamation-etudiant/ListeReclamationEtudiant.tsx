@@ -8,8 +8,8 @@ import Flatpickr from "react-flatpickr";
 import dummyImg from "../../assets/images/users/user-dummy-img.jpg"
 import { Link } from 'react-router-dom';
 
-const ListeDemandeEnseignant = () => {
-    document.title = "Demande Etudiant | Smart Institute";
+const ListeReclamationEtudiant = () => {
+    document.title = "Réclamation Etudiant | Smart University";
     const [modal_AddUserModals, setmodal_AddUserModals] = useState<boolean>(false);
     const [isMultiDeleteButton, setIsMultiDeleteButton] = useState<boolean>(false)
     function tog_AddUserModals() {
@@ -60,28 +60,14 @@ const ListeDemandeEnseignant = () => {
             //     filterable: true,
             // },
             {
-                Header: "Pièce demandée",
+                Header: "Réclamation",
                 accessor: "soustype",
                 disableFilters: true,
                 filterable: true,
             },
+           
             {
-                Header: "Etat",
-                  disableFilters: true,
-                   filterable: true,
-                   accessor: (cellProps: any) => {
-                      switch (cellProps.status) {
-                           case "en cours":
-                              return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
-                           case "Inactive":
-                               return (<span className="badge bg-danger-subtle text-danger"> {cellProps.status}</span>)
-                           default:
-                               return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
-                       }
-                   },
-               },
-            {
-                Header: "Enseignant",
+                Header: "Etudiant",
                 accessor: "etudiant",
                 disableFilters: true,
                 filterable: true,
@@ -99,11 +85,17 @@ const ListeDemandeEnseignant = () => {
                 filterable: true,
             },
             {
-                     Header: "Date d'Envoi",
+                     Header: "Date d'envoi",
                      accessor: "date",
                      disableFilters: true,
                      filterable: true,
                  },
+                 {
+                    Header: "Date de modification",
+                    accessor: "",
+                    disableFilters: true,
+                    filterable: true,
+                },
             // {
             //     Header: "Image",
             //     disableFilters: true,
@@ -137,7 +129,21 @@ const ListeDemandeEnseignant = () => {
             //     disableFilters: true,
             //     filterable: true,
             // },
-           
+            {
+                Header: "Etat",
+                  disableFilters: true,
+                   filterable: true,
+                   accessor: (cellProps: any) => {
+                      switch (cellProps.status) {
+                           case "en cours":
+                              return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
+                           case "Inactive":
+                               return (<span className="badge bg-danger-subtle text-danger"> {cellProps.status}</span>)
+                           default:
+                               return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
+                       }
+                   },
+               },
              
             {
                 Header: "Actions",
@@ -148,7 +154,7 @@ const ListeDemandeEnseignant = () => {
                         <ul className="hstack gap-2 list-unstyled mb-0">
               <li>
                 <Link
-                  to="/SingleDemandeEnseignant"
+                  to="/SingleReclamationEtudiant"
                   state={cellProps}
                   className="badge bg-info-subtle text-info view-item-btn"
                   data-bs-toggle="offcanvas"
@@ -171,7 +177,7 @@ const ListeDemandeEnseignant = () => {
               </li>
               <li>
                 <Link
-                  to="/EditDemandeEnseignant"
+                  to="/EditReclamationEtudiant"
                   className="badge bg-success-subtle text-success edit-item-btn"
                   state={cellProps}
                 >
@@ -225,7 +231,7 @@ const ListeDemandeEnseignant = () => {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumb title="Demande Etudiant" pageTitle="Liste des demandes" />
+                    <Breadcrumb title="Réclamation Etudiant" pageTitle="Liste des réclamations" />
 
                   
 
@@ -364,4 +370,4 @@ const ListeDemandeEnseignant = () => {
     );
 };
 
-export default ListeDemandeEnseignant;
+export default ListeReclamationEtudiant;

@@ -53,25 +53,25 @@ const ListeAvisEtudiant = () => {
             //     },
             //     id: '#',
             // },
-            {
-                Header: "ID",
-                accessor: "id",
-                disableFilters: true,
-                filterable: true,
-            },
-            {
-                Header: "Image",
-                disableFilters: true,
-                filterable: true,
-                accessor: (cellProps: any) => {
-                    return (<div className="d-flex align-items-center gap-2">
-                        <div className="flex-shrink-0">
-                            <img src={cellProps.user_img} alt="" className="avatar-xs rounded-circle user-profile-img" />
-                        </div>
-                        {/* <div className="flex-grow-1 ms-2 user_name">{cellProps.user_name}</div> */}
-                    </div>)
-                }
-            },
+            // {
+            //     Header: "ID",
+            //     accessor: "id",
+            //     disableFilters: true,
+            //     filterable: true,
+            // },
+            // {
+            //     Header: "Image",
+            //     disableFilters: true,
+            //     filterable: true,
+            //     accessor: (cellProps: any) => {
+            //         return (<div className="d-flex align-items-center gap-2">
+            //             <div className="flex-shrink-0">
+            //                 <img src={cellProps.user_img} alt="" className="avatar-xs rounded-circle user-profile-img" />
+            //             </div>
+            //             {/* <div className="flex-grow-1 ms-2 user_name">{cellProps.user_name}</div> */}
+            //         </div>)
+            //     }
+            // },
 
            
             {
@@ -86,12 +86,12 @@ const ListeAvisEtudiant = () => {
                 disableFilters: true,
                 filterable: true,
             },
-            // {
-            //     Header: "Date",
-            //     accessor: "",
-            //     disableFilters: true,
-            //     filterable: true,
-            // },
+            {
+                Header: "Date",
+                accessor: "",
+                disableFilters: true,
+                filterable: true,
+            },
             // {
             //     Header: "Account Status",
             //     disableFilters: true,

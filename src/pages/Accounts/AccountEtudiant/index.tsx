@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container } from 'react-bootstrap';
 import Breadcrumb from 'Common/BreadCrumb';
-import Profile from './Profile';
+
 import RecentOrders from './ProfilEtudiant';
 
 const MyAccount = () => {

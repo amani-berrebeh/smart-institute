@@ -78,12 +78,12 @@ const ListeDemandePersonnel = () => {
                 disableFilters: true,
                 filterable: true,
             },
-            {
-                Header: "Classe",
-                accessor: "classe",
-                disableFilters: true,
-                filterable: true,
-            },
+            // {
+            //     Header: "Classe",
+            //     accessor: "classe",
+            //     disableFilters: true,
+            //     filterable: true,
+            // },
             {
                      Header: "Date d'Envoi",
                      accessor: "date",
@@ -148,7 +148,7 @@ const ListeDemandePersonnel = () => {
                         <ul className="hstack gap-2 list-unstyled mb-0">
               <li>
                 <Link
-                  to="/SingleDemandeEtudiant"
+                  to="/SingleDemandePersonnel"
                   state={cellProps}
                   className="badge bg-info-subtle text-info view-item-btn"
                   data-bs-toggle="offcanvas"
@@ -171,7 +171,7 @@ const ListeDemandePersonnel = () => {
               </li>
               <li>
                 <Link
-                  to="/EditDemandeEtudiant"
+                  to="/EditDemandePersonnel"
                   className="badge bg-success-subtle text-success edit-item-btn"
                   state={cellProps}
                 >

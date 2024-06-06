@@ -75,9 +75,9 @@ import Logout from "pages/Authentication/Logout";
 import Register from "pages/Authentication/Register";
 import ForgotPassword from "pages/Authentication/ForgotPassword";
 import UserProfile from "pages/Authentication/user-profile";
-import GestionEnseignant from "pages/Gestion-enseignant/GestionEnseignant";
-import DemandeEnseignant from "pages/Demande-enseignant/DemandeEnseignant";
-import ReclamationEnseignant from "pages/ReclamationEnseignant/ReclamationEnseignant";
+
+import DemandeEnseignant from "pages/Demande-enseignant/ListeDemandeEnseignant";
+
 import AjouterEnseignant from "pages/Gestion-enseignant/AjouterEnseignant";
 
 import AjouterAvisEtudiant from "pages/avis-etudiant/AjouterAvisEtudiant";
@@ -95,12 +95,23 @@ import ListeDemandeEtudiant from "pages/Demande-etudiant/ListeDemandeEtudiant";
 import SingleDemandeEtudiant from "pages/Demande-etudiant/SingleDemandeEtudiant";
 import EditDemandeEtudiant from "pages/Demande-etudiant/EditDemandeEtudiant";
 import SingleActualite from "pages/actualite/SingleActualite";
-import ListeDemandeEnseignant from "pages/Demande-enseignant/DemandeEnseignant";
+import ListeDemandeEnseignant from "pages/Demande-enseignant/ListeDemandeEnseignant";
 import SingleDemandeEnseignant from "pages/Demande-enseignant/SingleDemandeEnseignant";
 import EditDemandeEnseignant from "pages/Demande-enseignant/EditDemandeEnseignant";
 import ListeDemandePersonnel from "pages/Demande-personnel/ListeDemandePersonnel";
 import SingleDemandePersonnel from "pages/Demande-personnel/SingleDemandePersonnel";
 import EditDemandePersonnel from "pages/Demande-personnel/EditDemandePersonnel";
+import AccountEnseignant from "pages/Accounts/AccountEnseignant";
+import AccountPersonnel from "pages/Accounts/AccountPersonnel";
+import ListeReclamationEtudiant from "pages/Reclamation-etudiant/ListeReclamationEtudiant";
+import SingleReclamationEtudiant from "pages/Reclamation-etudiant/SingleReclamationEtudiant";
+import EditReclamationEtudiant from "pages/Reclamation-etudiant/EditReclamationEtudiant";
+import ListeReclamationEnseignant from "pages/Reclamation-enseignant/ListeReclamationEnseignant";
+import SingleReclamationEnseignant from "pages/Reclamation-enseignant/SingleReclamationEnseignant";
+import EditReclamationEnseignant from "pages/Reclamation-enseignant/EditReclamationEnseignant";
+import ListeReclamationPersonnel from "pages/Reclamation-personnel/ListeReclamationPersonnel";
+import SingleReclamationPersonnel from "pages/Reclamation-personnel/SingleReclamationPersonnel";
+import EditReclamationPersonnel from "pages/Reclamation-personnel/EditReclamationPersonnel";
 
 const authProtectedRoutes = [
     { path: "/dashboard", component: <Dashboard /> },
@@ -108,8 +119,7 @@ const authProtectedRoutes = [
 
 
 
-    // New Routes 
-    { path: "/GestionEnseignant", component: <GestionEnseignant /> },
+   
     //avis etudiant
     { path: "/ListeAvisEtudiant", component: <ListeAvisEtudiant /> },
     { path: "/AjouterAvisEtudiant", component: <AjouterAvisEtudiant /> },
@@ -127,10 +137,7 @@ const authProtectedRoutes = [
     { path: "/AjouterActualite", component: <AjouterActualite /> },
     { path: "/DetailsActualite", component: <SingleActualite /> },
 
-    { path: "/DemandeEnseignant", component: <DemandeEnseignant /> },
-    { path: "/ReclamationEnseignant", component: <ReclamationEnseignant /> },
-    { path: "/AvisRattrapage", component: <ReclamationEnseignant /> },
-    { path: "/GestionEnseignant/AjouterEnseignant", component: <AjouterEnseignant /> },
+   
     
     //demande etudiant
     { path: "/ListeDemandeEtudiant", component: <ListeDemandeEtudiant /> },
@@ -142,11 +149,29 @@ const authProtectedRoutes = [
     { path: "/ListeDemandeEnseignant", component: <ListeDemandeEnseignant /> },
     { path: "/SingleDemandeEnseignant", component: <SingleDemandeEnseignant /> },
     { path: "/EditDemandeEnseignant", component: <EditDemandeEnseignant /> },
+    { path: "/accountEnseignant", component: <AccountEnseignant /> },
+
 
     //demande personnel
     { path: "/ListeDemandePersonnel", component: <ListeDemandePersonnel /> },
     { path: "/SingleDemandePersonnel", component: <SingleDemandePersonnel /> },
     { path: "/EditDemandePersonnel", component: <EditDemandePersonnel /> },
+    { path: "/accountPersonnel", component: <AccountPersonnel /> },
+     
+    //reclamation etudiant
+    { path: "/ListeReclamationEtudiant", component: <ListeReclamationEtudiant /> },
+    { path: "/SingleReclamationEtudiant", component: <SingleReclamationEtudiant /> },
+    { path: "/EditReclamationEtudiant", component: <EditReclamationEtudiant /> },
+    //reclamation enseignant
+    { path: "/ListeReclamationEnseignant", component: <ListeReclamationEnseignant /> },
+    { path: "/SingleReclamationEnseignant", component: <SingleReclamationEnseignant /> },
+    { path: "/EditReclamationEnseignant", component: <EditReclamationEnseignant /> },
+    //reclamation personnel
+    { path: "/ListeReclamationPersonnel", component: <ListeReclamationPersonnel /> },
+    { path: "/SingleReclamationPersonnel", component: <SingleReclamationPersonnel /> },
+    { path: "/EditReclamationPersonnel", component: <EditReclamationPersonnel /> },
+
+
 
 
 

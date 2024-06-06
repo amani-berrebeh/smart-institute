@@ -1,125 +1,27 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { Button, Card, Col, Container, Form, Modal, Row } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Button, Card, Col, Container, Dropdown, Form, Modal, Row } from 'react-bootstrap';
 import Breadcrumb from 'Common/BreadCrumb';
 import CountUp from 'react-countup';
-import TableContainer from "Common/TableContainer";
-import { userList } from "Common/data";
-import Flatpickr from "react-flatpickr";
-import dummyImg from "../../assets/images/users/user-dummy-img.jpg"
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
-const ReclamationEnseignant = () => {
-    document.title = "Demande Enseignant| Smart Institute";
-    const [modal_AddUserModals, setmodal_AddUserModals] = useState<boolean>(false);
-    const [isMultiDeleteButton, setIsMultiDeleteButton] = useState<boolean>(false)
-    function tog_AddUserModals() {
-        setmodal_AddUserModals(!modal_AddUserModals);
+import ListViewEnseignants from './ListViewEnseignant';
+
+const ListEnseignants = () => {
+
+    document.title = "Liste Des Enseignants | Application Smart Institute";
+
+    const navigate = useNavigate();
+
+    const [modal_AddEnseignantModals, setmodal_AddEnseignantModals] = useState<boolean>(false);
+    function tog_AddEnseignantModals() {
+        navigate("/AjouterEnseignant")
     }
-
-    // Checked All
-    const checkedAll = useCallback(() => {
-        const checkall = document.getElementById("checkAll") as HTMLInputElement;
-        const ele = document.querySelectorAll(".userCheckBox");
-
-        if (checkall.checked) {
-            ele.forEach((ele: any) => {
-                ele.checked = true;
-            });
-        } else {
-            ele.forEach((ele: any) => {
-                ele.checked = false;
-            });
-        }
-        checkedbox();
-    }, []);
-
-    const checkedbox = () => {
-        const ele = document.querySelectorAll(".userCheckBox:checked");
-        ele.length > 0 ? setIsMultiDeleteButton(true) : setIsMultiDeleteButton(false);
-    }
-
-    const columns = useMemo(
-        () => [
-            {
-                Header: (<div className="form-check">
-                    <input className="form-check-input" type="checkbox" id="checkAll" onClick={() => checkedAll()} />
-                </div>),
-                Cell: (cellProps: any) => {
-                    return (
-                        <div className="form-check">
-                            <input className="userCheckBox form-check-input" type="checkbox" name="chk_child" value={cellProps.row.original.id} onChange={() => checkedbox()} />
-                        </div>
-                    );
-                },
-                id: '#',
-            },
-            {
-                Header: "User Name",
-                disableFilters: true,
-                filterable: true,
-                accessor: (cellProps: any) => {
-                    return (<div className="d-flex align-items-center gap-2">
-                        <div className="flex-shrink-0">
-                            <img src={cellProps.user_img} alt="" className="avatar-xs rounded-circle user-profile-img" />
-                        </div>
-                        <div className="flex-grow-1 ms-2 user_name">{cellProps.user_name}</div>
-                    </div>)
-                }
-            },
-            {
-                Header: "Email",
-                accessor: "email_id",
-                disableFilters: true,
-                filterable: true,
-            },
-            {
-                Header: "Create Date",
-                accessor: "date",
-                disableFilters: true,
-                filterable: true,
-            },
-            {
-                Header: "Account Status",
-                disableFilters: true,
-                filterable: true,
-                accessor: (cellProps: any) => {
-                    switch (cellProps.status) {
-                        case "Active":
-                            return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
-                        case "Inactive":
-                            return (<span className="badge bg-danger-subtle text-danger"> {cellProps.status}</span>)
-                        default:
-                            return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
-                    }
-                },
-            },
-            {
-                Header: "Action",
-                disableFilters: true,
-                filterable: true,
-                accessor: (cellProps: any) => {
-                    return (
-                        <div className="d-flex gap-2">
-                            <div className="edit">
-                                <Button variant="ghost-info" size="sm" className="btn-ghost-info btn-icon edit-item-btn"><i className="ph-pencil-line"></i></Button>
-                            </div>
-                            <div className="remove">
-                                <Button variant="ghost-danger" size="sm" className="btn-ghost-danger btn-icon remove-item-btn"><i className="ph-trash"></i></Button>
-                            </div>
-                        </div>
-                    )
-                },
-            },
-        ],
-        [checkedAll]
-    );
 
     return (
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumb title="Users List" pageTitle="More" />
-
+                    <Breadcrumb title="Gestion des Enseignants" pageTitle="Liste Des Enseignants" />
                     <Row>
                         <Col xxl={3} md={6}>
                             <Card className="card-height-100 bg-warning-subtle border-0 overflow-hidden">
@@ -157,8 +59,10 @@ const ReclamationEnseignant = () => {
                                     </svg>
                                 </div>
                                 <Card.Body className="p-4 z-1 position-relative">
-                                    <h4 className="fs-22 fw-semibold mb-3"><CountUp end={7845102} separator=','/> </h4>
-                                    <p className="mb-0 fw-medium text-uppercase fs-14">Total Users</p>
+                                    <h4 className="fs-22 fw-semibold mb-3">
+                                        <CountUp start={0} end={207} duration={3} decimals={2} suffix="k" />
+                                    </h4>
+                                    <p className="mb-0 fw-medium text-uppercase fs-14">Nombre d'enseignants</p>
                                 </Card.Body>
                             </Card>
                         </Col>
@@ -198,8 +102,10 @@ const ReclamationEnseignant = () => {
                                     </svg>
                                 </div>
                                 <Card.Body className="p-4 z-1 position-relative">
-                                    <h4 className="fs-22 fw-semibold mb-3"><CountUp end={559.25} decimals={2} suffix="k" /></h4>
-                                    <p className="mb-0 fw-medium text-uppercase fs-14">Active Users</p>
+                                    <h4 className="fs-22 fw-semibold mb-3">
+                                        <CountUp start={0} end={159} duration={3} decimals={2} suffix="k" />
+                                    </h4>
+                                    <p className="mb-0 fw-medium text-uppercase fs-14">Enseignants Activés</p>
                                 </Card.Body>
                             </Card>
                         </Col>
@@ -239,166 +145,168 @@ const ReclamationEnseignant = () => {
                                     </svg>
                                 </div>
                                 <Card.Body className="p-4 z-1 position-relative">
-                                    <h4 className="fs-22 fw-semibold mb-3"><CountUp end={559.25} decimals={2} suffix="k" /></h4>
-                                    <p className="mb-0 fw-medium text-uppercase fs-14">Unactive Users</p>
+                                    <h4 className="fs-22 fw-semibold mb-3">
+                                        <CountUp start={0} end={48} duration={3} decimals={2} suffix="k" />
+                                    </h4>
+                                    <p className="mb-0 fw-medium text-uppercase fs-14">Enseignants Desactivés</p>
                                 </Card.Body>
                             </Card>
                         </Col>
-                        <Col xxl={3} md={6}>
+                        {/* <Col xxl={3} md={6}>
                             <Card className="bg-light border-0">
                                 <Card.Body className="p-3">
                                     <div className="p-3 bg-white rounded">
-                                        <div className="d-flex align-items-center gap-3">
+                                        <div className="d-flex align-items-center gap-2">
                                             <div className="flex-shrink-0">
-                                                <div className="avatar-sm">
-                                                    <div className="avatar-title bg-danger-subtle text-danger fs-4 rounded">
-                                                        <i className="ph-gift"></i>
-                                                    </div>
-                                                </div>
+                                                <img src={avatar2} alt="" className="avatar-sm rounded-circle" />
                                             </div>
                                             <div className="flex-grow-1">
-                                                <Link to="#" className="stretched-link"><h6 className="fs-17">Invite your friends to Toner</h6></Link>
-                                                <p className="text-muted mb-0">Nor again is there anyone pursues</p>
+                                                <Link to="#!"><h6 className="fs-16"><span className="text-success">#1</span> Amanda Harvey</h6></Link>
+                                                <p className="text-muted mb-0">To reach if you need to sell 200+ orders.</p>
                                             </div>
                                         </div>
                                     </div>
                                 </Card.Body>
                             </Card>
-                        </Col>
+                        </Col> */}
                     </Row>
 
-                    <Row id="usersList">
+                    <Row id="sellersList">
                         <Col lg={12}>
                             <Card>
                                 <Card.Body>
-                                    <Row className="g-lg-2 g-4">
+                                    <Row className="g-3">
                                         <Col lg={3}>
                                             <div className="search-box">
-                                                <input type="text" className="form-control search" placeholder="Search for users..." />
+                                                <input type="text" className="form-control search" placeholder="Chercher..." />
                                                 <i className="ri-search-line search-icon"></i>
                                             </div>
                                         </Col>
-
-                                        {isMultiDeleteButton && <Button variant="danger" className="btn-icon"><i className="ri-delete-bin-2-line"></i></Button>}
-
-                                        <Col sm={3} className="col-lg-auto ms-auto">
-                                            <Button onClick={() => tog_AddUserModals()} variant='primary' type="button" className="w-100 add-btn">
-                                                Add User
-                                            </Button>
+                                        <Col className="col-lg-auto">
+                                            <select className="form-select" id="idStatus" name="choices-single-default">
+                                                <option defaultValue="All">Status</option>
+                                                <option value="All">tous</option>
+                                                <option value="Active">Activé</option>
+                                                <option value="Inactive">Desactivé</option>
+                                            </select>
                                         </Col>
-                                        <Col sm={9} className="col-lg-auto">
-                                            <select className="form-select" data-choices data-choices-search-false name="choices-single-default" id="idStatus">
-                                                <option value="all">All</option>
+                                        {/* <Col className="col-lg-auto">
+                                            <select className="form-select" data-choices data-choices-search-false name="choices-single-default">
+                                                <option defaultValue="all">All</option>
                                                 <option value="Today">Today</option>
                                                 <option value="Yesterday">Yesterday</option>
                                                 <option value="Last 7 Days">Last 7 Days</option>
                                                 <option value="Last 30 Days">Last 30 Days</option>
-                                                <option defaultValue="This Month">This Month</option>
+                                                <option value="This Month">This Month</option>
                                                 <option value="Last Month">Last Month</option>
                                             </select>
+                                        </Col> */}
+                                        <Col className="col-lg-auto ms-auto">
+                                            <div className="hstack gap-2">
+                                                <Button variant='primary' className="add-btn"  onClick={() => tog_AddEnseignantModals()}>Ajouter Enseignant</Button>
+                                                {/* <Dropdown>
+                                                    <Dropdown.Toggle className="btn-icon btn btn-soft-dark arrow-none" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        <i className="ph-dots-three-outline"></i>
+                                                    </Dropdown.Toggle>
+                                                    <Dropdown.Menu as="ul">
+                                                        <li><Link className="dropdown-item" to="#">Action</Link></li>
+                                                        <li><Link className="dropdown-item" to="#">Another action</Link></li>
+                                                        <li><Link className="dropdown-item" to="#">Something else here</Link></li>
+                                                    </Dropdown.Menu>
+                                                </Dropdown> */}
+                                            </div>
                                         </Col>
                                     </Row>
                                 </Card.Body>
                             </Card>
+
+                            {/* <Modal className="fade modal-fullscreen" show={modal_AddSellerModals} onHide={() => { tog_AddSellerModals(); }} centered>
+                                <Modal.Header className="px-4 pt-4" closeButton>
+                                    <h5 className="modal-title" id="exampleModalLabel">Add Seller</h5>
+                                </Modal.Header>
+                                <Form className="tablelist-form">
+                                    <Modal.Body className="p-4">
+                                        <div id="alert-error-msg" className="d-none alert alert-danger py-2"></div>
+                                        <input type="hidden" id="id-field" />
+
+                                        <div className="mb-3">
+                                            <Form.Label htmlFor="seller-name-field">Seller Name</Form.Label>
+                                            <Form.Control type="text" id="seller-name-field" placeholder="Enter Seller Name" required />
+                                        </div>
+                                        <div className="mb-3">
+                                            <Form.Label htmlFor="item-stock-field">Item Stock</Form.Label>
+                                            <Form.Control type="text" id="item-stock-field" placeholder="Enter Item Stock" required />
+                                        </div>
+                                        <div className="mb-3">
+                                            <Form.Label htmlFor="balance-field">Balance</Form.Label>
+                                            <Form.Control type="text" id="balance-field" placeholder="Enter Balance" required />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <Form.Label htmlFor="email-field">Seller Email</Form.Label>
+                                            <Form.Control type="email" id="email-field" placeholder="Enter Email" required />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <Form.Label htmlFor="phone-field">Phone</Form.Label>
+                                            <Form.Control type="text" id="phone-field" placeholder="Enter Phone" required />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <Form.Label htmlFor="date-field">Create Date</Form.Label>
+                                            <Flatpickr
+                                                className="form-control flatpickr-input"
+                                                placeholder='Select Date-time'
+                                                options={{
+                                                    dateFormat: "d M, Y",
+                                                }}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label htmlFor="account-status-field" className="form-label">Account Status</label>
+                                            <select className="form-select" required id="account-status-field">
+                                                <option defaultValue="">Select account Status</option>
+                                                <option value="Active">Active</option>
+                                                <option value="Inactive">Inactive</option>
+                                            </select>
+                                        </div>
+                                    </Modal.Body>
+                                    <div className="modal-footer">
+                                        <div className="hstack gap-2 justify-content-end">
+                                            <Button className="btn-ghost-danger" onClick={() => { tog_AddSellerModals(); }}>Close</Button>
+                                            <Button variant='success' id="add-btn">Add Seller</Button>
+                                        </div>
+                                    </div>
+                                </Form>
+                            </Modal> */}
+
                             <Card>
                                 <Card.Body className='p-0'>
-                                    
-                                        <TableContainer
-                                            columns={(columns || [])}
-                                            data={(userList || [])}
-                                            // isGlobalFilter={false}
-                                            iscustomPageSize={false}
-                                            isBordered={false}
-                                            customPageSize={10}
-                                            className="custom-header-css table align-middle table-nowrap"
-                                            tableClass="table-centered align-middle table-nowrap mb-0"
-                                            theadClass="text-muted table-light"
-                                            SearchPlaceholder='Search Products...'
-                                        />
+                                    {/* <div className="table-responsive table-card mb-1"> */}
+                                        <table className="table align-middle table-nowrap" id="customerTable">
+                                        <ListViewEnseignants />
+                                        </table>
                                         <div className="noresult" style={{ display: "none" }}>
-                                            <div className="text-center">
+                                            <div className="text-center py-4">
+                                                <div className="avatar-md mx-auto mb-4">
+                                                    <div className="avatar-title bg-primary-subtle text-primary rounded-circle fs-24">
+                                                        <i className="bi bi-search"></i>
+                                                    </div>
+                                                </div>
                                                 <h5 className="mt-2">Sorry! No Result Found</h5>
-                                                <p className="text-muted mb-0">We've searched more than 150+ Orders We did not find any orders for you search.</p>
+                                                <p className="text-muted mb-0">We've searched more than 150+ seller We did not find any seller for you search.</p>
                                             </div>
                                         </div>
-                                    
+                                    {/* </div> */}
                                 </Card.Body>
                             </Card>
                         </Col>
                     </Row>
-
-                    <Modal className="fade" show={modal_AddUserModals} onHide={() => { tog_AddUserModals(); }} centered>
-                        <Modal.Header className="px-4 pt-4" closeButton>
-                            <h5 className="modal-title" id="exampleModalLabel">Add User</h5>
-                        </Modal.Header>
-                        <Form className="tablelist-form">
-                            <Modal.Body className="p-4">
-                                <div id="alert-error-msg" className="d-none alert alert-danger py-2"></div>
-                                <input type="hidden" id="id-field" />
-
-                                <div className="text-center">
-                                    <div className="position-relative d-inline-block">
-                                        <div className="position-absolute  bottom-0 end-0">
-                                            <label htmlFor="customer-image-input" className="mb-0" data-bs-toggle="tooltip" data-bs-placement="right" title="Select Image">
-                                                <div className="avatar-xs cursor-pointer">
-                                                    <div className="avatar-title bg-light border rounded-circle text-muted">
-                                                        <i className="ri-image-fill"></i>
-                                                    </div>
-                                                </div>
-                                            </label>
-                                            <Form.Control className="d-none" defaultValue="" id="users-image-input" type="file" accept="image/png, image/gif, image/jpeg" />
-                                        </div>
-                                        <div className="avatar-lg p-1">
-                                            <div className="avatar-title bg-light rounded-circle">
-                                                <img src={dummyImg} alt="dummyImg" id="users-img-field" className="avatar-md rounded-circle object-cover" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="mb-3">
-                                    <Form.Label htmlFor="user-name">User Name</Form.Label>
-                                    <Form.Control type="text" id="user-name-field" placeholder="Enter Name" required />
-                                </div>
-                                <div className="mb-3">
-                                    <Form.Label htmlFor="email-field">User Email</Form.Label>
-                                    <Form.Control type="email" id="email-field" placeholder="Enter Email" required />
-                                </div>
-
-                                <div className="mb-3">
-                                    <Form.Label htmlFor="date-field">Date</Form.Label>
-                                    <Flatpickr
-                                        className="form-control flatpickr-input"
-                                        placeholder='Select Date'
-                                        options={{
-                                            mode: "range",
-                                            dateFormat: "d M, Y",
-                                        }}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label htmlFor="account-status" className="form-label">Account Status</label>
-                                    <select className="form-select" required id="account-status-field">
-                                        <option defaultValue="">Account Status</option>
-                                        <option value="Active">Active</option>
-                                        <option value="Inactive">inactive</option>
-                                    </select>
-                                </div>
-                            </Modal.Body>
-                            <div className="modal-footer">
-                                <div className="hstack gap-2 justify-content-end">
-                                    <Button className="btn-ghost-danger" onClick={() => { tog_AddUserModals(); }}>Close</Button>
-                                    <Button variant='success' id="add-btn">Add User</Button>
-                                </div>
-                            </div>
-                        </Form>
-                    </Modal>
-
-                </Container >
-            </div >
-        </React.Fragment >
+                </Container>
+            </div>
+        </React.Fragment>
     );
-};
+}
 
-export default ReclamationEnseignant;
+export default ListEnseignants;

@@ -9,22 +9,22 @@ import Flatpickr from "react-flatpickr";
 import avatar2 from "../../assets/images/users/avatar-2.jpg"
 import ListViewTable from './listViewTable';
 
-const GestionEnseignant = () => {
+const ListEtudiants = () => {
 
-    document.title = "List View - Sellers | Toner eCommerce + Admin React Template";
+    document.title = "Liste Des Etudiants | Application Smart Institute";
 
     const navigate = useNavigate();
 
     const [modal_AddEnseignantModals, setmodal_AddEnseignantModals] = useState<boolean>(false);
     function tog_AddEnseignantModals() {
-        navigate("/GestionEnseignant/AjouterEnseignant")
+        navigate("/AjouterEtudiant")
     }
 
     return (
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumb title="Gestion des Enseignants" pageTitle="Dashboard" />
+                    <Breadcrumb title="Gestion des Etudiants" pageTitle="Liste Des Etudiants" />
                     <Row>
                         <Col xxl={3} md={6}>
                             <Card className="card-height-100 bg-warning-subtle border-0 overflow-hidden">
@@ -65,7 +65,7 @@ const GestionEnseignant = () => {
                                     <h4 className="fs-22 fw-semibold mb-3">
                                         <CountUp start={0} end={207} duration={3} decimals={2} suffix="k" />
                                     </h4>
-                                    <p className="mb-0 fw-medium text-uppercase fs-14">Nombre d'enseignants</p>
+                                    <p className="mb-0 fw-medium text-uppercase fs-14">Nombre d'etudiants</p>
                                 </Card.Body>
                             </Card>
                         </Col>
@@ -108,7 +108,7 @@ const GestionEnseignant = () => {
                                     <h4 className="fs-22 fw-semibold mb-3">
                                         <CountUp start={0} end={159} duration={3} decimals={2} suffix="k" />
                                     </h4>
-                                    <p className="mb-0 fw-medium text-uppercase fs-14">Enseignants Activés</p>
+                                    <p className="mb-0 fw-medium text-uppercase fs-14">Etudiants Activés</p>
                                 </Card.Body>
                             </Card>
                         </Col>
@@ -151,7 +151,7 @@ const GestionEnseignant = () => {
                                     <h4 className="fs-22 fw-semibold mb-3">
                                         <CountUp start={0} end={48} duration={3} decimals={2} suffix="k" />
                                     </h4>
-                                    <p className="mb-0 fw-medium text-uppercase fs-14">Enseignants Desactivés</p>
+                                    <p className="mb-0 fw-medium text-uppercase fs-14">Etudiants Desactivés</p>
                                 </Card.Body>
                             </Card>
                         </Col>
@@ -181,7 +181,7 @@ const GestionEnseignant = () => {
                                     <Row className="g-3">
                                         <Col lg={3}>
                                             <div className="search-box">
-                                                <input type="text" className="form-control search" placeholder="Search..." />
+                                                <input type="text" className="form-control search" placeholder="Chercher..." />
                                                 <i className="ri-search-line search-icon"></i>
                                             </div>
                                         </Col>
@@ -193,7 +193,7 @@ const GestionEnseignant = () => {
                                                 <option value="Inactive">Desactivé</option>
                                             </select>
                                         </Col>
-                                        <Col className="col-lg-auto">
+                                        {/* <Col className="col-lg-auto">
                                             <select className="form-select" data-choices data-choices-search-false name="choices-single-default">
                                                 <option defaultValue="all">All</option>
                                                 <option value="Today">Today</option>
@@ -203,10 +203,10 @@ const GestionEnseignant = () => {
                                                 <option value="This Month">This Month</option>
                                                 <option value="Last Month">Last Month</option>
                                             </select>
-                                        </Col>
+                                        </Col> */}
                                         <Col className="col-lg-auto ms-auto">
                                             <div className="hstack gap-2">
-                                                <Button variant='primary' className="add-btn"  onClick={() => tog_AddEnseignantModals()}>Ajouter Enseignant</Button>
+                                                <Button variant='primary' className="add-btn"  onClick={() => tog_AddEnseignantModals()}>Ajouter Etudiant</Button>
                                                 {/* <Dropdown>
                                                     <Dropdown.Toggle className="btn-icon btn btn-soft-dark arrow-none" data-bs-toggle="dropdown" aria-expanded="false">
                                                         <i className="ph-dots-three-outline"></i>
@@ -312,4 +312,4 @@ const GestionEnseignant = () => {
     );
 }
 
-export default GestionEnseignant;
+export default ListEtudiants;

@@ -1,18 +1,17 @@
 import React from 'react';
 import { Container } from 'react-bootstrap';
 import Breadcrumb from 'Common/BreadCrumb';
-import Profile from './Profile';
-import RecentOrders from './ProfilEtudiant';
+import RecentOrders from './ProfilPersonnel';
 
-const MyAccount = () => {
+const AccountPersonnel = () => {
 
-    document.title = "My Account | Toner eCommerce + Admin React Template";
+    document.title = "Compte Personnel | Smart University";
 
     return (
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumb title="Profil étudiant" pageTitle="Profils" />
+                    <Breadcrumb title="Profil personnel" pageTitle="Profils" />
                     <RecentOrders />
                 </Container>
             </div>
@@ -20,4 +19,4 @@ const MyAccount = () => {
     );
 };
 
-export default MyAccount;
+export default AccountPersonnel;

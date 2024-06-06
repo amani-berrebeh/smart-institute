@@ -9,7 +9,7 @@ import {
   Row,
   Tab,
 } from "react-bootstrap";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Carousel, Image } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 
@@ -25,7 +25,13 @@ import student from "assets/images/etudiant.png"
 import file from "assets/images/demande.png"
 
 const SingleDemandePersonnel = () => {
-  document.title = "Modifier demande Etudiant | Smart Institute";
+  document.title = "Demande Personnel | Smart Institute";
+
+  const navigate = useNavigate();
+  const Navigate = () => {
+       
+    navigate('/accountPersonnel'); 
+  };
   const state = useLocation();
   console.log("state", state);
 
@@ -34,7 +40,7 @@ const SingleDemandePersonnel = () => {
       <div className="page-content">
         <Container fluid={true}>
           <Breadcrumb
-            title="demande Etudiant"
+            title="demande Personnel"
             pageTitle="Modifier La Demande"
           />
           <Row>
@@ -71,13 +77,13 @@ const SingleDemandePersonnel = () => {
               <Card className="categrory-widgets overflow-hidden">
                 <div className="card-header d-flex align-items-center">
                   <h5 className="card-title flex-grow-1 mb-0">
-                    Détails de l'étudiant{" "}
+                    Détails du personnel{" "}
                     {/* <i className="bi bi-mortarboard-fill"></i> */}
                   </h5>
                   <div className="flex-shrink-0">
-                    <Link to="/accountEtudiant" className="btn btn-sm btn-info m-1">
-                      Voir Etudiant
-                    </Link>
+                  <Button  onClick={() => Navigate()} type="button" className="btn btn-info btn-label m-1"><i className="bi bi-eye label-icon align-middle fs-16 me-2"></i>Voir Personnel</Button>
+
+                    
                   </div>
                 </div>
                 <div className="card-body">

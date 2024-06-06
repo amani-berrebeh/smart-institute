@@ -9,7 +9,7 @@ import {
   Row,
   Tab,
 } from "react-bootstrap";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Carousel, Image } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 
@@ -28,6 +28,12 @@ const SingleDemandeEtudiant = () => {
   document.title = "Modifier demande Etudiant | Smart Institute";
   const state = useLocation();
   console.log("state", state);
+  const navigate = useNavigate();
+  const Navigate = () => {
+       
+    navigate('/accountEtudiant'); 
+  };
+
 
   return (
     <React.Fragment>
@@ -75,9 +81,9 @@ const SingleDemandeEtudiant = () => {
                     {/* <i className="bi bi-mortarboard-fill"></i> */}
                   </h5>
                   <div className="flex-shrink-0">
-                    <Link to="/accountEtudiant" className="btn btn-sm btn-info m-1">
-                      Voir Etudiant
-                    </Link>
+                  <Button  onClick={() => Navigate()} type="button" className="btn btn-info btn-label m-1"><i className="bi bi-eye label-icon align-middle fs-16 me-2"></i>Voir étudiant </Button>
+
+                    
                   </div>
                 </div>
                 <div className="card-body">
@@ -134,7 +140,7 @@ const SingleDemandeEtudiant = () => {
                   </h5>
                   <div className="flex-shrink-0">
                   <Button type="button" className="btn btn-primary btn-label m-1"><i className="bi bi-file-earmark-arrow-down label-icon align-middle fs-16 me-2"></i>Générer</Button>
-                  <Button type="button" className="btn btn-success btn-label"><i className="bi bi-postcard label-icon align-middle fs-16 me-2"></i> Notifier l'étudiant</Button>
+                  <Button type="button" className="btn btn-success btn-label"><i className="bi bi-postcard label-icon align-middle fs-16 me-2"></i> Notifier le personnel</Button>
                   </div>
                 </div>
                 <div className="card-body">

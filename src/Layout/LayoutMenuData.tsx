@@ -231,6 +231,7 @@ const Navdata = () => {
             icon: "bi bi-telephone-forward",
            
         },
+        // demande enseignant
         {
             id: "Demande-enseignant",
             label: "Demande Enseignant",
@@ -238,11 +239,36 @@ const Navdata = () => {
             icon: "bi bi-telephone-forward",
            
         },
+        // demande personnel
         {
             id: "Demande-personnel",
             label: "Demande Personnel",
             link: "/ListeDemandePersonnel",
             icon: "bi bi-telephone-forward",
+           
+        },
+        // reclamation etudiant
+        {
+            id: "Reclamation-etudiant",
+            label: "Réclamation Etudiant",
+            link: "/ListeReclamationEtudiant",
+            icon: "bi bi-envelope-exclamation",
+           
+        },
+        // reclamation enseignant
+        {
+            id: "Reclamation-enseignant",
+            label: "Réclamation Enseignant",
+            link: "/ListeReclamationEnseignant",
+            icon: "bi bi-envelope-exclamation",
+           
+        },
+        // reclamation personnel
+        {
+            id: "Reclamation-personnel",
+            label: "Réclamation Personnel",
+            link: "/ListeReclamationPersonnel",
+            icon: "bi bi-envelope-exclamation",
            
         },
 

@@ -3,13 +3,13 @@ import { Button, Card, Col, Container, Form, Modal, Row } from 'react-bootstrap'
 import Breadcrumb from 'Common/BreadCrumb';
 import CountUp from 'react-countup';
 import TableContainer from "Common/TableContainer";
-import { userList } from "Common/data";
+import { demandeEtudiant } from "Common/data/demandeEtudiant";
 import Flatpickr from "react-flatpickr";
 import dummyImg from "../../assets/images/users/user-dummy-img.jpg"
 import { Link } from 'react-router-dom';
 
-const ListeAvisEnseignant = () => {
-    document.title = "Avis Enseignant | Smart Institute";
+const ListeReclamationPersonnel = () => {
+    document.title = "Réclamation Personnel | Smart University";
     const [modal_AddUserModals, setmodal_AddUserModals] = useState<boolean>(false);
     const [isMultiDeleteButton, setIsMultiDeleteButton] = useState<boolean>(false)
     function tog_AddUserModals() {
@@ -54,11 +54,48 @@ const ListeAvisEnseignant = () => {
             //     id: '#',
             // },
             // {
-            //     Header: "ID",
-            //     accessor: "id",
+            //     Header: "Type",
+            //     accessor: "type",
             //     disableFilters: true,
             //     filterable: true,
             // },
+            {
+                Header: "Réclamation",
+                accessor: "soustype",
+                disableFilters: true,
+                filterable: true,
+            },
+           
+            {
+                Header: "Personnel",
+                accessor: "etudiant",
+                disableFilters: true,
+                filterable: true,
+            },
+            {
+                Header: "CIN",
+                accessor: "CIN",
+                disableFilters: true,
+                filterable: true,
+            },
+            {
+                Header: "Classe",
+                accessor: "classe",
+                disableFilters: true,
+                filterable: true,
+            },
+            {
+                     Header: "Date d'envoi",
+                     accessor: "date",
+                     disableFilters: true,
+                     filterable: true,
+                 },
+                 {
+                    Header: "Date de modification",
+                    accessor: "",
+                    disableFilters: true,
+                    filterable: true,
+                },
             // {
             //     Header: "Image",
             //     disableFilters: true,
@@ -74,41 +111,42 @@ const ListeAvisEnseignant = () => {
             // },
 
            
-            {
-                Header: "Titre",
-                accessor: "title",
-                disableFilters: true,
-                filterable: true,
-            },
-            {
-                Header: "Description",
-                accessor: "",
-                disableFilters: true,
-                filterable: true,
-            },
-            {
-                Header: "Date",
-                accessor: "",
-                disableFilters: true,
-                filterable: true,
-            },
             // {
-            //     Header: "Account Status",
+            //     Header: "Titre",
+            //     accessor: "title",
             //     disableFilters: true,
             //     filterable: true,
-            //     accessor: (cellProps: any) => {
-            //         switch (cellProps.status) {
-            //             case "Active":
-            //                 return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
-            //             case "Inactive":
-            //                 return (<span className="badge bg-danger-subtle text-danger"> {cellProps.status}</span>)
-            //             default:
-            //                 return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
-            //         }
-            //     },
+            // },
+            // {
+            //     Header: "Description",
+            //     accessor: "",
+            //     disableFilters: true,
+            //     filterable: true,
+            // },
+            // {
+            //     Header: "Date",
+            //     accessor: "",
+            //     disableFilters: true,
+            //     filterable: true,
             // },
             {
-                Header: "Action",
+                Header: "Etat",
+                  disableFilters: true,
+                   filterable: true,
+                   accessor: (cellProps: any) => {
+                      switch (cellProps.status) {
+                           case "en cours":
+                              return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
+                           case "Inactive":
+                               return (<span className="badge bg-danger-subtle text-danger"> {cellProps.status}</span>)
+                           default:
+                               return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
+                       }
+                   },
+               },
+             
+            {
+                Header: "Actions",
                 disableFilters: true,
                 filterable: true,
                 accessor: (cellProps: any) => {
@@ -116,7 +154,7 @@ const ListeAvisEnseignant = () => {
                         <ul className="hstack gap-2 list-unstyled mb-0">
               <li>
                 <Link
-                  to="/SingleAvisEnseignant"
+                  to="/SingleReclamationPersonnel"
                   state={cellProps}
                   className="badge bg-info-subtle text-info view-item-btn"
                   data-bs-toggle="offcanvas"
@@ -139,8 +177,9 @@ const ListeAvisEnseignant = () => {
               </li>
               <li>
                 <Link
-                  to="#GroupDetails"
+                  to="/EditReclamationPersonnel"
                   className="badge bg-success-subtle text-success edit-item-btn"
+                  state={cellProps}
                 >
                   <i
                     className="ph ph-pencil-line"
@@ -192,7 +231,9 @@ const ListeAvisEnseignant = () => {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumb title="Liste des Avis" pageTitle="More" />
+                    <Breadcrumb title="Réclamations Personnels" pageTitle="Liste des réclamations" />
+
+                  
 
                     <Row id="usersList">
                         <Col lg={12}>
@@ -201,7 +242,7 @@ const ListeAvisEnseignant = () => {
                                     <Row className="g-lg-2 g-4">
                                         <Col lg={3}>
                                             <div className="search-box">
-                                                <input type="text" className="form-control search" placeholder="Chercher un avis..." />
+                                                <input type="text" className="form-control search" placeholder="Chercher une demande..." />
                                                 <i className="ri-search-line search-icon"></i>
                                             </div>
                                         </Col>
@@ -232,7 +273,7 @@ const ListeAvisEnseignant = () => {
                                     
                                         <TableContainer
                                             columns={(columns || [])}
-                                            data={(userList || [])}
+                                            data={(demandeEtudiant || [])}
                                             // isGlobalFilter={false}
                                             iscustomPageSize={false}
                                             isBordered={false}
@@ -329,4 +370,4 @@ const ListeAvisEnseignant = () => {
     );
 };
 
-export default ListeAvisEnseignant;
+export default ListeReclamationPersonnel;

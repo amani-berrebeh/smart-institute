@@ -65,21 +65,7 @@ const ListeDemandeEtudiant = () => {
                 disableFilters: true,
                 filterable: true,
             },
-            {
-                Header: "Etat",
-                  disableFilters: true,
-                   filterable: true,
-                   accessor: (cellProps: any) => {
-                      switch (cellProps.status) {
-                           case "en cours":
-                              return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
-                           case "Inactive":
-                               return (<span className="badge bg-danger-subtle text-danger"> {cellProps.status}</span>)
-                           default:
-                               return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
-                       }
-                   },
-               },
+           
             {
                 Header: "Etudiant",
                 accessor: "etudiant",
@@ -99,11 +85,17 @@ const ListeDemandeEtudiant = () => {
                 filterable: true,
             },
             {
-                     Header: "Date d'Envoi",
+                     Header: "Date d'envoi",
                      accessor: "date",
                      disableFilters: true,
                      filterable: true,
                  },
+                 {
+                    Header: "Date de modification",
+                    accessor: "",
+                    disableFilters: true,
+                    filterable: true,
+                },
             // {
             //     Header: "Image",
             //     disableFilters: true,
@@ -137,7 +129,21 @@ const ListeDemandeEtudiant = () => {
             //     disableFilters: true,
             //     filterable: true,
             // },
-           
+            {
+                Header: "Etat",
+                  disableFilters: true,
+                   filterable: true,
+                   accessor: (cellProps: any) => {
+                      switch (cellProps.status) {
+                           case "en cours":
+                              return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
+                           case "Inactive":
+                               return (<span className="badge bg-danger-subtle text-danger"> {cellProps.status}</span>)
+                           default:
+                               return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
+                       }
+                   },
+               },
              
             {
                 Header: "Actions",

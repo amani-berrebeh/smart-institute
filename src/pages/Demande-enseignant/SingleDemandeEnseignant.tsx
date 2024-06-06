@@ -9,7 +9,7 @@ import {
   Row,
   Tab,
 } from "react-bootstrap";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Carousel, Image } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 
@@ -25,16 +25,22 @@ import student from "assets/images/etudiant.png"
 import file from "assets/images/demande.png"
 
 const SingleDemandeEnseignant = () => {
-  document.title = "Modifier demande Etudiant | Smart Institute";
+  document.title = "Demande Enseignant | Smart University";
+  const navigate = useNavigate();
+  const Navigate = () => {
+       
+    navigate('/accountEnseignant'); 
+  };
+
   const state = useLocation();
   console.log("state", state);
-
+ 
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
           <Breadcrumb
-            title="demande Etudiant"
+            title="Demande enseignant "
             pageTitle="Modifier La Demande"
           />
           <Row>
@@ -71,13 +77,13 @@ const SingleDemandeEnseignant = () => {
               <Card className="categrory-widgets overflow-hidden">
                 <div className="card-header d-flex align-items-center">
                   <h5 className="card-title flex-grow-1 mb-0">
-                    Détails de l'étudiant{" "}
+                    Détails de l'enseignant{" "}
                     {/* <i className="bi bi-mortarboard-fill"></i> */}
                   </h5>
                   <div className="flex-shrink-0">
-                    <Link to="#" className="btn btn-sm btn-info m-1">
-                      Voir Enseignant
-                    </Link>
+                  <Button  onClick={() => Navigate()} type="button" className="btn btn-info btn-label m-1"><i className="bi bi-eye label-icon align-middle fs-16 me-2"></i>Voir enseignant</Button>
+
+                    
                   </div>
                 </div>
                 <div className="card-body">
@@ -133,38 +139,52 @@ const SingleDemandeEnseignant = () => {
                     Détails de la demande
                   </h5>
                   <div className="flex-shrink-0">
-                    <Link to="#" className="btn btn-sm btn-success m-1">
-                      Modifier l'état
-                    </Link>
-                    <Link to="#" className="btn btn-sm btn-info m-1">
-                      Notifier l'étudiant
-                    </Link>
+                  <Button type="button" className="btn btn-primary btn-label m-1"><i className="bi bi-file-earmark-arrow-down label-icon align-middle fs-16 me-2"></i>Générer</Button>
+                  <Button type="button" className="btn btn-success btn-label"><i className="bi bi-postcard label-icon align-middle fs-16 me-2"></i> Notifier l'enseignant</Button>
                   </div>
                 </div>
                 <div className="card-body">
                   <div className="text-center">
                     <i className="bi bi-card-list fs-1 text-muted"></i>
-                    {/* <h5 className="fs-18">Toner Logistics</h5> */}
-                    <p className="mb-2 fs-5">
-                      Pièce demandée: {state.state?.soustype!}
-                    </p>
-                    <p className="mb-2 fs-5">
-                      Langue:{" "}
-                      <span className="badge bg-info-subtle text-info">
+                   
+                  </div>
+                  <div className="table-responsive">
+                    <table className="table table-sm table-borderless align-middle description-table mb-0">
+                      <tbody>
+                        <tr>
+                          <td className="fs-5">Pièce demandée:</td>
+                          <td>
+                            <span className="mb-1 fs-5">
+                            {state.state?.soustype!}
+                            </span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="fs-5">Langue:</td>
+                          <td>
+                          <span className="badge bg-info-subtle text-info">
                         Français
                       </span>
-                    </p>
-                    <p className="mb-2 fs-5">
-                      Nombre de copie:{" "}
-                      <span className="badge bg-secondary-subtle text-secondary">
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="fs-5">Nombre de copie:</td>
+                          <td>
+                          <span className="badge bg-secondary-subtle text-secondary">
                         1
                       </span>
-                    </p>
-                    <p className="mb-3 fs-5">
-                     Etat de la demande:<span className="badge bg-danger-subtle text-danger">
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="fs-5">Etat de la demande:</td>
+                          <td>
+                          <span className="badge bg-danger-subtle text-danger">
                      {state.state?.status!}
                       </span> 
-                    </p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
                 <img src={file} alt="" className="img-fluid category-img object-fit-cover" />
