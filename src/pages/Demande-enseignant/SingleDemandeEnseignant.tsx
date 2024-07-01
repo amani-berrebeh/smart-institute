@@ -29,7 +29,7 @@ const SingleDemandeEnseignant = () => {
   const navigate = useNavigate();
   const Navigate = () => {
        
-    navigate('/accountEnseignant'); 
+    navigate('/gestion-enseignant/compte-enseignant'); 
   };
 
   const state = useLocation();
@@ -52,7 +52,7 @@ const SingleDemandeEnseignant = () => {
                 <Card.Body>
                   <Card className="border-0 shadow-none mb-0">
                     <Card.Body
-                      className="rounded profile-basic"
+                      className="rounded profile-basic mb-n5"
                       style={{
                         backgroundImage: `url(${img4})`,
                         backgroundSize: "cover",
@@ -63,7 +63,7 @@ const SingleDemandeEnseignant = () => {
                         <Image
                           src={avatar1}
                           alt=""
-                          className="avatar-lg rounded-circle p-1 bg-body mt-n3"
+                          className="avatar-xxl rounded-circle p-1 bg-body mt-n5"
                         />
                       </div>
                     </Card.Body>

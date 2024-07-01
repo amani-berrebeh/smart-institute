@@ -23,7 +23,7 @@ const ListPersonnels = () => {
   const [modal_AddEnseignantModals, setmodal_AddEnseignantModals] =
     useState<boolean>(false);
   function tog_AddEnseignantModals() {
-    navigate("/AjouterPersonnel");
+    navigate("/gestion-personnel/ajouter-personnel");
   }
   const columns = useMemo(
     () => [
@@ -131,7 +131,7 @@ const ListPersonnels = () => {
             <ul className="hstack gap-2 list-unstyled mb-0">
               <li>
                 <Link
-                  to="#"
+                  to="/gestion-personnel/compte-personnel"
                   className="badge bg-info-subtle text-info view-item-btn"
                 >
                   <i

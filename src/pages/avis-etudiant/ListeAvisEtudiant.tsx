@@ -116,7 +116,7 @@ const ListeAvisEtudiant = () => {
                         <ul className="hstack gap-2 list-unstyled mb-0">
               <li>
                 <Link
-                  to="/SingleAvisEtudiant"
+                  to="/avis-etudiant/single-avis-etudiant"
                   state={cellProps}
                   className="badge bg-info-subtle text-info view-item-btn"
                   data-bs-toggle="offcanvas"

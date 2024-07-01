@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -14,14 +10,7 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "esnext",
-    "baseUrl": "./src", // This must be specified if "paths" is.
-  //   "paths": {
-  //      "@component/*": ["Components/views/*"],
-  //      "@common/*": ["Components/Common/*"],
-  //      "@assets/*": ["src/assets/*"],
-  //      "@shared/*": ["app/_shared/*"],
-  //      "@helpers/*": ["helpers/*"]
-  //  },
+    "baseUrl": "./src",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,

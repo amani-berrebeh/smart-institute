@@ -303,7 +303,7 @@ const ListeActualite = () => {
                   </Card.Body>
                   <div className="card-footer mt-4 hstack gap-2">
                     <Link
-                      to="/DetailsActualite"
+                      to="/actualite/details-actualite"
                       state={item}
                       className="card-link link-secondary"
                     >

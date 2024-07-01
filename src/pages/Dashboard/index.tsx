@@ -10,10 +10,15 @@ import TopSalesLocation from './TopSalesLocation';
 import Widgets from './Widgets';
 import RecentOrders from './RecentOrders';
 import Revenue from './Revenue';
+import { selectCurrentUser } from "features/account/authSlice";
+import { RootState } from "app/store";
+import { useSelector } from "react-redux";
 
 const Dashboard = () => {
 
-    document.title = "Dashboard | Toner eCommerce + Admin React Template";
+    document.title = "Dashboard | Smart University";
+    const user: any = useSelector((state: RootState) => selectCurrentUser(state));
+    
 
     return (
         <React.Fragment>

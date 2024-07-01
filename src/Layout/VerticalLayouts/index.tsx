@@ -54,7 +54,7 @@ const VerticalLayout = (props: any) => {
   };
 
   const path = props.router.location.pathname;
-  const navData = navdata().props.children;
+  const navData = navdata().props?.children;
   const [modal_Note, setmodal_Note] = useState<boolean>(false);
   function tog_ModalNotes() {
     setmodal_Note(!modal_Note);

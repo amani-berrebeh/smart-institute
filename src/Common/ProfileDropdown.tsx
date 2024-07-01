@@ -5,9 +5,18 @@ import { createSelector } from 'reselect';
 //import images
 import avatar1 from "assets/images/users/avatar-1.jpg";
 
-const ProfileDropdown = () => {
+import { RootState } from '../app/store'; // Import your RootState interface
+import { selectCurrentUser } from '../features/account/authSlice'; 
+import axios from 'axios';
 
-    const [userName, setUserName] = useState<any>("Robert");
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
+
+const ProfileDropdown = () => {
+    const user = useSelector((state: RootState) => selectCurrentUser(state));
+    const navigate = useNavigate()
+
+    const [userName, setUserName] = useState<any>("Admin");
 
     const profiledropdownData = createSelector(
         (state: any) => state.Profile,
@@ -16,12 +25,29 @@ const ProfileDropdown = () => {
     const { success } = useSelector(profiledropdownData);
 
     useEffect(() => {
-        const authUser: any = localStorage.getItem("authUser")
-        if (authUser) {
-            const obj = JSON.parse(authUser);
-            setUserName(process.env.REACT_APP_DEFAULTAUTH === "fake" ? obj.username : process.env.REACT_APP_DEFAULTAUTH === "firebase" ? obj.email && obj.email : "Robert" );
+        if (localStorage.getItem("authUser")) {
+            if (process.env.REACT_APP_DEFAULTAUTH === "firebase") {
+                const obj = JSON.parse(localStorage.getItem("authUser") || "{}");
+                setUserName(obj.displayName);
+            } else if (
+                process.env.REACT_APP_DEFAULTAUTH === "fake" ||
+                process.env.REACT_APP_DEFAULTAUTH === "jwt"
+            ) {
+                const obj = JSON.parse(localStorage.getItem("authUser") || "{}");
+                setUserName(obj.username);
+            }
         }
-    }, [userName, success]);
+    }, [success]);
+    
+    const logout = () =>{
+        axios.post(`${process.env.REACT_APP_API_URL}/user/logout-user/${user?._id!}`,{})
+        .then((res: any)=> {
+          console.log(res);
+          Cookies.remove('astk');
+          navigate("/login")
+
+        })
+    };
 
     return (
         <React.Fragment>
@@ -36,7 +62,7 @@ const ProfileDropdown = () => {
                     </span>
                 </Dropdown.Toggle>
                 <Dropdown.Menu className="dropdown-menu-end">
-                    <h6 className="dropdown-header">Welcome {userName}!</h6>
+                    <h6 className="dropdown-header">Welcome {user?.name}!</h6>
                     <Dropdown.Item href="/user-profile"><i className="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i> <span className="align-middle">Profile</span></Dropdown.Item>
                     <Dropdown.Item href="/#!"><i className="mdi mdi-message-text-outline text-muted fs-16 align-middle me-1"></i> <span className="align-middle">Messages</span></Dropdown.Item>
                     <Dropdown.Item href="/#!"><i className="mdi mdi-calendar-check-outline text-muted fs-16 align-middle me-1"></i> <span className="align-middle">Taskboard</span></Dropdown.Item>
@@ -45,7 +71,7 @@ const ProfileDropdown = () => {
                     <Dropdown.Item href="/pages-profile"><i className="mdi mdi-wallet text-muted fs-16 align-middle me-1"></i> <span className="align-middle">Balance : <b>$8451.36</b></span></Dropdown.Item>
                     <Dropdown.Item href="/pages-profile-settings"><span className="badge bg-success-subtle text-success mt-1 float-end">New</span><i className="mdi mdi-cog-outline text-muted fs-16 align-middle me-1"></i> <span className="align-middle">Settings</span></Dropdown.Item>
                     <Dropdown.Item href="/auth-lockscreen-basic"><i className="mdi mdi-lock text-muted fs-16 align-middle me-1"></i> <span className="align-middle">Lock screen</span></Dropdown.Item>
-                    <Dropdown.Item href="/logout"><i className="mdi mdi-logout text-muted fs-16 align-middle me-1"></i> <span className="align-middle" data-key="t-logout">Logout</span></Dropdown.Item>
+                    <Dropdown.Item onClick={logout}><i className="mdi mdi-logout text-muted fs-16 align-middle me-1"></i> <span className="align-middle" data-key="t-logout">Logout</span></Dropdown.Item>
                 </Dropdown.Menu>
             </Dropdown>
         </React.Fragment>

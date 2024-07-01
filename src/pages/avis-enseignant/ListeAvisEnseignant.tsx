@@ -8,8 +8,16 @@ import Flatpickr from "react-flatpickr";
 import dummyImg from "../../assets/images/users/user-dummy-img.jpg"
 import { Link } from 'react-router-dom';
 
+import { actionAuthorization } from 'utils/pathVerification';
+import { RootState } from 'app/store';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from 'features/account/authSlice'; 
+
+
 const ListeAvisEnseignant = () => {
     document.title = "Avis Enseignant | Smart Institute";
+    const user = useSelector((state: RootState) => selectCurrentUser(state));
+
     const [modal_AddUserModals, setmodal_AddUserModals] = useState<boolean>(false);
     const [isMultiDeleteButton, setIsMultiDeleteButton] = useState<boolean>(false)
     function tog_AddUserModals() {
@@ -114,72 +122,78 @@ const ListeAvisEnseignant = () => {
                 accessor: (cellProps: any) => {
                     return (
                         <ul className="hstack gap-2 list-unstyled mb-0">
+                             {actionAuthorization("/avis-enseignant/single-avis-enseignant",user?.permissions!)?
+                             <li>
+                             <Link
+                               to="/avis-enseignant/single-avis-enseignant"
+                               state={cellProps}
+                               className="badge bg-info-subtle text-info view-item-btn"
+                               data-bs-toggle="offcanvas"
+                             >
+                               <i
+                                 className="ph ph-eye"
+                                 style={{
+                                   transition: "transform 0.3s ease-in-out",
+                                   cursor: "pointer",
+                                   fontSize: "1.5em",
+                                 }}
+                                 onMouseEnter={(e) =>
+                                   (e.currentTarget.style.transform = "scale(1.4)")
+                                 }
+                                 onMouseLeave={(e) =>
+                                   (e.currentTarget.style.transform = "scale(1)")
+                                 }
+                               ></i>
+                             </Link>
+                           </li> : <></>
+                            }
+              
               <li>
-                <Link
-                  to="/SingleAvisEnseignant"
-                  state={cellProps}
-                  className="badge bg-info-subtle text-info view-item-btn"
-                  data-bs-toggle="offcanvas"
-                >
-                  <i
-                    className="ph ph-eye"
-                    style={{
-                      transition: "transform 0.3s ease-in-out",
-                      cursor: "pointer",
-                      fontSize: "1.5em",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.transform = "scale(1.4)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.transform = "scale(1)")
-                    }
-                  ></i>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="#GroupDetails"
-                  className="badge bg-success-subtle text-success edit-item-btn"
-                >
-                  <i
-                    className="ph ph-pencil-line"
-                    style={{
-                      transition: "transform 0.3s ease-in-out",
-                      cursor: "pointer",
-                      fontSize: "1.5em",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.transform = "scale(1.4)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.transform = "scale(1)")
-                    }
-                  ></i>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="#"
-                  className="badge bg-danger-subtle text-danger remove-item-btn"
-                 
-                >
-                  <i
-                    className="ph ph-trash"
-                    style={{
-                      transition: "transform 0.3s ease-in-out",
-                      cursor: "pointer",
-                      fontSize: "1.5em",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.transform = "scale(1.4)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.transform = "scale(1)")
-                    }
-                  ></i>
-                </Link>
-              </li>
+              <Link
+                to="#"
+                className="badge bg-success-subtle text-success edit-item-btn"
+              >
+                <i
+                  className="ph ph-pencil-line"
+                  style={{
+                    transition: "transform 0.3s ease-in-out",
+                    cursor: "pointer",
+                    fontSize: "1.5em",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.transform = "scale(1.4)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.transform = "scale(1)")
+                  }
+                ></i>
+              </Link>
+            </li>
+            {actionAuthorization("/avis-enseignant/supprimer-avis-enseignant",user?.permissions!)?
+            <li>
+            <Link
+              to="#"
+              className="badge bg-danger-subtle text-danger remove-item-btn"
+             
+            >
+              <i
+                className="ph ph-trash"
+                style={{
+                  transition: "transform 0.3s ease-in-out",
+                  cursor: "pointer",
+                  fontSize: "1.5em",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.transform = "scale(1.4)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.transform = "scale(1)")
+                }
+              ></i>
+            </Link>
+          </li> : <></>
+        }
+              
             </ul>
                     )
                 },
