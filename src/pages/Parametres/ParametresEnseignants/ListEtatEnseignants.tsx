@@ -10,13 +10,18 @@ import {
   Row,
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
-import CountUp from "react-countup";
 import { Link, useNavigate } from "react-router-dom";
 import TableContainer from "Common/TableContainer";
-import { sellerList } from "Common/data";
+import Swal from "sweetalert2";
+import { useDeleteEtatEnseignantMutation, useFetchEtatsEnseignantQuery } from "features/etatEnseignant/etatEnseignant";
+import { actionAuthorization } from 'utils/pathVerification';
+import { RootState } from 'app/store';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from 'features/account/authSlice'; 
 
 const ListEtatEnseignants = () => {
   document.title = "Liste états des enseignants | Smart University";
+  const user = useSelector((state: RootState) => selectCurrentUser(state));
 
   const navigate = useNavigate();
 
@@ -24,6 +29,49 @@ const ListEtatEnseignants = () => {
     useState<boolean>(false);
   function tog_AddParametreModals() {
     setmodal_AddParametreModals(!modal_AddParametreModals);
+  }
+
+  function tog_AddEtatEnseignant() {
+    navigate("/parametre-enseignant/etat/ajouter-etat-enseignant");
+  }
+  const { data = [] } = useFetchEtatsEnseignantQuery();
+  const [deleteEtatEnseignant] = useDeleteEtatEnseignantMutation();
+
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger",
+    },
+    buttonsStyling: false,
+  });
+  const AlertDelete = async (_id: string) => {
+  
+    swalWithBootstrapButtons
+    .fire({
+      title: "Êtes-vous sûr?",
+      text: "Vous ne pourrez pas revenir en arrière!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Oui, supprimez-le!",
+      cancelButtonText: "Non, annuler!",
+      reverseButtons: true,
+    })
+    .then((result) => {
+      if (result.isConfirmed) {
+        deleteEtatEnseignant(_id);
+        swalWithBootstrapButtons.fire(
+          "Supprimé!",
+          "L'état compte enseignant a été supprimé.",
+          "success"
+        );
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        swalWithBootstrapButtons.fire(
+          "Annulé",
+          "L'état compte enseignant est en sécurité :)",
+          "error"
+        );
+      }
+    });
   }
   const columns = useMemo(
     () => [
@@ -56,20 +104,20 @@ const ListEtatEnseignants = () => {
       },
       {
         Header: "Value",
-        accessor: "sellerName",
+        accessor: "value_etat_enseignant",
         disableFilters: true,
         filterable: true,
       },
 
       {
-        Header: "Etat Enseignant",
-        accessor: "balance",
+        Header: "Etat Compte Enseignant",
+        accessor: "etat_fr",
         disableFilters: true,
         filterable: true,
       },
       {
-        Header: "حالة الأستاذ",
-        accessor: "email",
+        Header: "حالة حساب الأستاذ",
+        accessor: "etat_ar",
         disableFilters: true,
         filterable: true,
       },
@@ -78,33 +126,16 @@ const ListEtatEnseignants = () => {
         Header: "Action",
         disableFilters: true,
         filterable: true,
-        accessor: (cellProps: any) => {
+        accessor: (etatEnseignant: any) => {
           return (
             <ul className="hstack gap-2 list-unstyled mb-0">
+    {actionAuthorization("/parametre-enseignant/etat/edit-etat-enseignant",user?.permissions!)?
+
               <li>
                 <Link
-                  to="#"
-                  className="badge bg-info-subtle text-info view-item-btn"
-                >
-                  <i
-                    className="ph ph-eye"
-                    style={{
-                      transition: "transform 0.3s ease-in-out",
-                      cursor: "pointer",
-                      fontSize: "1.5em",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.transform = "scale(1.4)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.transform = "scale(1)")
-                    }
-                  ></i>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="#"
+             
+                  to="/parametre-enseignant/etat/edit-etat-enseignant"
+                  state={etatEnseignant}
                   className="badge bg-primary-subtle text-primary edit-item-btn"
                 >
                   <i
@@ -120,9 +151,12 @@ const ListEtatEnseignants = () => {
                     onMouseLeave={(e) =>
                       (e.currentTarget.style.transform = "scale(1)")
                     }
+                    
                   ></i>
                 </Link>
-              </li>
+              </li> :<></> }
+              {actionAuthorization("/parametre-enseignant/etat/edit-etat-enseignant",user?.permissions!)?
+
               <li>
                 <Link
                   to="#"
@@ -141,9 +175,10 @@ const ListEtatEnseignants = () => {
                     onMouseLeave={(e) =>
                       (e.currentTarget.style.transform = "scale(1)")
                     }
+                    onClick={() => AlertDelete(etatEnseignant?._id!)}
                   ></i>
                 </Link>
-              </li>
+              </li> :<></>}
             </ul>
           );
         },
@@ -190,19 +225,21 @@ const ListEtatEnseignants = () => {
 
                     <Col className="col-lg-auto ms-auto">
                       <div className="hstack gap-2">
+                      {actionAuthorization("/parametre-enseignant/etat/ajouter-etat-enseignant",user?.permissions!)?
+
                         <Button
                           variant="primary"
                           className="add-btn"
-                          onClick={() => tog_AddParametreModals()}
+                          onClick={() => tog_AddEtatEnseignant()}
                         >
                           Ajouter Etat
-                        </Button>
+                        </Button> :<></>}
                       </div>
                     </Col>
                   </Row>
                 </Card.Body>
               </Card>
-
+{/* 
               <Modal
                 className="fade modal-fullscreen"
                 show={modal_AddParametreModals}
@@ -281,7 +318,7 @@ const ListEtatEnseignants = () => {
                     </div>
                   </div>
                 </Form>
-              </Modal>
+              </Modal> */}
 
               <Card>
                 <Card.Body className="p-0">
@@ -292,7 +329,7 @@ const ListEtatEnseignants = () => {
                   >
                     <TableContainer
                       columns={columns || []}
-                      data={sellerList || []}
+                      data={data || []}
                       // isGlobalFilter={false}
                       iscustomPageSize={false}
                       isBordered={false}

@@ -4,17 +4,17 @@ import {
   Card,
   Col,
   Container,
-  Dropdown,
-  Form,
+ Form,
   Modal,
   Row,
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
-import CountUp from "react-countup";
 import { Link, useNavigate } from "react-router-dom";
 
 import { sellerList } from "Common/data";
+import Swal from "sweetalert2";
 import TableContainer from "Common/TableContainer";
+import { Classe, useDeleteClasseMutation, useFetchClassesQuery } from "features/classe/classe";
 
 const ListClasses = () => {
   document.title = "Liste des classes | Smart University";
@@ -26,6 +26,54 @@ const ListClasses = () => {
   function tog_AddParametreModals() {
     setmodal_AddParametreModals(!modal_AddParametreModals);
   }
+
+  function tog_AddClasse() {
+    navigate("/departement/gestion-classes/add-classe");
+  }
+  const { data = [] } = useFetchClassesQuery();
+  const [deleteClasse] = useDeleteClasseMutation();
+  console.log(data)
+
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger",
+    },
+    buttonsStyling: false,
+  });
+  const AlertDelete = async (_id: string) => {
+    swalWithBootstrapButtons
+      .fire({
+        title: "Êtes-vous sûr?",
+        text: "Vous ne pourrez pas revenir en arrière!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Oui, supprimez-le!",
+        cancelButtonText: "Non, annuler!",
+        reverseButtons: true,
+      })
+      .then((result) => {
+        if (result.isConfirmed) {
+          deleteClasse(_id);
+          swalWithBootstrapButtons.fire(
+            "Supprimé!",
+            "Classe a été supprimé.",
+            "success"
+          );
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          swalWithBootstrapButtons.fire(
+            "Annulé",
+            "Classe est en sécurité :)",
+            "error"
+          );
+        }
+      });
+  };
+
+
+
+
+
   const columns = useMemo(
     () => [
         {
@@ -35,39 +83,34 @@ const ListClasses = () => {
             },
             id: '#',
         },
+       
         {
-            Header: "ID",
-            accessor: "id",
+            Header: "Nom Classe (FR)",
+            accessor: "nom_classe_fr",
             disableFilters: true,
             filterable: true,
         },
-        {
-            Header: "Nom Classe (AR)",
-            class: "sellerName",
-            disableFilters: true,
-            filterable: true,
-        },
-        {
-          Header: "Nom Classe (FR)",
-          accessor: "",
-          disableFilters: true,
-          filterable: true,
+      //   {
+      //     Header: "Nom Classe (FR)",
+      //     accessor: "nom_classe_ar",
+      //     disableFilters: true,
+      //     filterable: true,
+      // },
+      {
+        Header: "Departement",
+        accessor: (row: any) => row.departement?.name_fr || "",
+        disableFilters: true,
+        filterable: true,
       },
         {
-            Header: "Département",
-            accessor: "balance",
-            disableFilters: true,
-            filterable: true,
-        },
-        {
             Header: "Niveau",
-            accessor: "email",
+            accessor: (row: any) => row.niveau_classe?.abreviation || "",
             disableFilters: true,
             filterable: true,
         },
         {
           Header: "Section",
-          accessor: "",
+          accessor: (row: any) => row.section_classe?.abreviation || "",
           disableFilters: true,
           filterable: true,
       },
@@ -75,14 +118,14 @@ const ListClasses = () => {
             Header: "Affectater Matières",
             disableFilters: true,
             filterable: true,
-            accessor: (cellProps: any) => {
+            accessor: (classe: Classe) => {
               return (
                   <ul className="hstack gap-2 list-unstyled mb-0">
                     <li>
                       <Link
                         to="/gestion-departement/classes/affecter-matiere"
                         className="badge bg-success-subtle text-success remove-item-btn"
-                        state={cellProps}
+                        state={classe}
                       >
                         <i
                           className="ph ph-file-plus"
@@ -105,50 +148,15 @@ const ListClasses = () => {
                 );
           },
         },
-        // {
-        //     Header: "Activation",
-        //     disableFilters: true,
-        //     filterable: true,
-        //     accessor: (cellProps: any) => {
-        //         switch (cellProps.status) {
-        //             case "Activé":
-        //                 return (<span className="badge bg-success-subtle text-success text-uppercase"> {cellProps.status}</span>)
-        //             case "Desactivé":
-        //                 return (<span className="badge bg-danger-subtle text-danger text-uppercase"> {cellProps.status}</span>)
-        //             default:
-        //                 return (<span className="badge bg-success-subtle text-success text-uppercase"> {cellProps.status}</span>)
-        //         }
-        //     },
-        // },
+
         {
             Header: "Action",
             disableFilters: true,
             filterable: true,
-            accessor: (cellProps: any) => {
+            accessor: (classe: Classe) => {
                 return (
                     <ul className="hstack gap-2 list-unstyled mb-0">
-                      {/* <li>
-                        <Link
-                          to="#"
-                          className="badge bg-info-subtle text-info view-item-btn"
-               
-                        >
-                          <i
-                            className="ph ph-eye"
-                            style={{
-                              transition: "transform 0.3s ease-in-out",
-                              cursor: "pointer",
-                              fontSize: "1.5em",
-                            }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.transform = "scale(1.4)")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.transform = "scale(1)")
-                            }
-                          ></i>
-                        </Link>
-                      </li> */}
+                     
                       <li>
                         <Link
                           to="#"
@@ -189,7 +197,7 @@ const ListClasses = () => {
                             onMouseLeave={(e) =>
                               (e.currentTarget.style.transform = "scale(1)")
                             }
-                            
+                            onClick={() => AlertDelete(classe?._id!)}
                           ></i>
                         </Link>
                       </li>
@@ -243,9 +251,9 @@ const ListClasses = () => {
                         <Button
                           variant="primary"
                           className="add-btn"
-                          onClick={() => tog_AddParametreModals()}
+                          onClick={() => tog_AddClasse()}
                         >
-                          Ajouter Classe
+                          Ajouter classe
                         </Button>
                       </div>
                     </Col>
@@ -422,7 +430,7 @@ const ListClasses = () => {
                  <React.Fragment>
             <TableContainer
                 columns={(columns || [])}
-                data={(sellerList || [])}
+                data={(data || [])}
                 // isGlobalFilter={false}
                 iscustomPageSize={false}
                 isBordered={false}

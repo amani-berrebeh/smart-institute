@@ -3,7 +3,7 @@ import { RootState } from "app/store";
 
 export interface UserResponse {
   user: {
-    _id?: string;
+    _id: string;
     name: string;
     email: string;
     login: string;
@@ -66,8 +66,15 @@ export const accountSlice = createApi({
         }),
         providesTags: ["Account"],
       }),
+      deleteUser: builder.mutation<void, string >({
+        query: (_id) => ({
+          url: `delete-user/${_id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["Account"],
+      }),
     };
   },
 });
 
-export const { useLoginMutation, useGetUserMutation, useFetchAllUsersQuery } = accountSlice;
+export const { useLoginMutation, useGetUserMutation, useFetchAllUsersQuery, useDeleteUserMutation } = accountSlice;

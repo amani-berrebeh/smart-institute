@@ -4,15 +4,13 @@ import {
   Card,
   Col,
   Container,
-  Dropdown,
-  Form,
-  Modal,
   Row,
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import { Link, useNavigate } from "react-router-dom";
 import TableContainer from "Common/TableContainer";
-import { sellerList } from "Common/data";
+import Swal from "sweetalert2";
+import { Niveau, useDeleteNiveauMutation, useFetchNiveauxQuery } from "features/niveau/niveau";
 
 
 const ListNiveau = () => {
@@ -25,6 +23,48 @@ const ListNiveau = () => {
   function tog_AddParametreModals() {
     setmodal_AddParametreModals(!modal_AddParametreModals);
   }
+
+  function tog_AddNiveau() {
+    navigate("/departement/gestion-classes/add-niveau");
+  }
+  const { data = [] } = useFetchNiveauxQuery();
+  const [deleteNiveau] = useDeleteNiveauMutation();
+
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger",
+    },
+    buttonsStyling: false,
+  });
+  const AlertDelete = async (_id: string) => {
+    swalWithBootstrapButtons
+      .fire({
+        title: "Êtes-vous sûr?",
+        text: "Vous ne pourrez pas revenir en arrière!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Oui, supprimez-le!",
+        cancelButtonText: "Non, annuler!",
+        reverseButtons: true,
+      })
+      .then((result) => {
+        if (result.isConfirmed) {
+          deleteNiveau(_id);
+          swalWithBootstrapButtons.fire(
+            "Supprimé!",
+            "Niveau a été supprimé.",
+            "success"
+          );
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          swalWithBootstrapButtons.fire(
+            "Annulé",
+            "Niveau est en sécurité :)",
+            "error"
+          );
+        }
+      });
+  };
   const columns = useMemo(
     () => [
         {
@@ -34,79 +74,40 @@ const ListNiveau = () => {
             },
             id: '#',
         },
+      
         {
-            Header: "ID",
-            accessor: "itemStock",
-            disableFilters: true,
-            filterable: true,
-        },
-        {
-            Header: "Nom (AR)",
-            accessor: "sellerName",
+            Header: "Niveau Classe",
+            accessor: "name_niveau_fr",
             disableFilters: true,
             filterable: true,
         },
        
         {
-            Header: "Nom (FR)",
-            accessor: "balance",
+            Header: "المستوى التعليمي",
+            accessor: "name_niveau_ar",
             disableFilters: true,
             filterable: true,
         },
         {
             Header: "Abréviation",
-            accessor: "email",
+            accessor: "abreviation",
             disableFilters: true,
             filterable: true,
         },
        
-        // {
-        //     Header: "Activation",
-        //     disableFilters: true,
-        //     filterable: true,
-        //     accessor: (cellProps: any) => {
-        //         switch (cellProps.status) {
-        //             case "Activé":
-        //                 return (<span className="badge bg-success-subtle text-success text-uppercase"> {cellProps.status}</span>)
-        //             case "Desactivé":
-        //                 return (<span className="badge bg-danger-subtle text-danger text-uppercase"> {cellProps.status}</span>)
-        //             default:
-        //                 return (<span className="badge bg-success-subtle text-success text-uppercase"> {cellProps.status}</span>)
-        //         }
-        //     },
-        // },
+   
         {
             Header: "Action",
             disableFilters: true,
             filterable: true,
-            accessor: (cellProps: any) => {
+            accessor: (niveau: Niveau) => {
                 return (
                     <ul className="hstack gap-2 list-unstyled mb-0">
-                      {/* <li>
-                        <Link
-                          to="#"
-                          className="badge bg-info-subtle text-info view-item-btn"
-               
-                        >
-                          <i
-                            className="ph ph-eye"
-                            style={{
-                              transition: "transform 0.3s ease-in-out",
-                              cursor: "pointer",
-                              fontSize: "1.5em",
-                            }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.transform = "scale(1.4)")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.transform = "scale(1)")
-                            }
-                          ></i>
-                        </Link>
-                      </li> */}
+                      
                       <li>
                         <Link
-                          to="#"
+                          to="/departement/gestion-classes/edit-niveau"
+                          state={niveau}
                           className="badge bg-primary-subtle text-primary edit-item-btn"
                     
                         >
@@ -144,7 +145,7 @@ const ListNiveau = () => {
                             onMouseLeave={(e) =>
                               (e.currentTarget.style.transform = "scale(1)")
                             }
-                            
+                            onClick={() => AlertDelete(niveau?._id!)}
                           ></i>
                         </Link>
                       </li>
@@ -193,7 +194,7 @@ const ListNiveau = () => {
                         <Button
                           variant="primary"
                           className="add-btn"
-                          onClick={() => tog_AddParametreModals()}
+                          onClick={() => tog_AddNiveau()}
                         >
                           Ajouter niveau
                         </Button>
@@ -204,7 +205,7 @@ const ListNiveau = () => {
                 </Card.Body>
               </Card>
 
-              <Modal
+              {/* <Modal
                 className="fade modal-fullscreen"
                 show={modal_AddParametreModals}
                 onHide={() => {
@@ -276,7 +277,7 @@ const ListNiveau = () => {
                     </div>
                   </div>
                 </Form>
-              </Modal>
+              </Modal> */}
 
               <Card>
                 <Card.Body className="p-0">
@@ -287,7 +288,7 @@ const ListNiveau = () => {
                   >
                     <TableContainer
                 columns={(columns || [])}
-                data={(sellerList || [])}
+                data={(data || [])}
                 // isGlobalFilter={false}
                 iscustomPageSize={false}
                 isBordered={false}

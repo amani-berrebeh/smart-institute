@@ -7,9 +7,14 @@ import { userList } from "Common/data";
 import Flatpickr from "react-flatpickr";
 import dummyImg from "../../assets/images/users/user-dummy-img.jpg"
 import { Link } from 'react-router-dom';
+import { actionAuthorization } from 'utils/pathVerification';
+import { RootState } from 'app/store';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from 'features/account/authSlice'; 
 
 const ListeAvisPersonnel = () => {
     document.title = "Avis Personnel | Smart Institute";
+    const user = useSelector((state: RootState) => selectCurrentUser(state));
     const [modal_AddUserModals, setmodal_AddUserModals] = useState<boolean>(false);
     const [isMultiDeleteButton, setIsMultiDeleteButton] = useState<boolean>(false)
     function tog_AddUserModals() {
@@ -114,6 +119,7 @@ const ListeAvisPersonnel = () => {
                 accessor: (cellProps: any) => {
                     return (
                         <ul className="hstack gap-2 list-unstyled mb-0">
+                             {actionAuthorization("/avis-personnel/single-avis-personnel",user?.permissions!)?
               <li>
                 <Link
                   to="/avis-personnel/single-avis-personnel"
@@ -136,7 +142,9 @@ const ListeAvisPersonnel = () => {
                     }
                   ></i>
                 </Link>
-              </li>
+              </li> : <></>
+                }
+                 {actionAuthorization("/avis-personnel/edit-avis-personnel",user?.permissions!)?
               <li>
                 <Link
                   to="#GroupDetails"
@@ -157,8 +165,10 @@ const ListeAvisPersonnel = () => {
                     }
                   ></i>
                 </Link>
-              </li>
-              <li>
+              </li> : <></>
+               }
+                {actionAuthorization("/avis-personnel/supprimer-avis-personnel",user?.permissions!)?
+                <li>
                 <Link
                   to="#"
                   className="badge bg-danger-subtle text-danger remove-item-btn"
@@ -179,7 +189,7 @@ const ListeAvisPersonnel = () => {
                     }
                   ></i>
                 </Link>
-              </li>
+              </li> : <></>}
             </ul>
                     )
                 },

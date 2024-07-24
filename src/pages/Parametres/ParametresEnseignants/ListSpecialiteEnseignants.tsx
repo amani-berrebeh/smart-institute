@@ -13,12 +13,18 @@ import Breadcrumb from "Common/BreadCrumb";
 import { Link, useNavigate } from "react-router-dom";
 import TableContainer from "Common/TableContainer";
 import { sellerList } from "Common/data";
+import Swal from "sweetalert2";
+import { SpecialiteEnseignant, useDeleteSpecialiteEnseignantMutation, useFetchSpecialitesEnseignantQuery } from "features/specialiteEnseignant/specialiteEnseignant";
+import { actionAuthorization } from 'utils/pathVerification';
+import { RootState } from 'app/store';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from 'features/account/authSlice'; 
 
 
-
-const ListePostPersonnels = () => {
+const ListSpecialiteEnseignants = () => {
   document.title =
-    "Liste postes des personnels | Smart University";
+    "Liste spécialités des enseignants | Smart University";
+    const user = useSelector((state: RootState) => selectCurrentUser(state));
 
   const navigate = useNavigate();
 
@@ -27,6 +33,52 @@ const ListePostPersonnels = () => {
   function tog_AddParametreModals() {
     setmodal_AddParametreModals(!modal_AddParametreModals);
   }
+
+
+  function tog_AddSpecialiteEnseignant() {
+    navigate("/parametre-enseignant/specialite/ajouter-specialite-enseignant");
+  }
+  const { data = [] } = useFetchSpecialitesEnseignantQuery();
+  const [deleteSpecialiteEnseignant] = useDeleteSpecialiteEnseignantMutation();
+
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger",
+    },
+    buttonsStyling: false,
+  });
+  const AlertDelete = async (_id: string) => {
+  
+    swalWithBootstrapButtons
+    .fire({
+      title: "Êtes-vous sûr?",
+      text: "Vous ne pourrez pas revenir en arrière!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Oui, supprimez-le!",
+      cancelButtonText: "Non, annuler!",
+      reverseButtons: true,
+    })
+    .then((result) => {
+      if (result.isConfirmed) {
+        deleteSpecialiteEnseignant(_id);
+        swalWithBootstrapButtons.fire(
+          "Supprimé!",
+          "Spécialité enseignant a été supprimé.",
+          "success"
+        );
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        swalWithBootstrapButtons.fire(
+          "Annulé",
+          "Spécialité enseignant est en sécurité :)",
+          "error"
+        );
+      }
+    });
+  }
+
+
   const columns = useMemo(
     () => [
         {
@@ -36,52 +88,40 @@ const ListePostPersonnels = () => {
             },
             id: '#',
         },
-        
+       
         {
-            Header: "Poste Personnel",
-            accessor: "balance",
+            Header: "Value",
+            accessor: "value_specialite_enseignant",
+            disableFilters: true,
+            filterable: true,
+        },
+       
+        {
+            Header: "Spécialité Enseignant",
+            accessor: "specialite_fr",
             disableFilters: true,
             filterable: true,
         },
         {
-            Header: "الخطة الوظيفية",
-            accessor: "email",
+            Header: "الإختصاص",
+            accessor: "specialite_ar",
             disableFilters: true,
             filterable: true,
         },
-      
+       
         {
             Header: "Action",
             disableFilters: true,
             filterable: true,
-            accessor: (cellProps: any) => {
+            accessor: (specialiteEnseignant: SpecialiteEnseignant) => {
                 return (
-                    <ul className="hstack gap-2 list-unstyled mb-0">
+                    <ul className="hstack gap-2 list-unstyled mb-0">       
+                 {actionAuthorization("/parametre-enseignant/specialite/edit-specialite-enseignant",user?.permissions!)?
+          
                       <li>
                         <Link
-                          to="#"
-                          className="badge bg-info-subtle text-info view-item-btn"
-               
-                        >
-                          <i
-                            className="ph ph-eye"
-                            style={{
-                              transition: "transform 0.3s ease-in-out",
-                              cursor: "pointer",
-                              fontSize: "1.5em",
-                            }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.transform = "scale(1.4)")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.transform = "scale(1)")
-                            }
-                          ></i>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          to="#"
+                          to="/parametre-enseignant/specialite/edit-specialite-enseignant"
+                          state={specialiteEnseignant}
                           className="badge bg-primary-subtle text-primary edit-item-btn"
                     
                         >
@@ -100,7 +140,9 @@ const ListePostPersonnels = () => {
                             }
                           ></i>
                         </Link>
-                      </li>
+                      </li> : <></>}
+                      {actionAuthorization("/parametre-enseignant/specialite/supprimer-specialite-enseignant",user?.permissions!)?
+
                       <li>
                         <Link
                           to="#"
@@ -119,10 +161,11 @@ const ListePostPersonnels = () => {
                             onMouseLeave={(e) =>
                               (e.currentTarget.style.transform = "scale(1)")
                             }
+                            onClick={() => AlertDelete(specialiteEnseignant?._id!)}
                             
                           ></i>
                         </Link>
-                      </li>
+                      </li> :<></>}
                     </ul>
                   );
             },
@@ -134,9 +177,8 @@ const ListePostPersonnels = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          <Breadcrumb title="Paramètres des personnels" pageTitle="Liste postes des personnels" />
-        
-
+          <Breadcrumb title="Paramètres des enseignants" pageTitle="Liste spécialités des enseignants" />
+      
           <Row id="sellersList">
             <Col lg={12}>
               <Card>
@@ -164,24 +206,26 @@ const ListePostPersonnels = () => {
                         <option value="Inactive">Desactivé</option>
                       </select>
                     </Col>
-                    
+                   
                     <Col className="col-lg-auto ms-auto">
                       <div className="hstack gap-2">
+                      {actionAuthorization("/parametre-enseignant/specialite/ajouter-specialite-enseignant",user?.permissions!)?
+
                         <Button
                           variant="primary"
                           className="add-btn"
-                          onClick={() => tog_AddParametreModals()}
+                          onClick={() => tog_AddSpecialiteEnseignant()}
                         >
-                          Ajouter Poste
-                        </Button>
-                      
+                          Ajouter spécialité enseignant
+                        </Button> :<></>}
+                       
                       </div>
                     </Col>
                   </Row>
                 </Card.Body>
               </Card>
 
-              <Modal
+              {/* <Modal
                 className="fade modal-fullscreen"
                 show={modal_AddParametreModals}
                 onHide={() => {
@@ -191,7 +235,7 @@ const ListePostPersonnels = () => {
               >
                 <Modal.Header className="px-4 pt-4" closeButton>
                   <h5 className="modal-title" id="exampleModalLabel">
-                    Ajouter Poste Personnel
+                    Ajouter Spécialité Enseignant
                   </h5>
                 </Modal.Header>
                 <Form className="tablelist-form">
@@ -215,7 +259,7 @@ const ListePostPersonnels = () => {
                     </div>
                     <div className="mb-3">
                       <Form.Label htmlFor="item-stock-field">
-                     Poste Personnel
+                        Spécialité Enseignant
                       </Form.Label>
                       <Form.Control
                         type="text"
@@ -232,7 +276,7 @@ const ListePostPersonnels = () => {
                         textAlign: "right",
                       }}
                     >
-                      <Form.Label htmlFor="phone-field">الخطة الوظيفية</Form.Label>
+                      <Form.Label htmlFor="phone-field">الإختصاص</Form.Label>
                       <Form.Control
                         type="text"
                         id="phone-field"
@@ -257,7 +301,7 @@ const ListePostPersonnels = () => {
                     </div>
                   </div>
                 </Form>
-              </Modal>
+              </Modal> */}
 
               <Card>
                 <Card.Body className="p-0">
@@ -268,7 +312,7 @@ const ListePostPersonnels = () => {
                   >
                     <TableContainer
                 columns={(columns || [])}
-                data={(sellerList || [])}
+                data={(data || [])}
                 // isGlobalFilter={false}
                 iscustomPageSize={false}
                 isBordered={false}
@@ -304,7 +348,7 @@ const ListePostPersonnels = () => {
   );
 };
 
-export default ListePostPersonnels;
+export default ListSpecialiteEnseignants;
 
 
 

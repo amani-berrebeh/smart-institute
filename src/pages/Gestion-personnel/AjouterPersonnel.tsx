@@ -9,20 +9,21 @@ import {
   Image,
   Row,
 } from "react-bootstrap";
-import Breadcrumb from "Common/BreadCrumb";
 import { Link, useNavigate } from "react-router-dom";
 import Flatpickr from "react-flatpickr";
-import Dropzone from "react-dropzone";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import SimpleBar from "simplebar-react";
 import country from "Common/country";
 import Swal from "sweetalert2";
-
-import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
-
-import { useSelector } from "react-redux";
+import {
+  Personnel,
+  useAddPersonnelMutation,
+} from "features/personnel/personnelSlice";
+import { useFetchEtatsPersonnelQuery } from "features/etatPersonnel/etatPersonnelSlice";
+import { useFetchPostesPersonnelQuery } from "features/postePersonnel/postePersonnel";
+import { useFetchGradesPersonnelQuery } from "features/gradePersonnel/gradePersonnel";
+import { useFetchCategoriesPersonnelQuery } from "features/categoriePersonnel/categoriePersonnel";
+import { useFetchServicesPersonnelQuery } from "features/servicePersonnel/servicePersonnel";
 
 type Wilaya =
   | "اريانة"
@@ -390,84 +391,214 @@ const AjouterPersonnels = () => {
   document.title = " Ajouter Personnel | Application Smart Institute";
   const navigate = useNavigate();
   const [selectedFiles, setselectedFiles] = useState([]);
-  // Mutation to create account
-
-  // Account's Values and Functions
-  // groupId: "65def391137b93f458f52c1f",
-
   const [seletedCountry, setseletedCountry] = useState<any>({});
+  const [selectedCountry1, setSelectedCountry1] = useState<any>({});
   const [seletedCountry1, setseletedCountry1] = useState<any>({});
-
   const [selectedOption, setSelectedOption] = useState<string>("");
-
-  const handleCheckboxChange = (option: string) => {
-    setSelectedOption((prev) => (prev === option ? "" : option));
-  };
-
-  const fileInputs: { [key: string]: string[] } = {
-    جديد: [],
-    راسب: ["بطاقة أعداد السنة الفارطة"],
-    نقلة: ["بطاقة تعيين", "شهادة مغادرة", "بطاقة أعداد السنة الفارطة"],
-    "إعادة توجيه": ["وثيقة إعادة توجيه", "بطاقة أعداد السنة الفارطة"],
-    "إعادة إدماج": ["وثيقة إعادة ادماج"],
-    "ترسيم إستثنائي": [
-      "بطاقة أعداد السنة الفارطة",
-      "مطلب كتابي",
-      "وصل خلاص التسجيل كاملاً",
-    ],
-    "إجازة ثانية": ["بطاقة تعيين", "بطاقة أعداد السنة الفارطة"],
-  };
+  const [selectedGender, setSelectedGender] = useState<string>("");
   const [selectedWilaya, setSelectedWilaya] = useState<Wilaya | "">("");
   const [selectedDelegation, setSelectedDelegation] = useState<string>("");
+  const [selectedDateDelivrance, setSelectedDateDelivrance] =
+    useState<Date | null>(null);
+  const [selectedDateAffectation, setSelectedDateAffectation] =
+    useState<Date | null>(null);
+  const [selectedDateDesignation, setSelectedDateDesignation] =
+    useState<Date | null>(null);
+    const [selectedStatus, setSelectedStatus] = useState<string>("");
 
-  const handleWilayaChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedWilaya(event.target.value as Wilaya);
-    setSelectedDelegation("");
+  const [createPersonnel] = useAddPersonnelMutation();
+  const { data: etat_compte = [] } = useFetchEtatsPersonnelQuery();
+  const { data: poste = [] } = useFetchPostesPersonnelQuery();
+  const { data: grade = [] } = useFetchGradesPersonnelQuery();
+  const { data: categorie = [] } = useFetchCategoriesPersonnelQuery();
+  const { data: service = [] } = useFetchServicesPersonnelQuery();
+
+  const [formData, setFormData] = useState<Personnel>({
+    _id: "",
+    nom_fr: "",
+    nom_ar: "",
+    prenom_fr: "",
+    prenom_ar: "",
+    lieu_naissance_fr: "",
+    lieu_naissance_ar: "",
+    date_designation: "",
+    date_naissance: "",
+    nationalite: "",
+    etat_civil: "",
+    sexe: "",
+    etat_compte: {
+      _id: "",
+      value: "",
+      etat_fr: "",
+      etat_ar: "",
+    },
+    poste: {
+      _id: "",
+      value: "",
+      poste_fr: "",
+      poste_ar: "",
+    },
+    grade: {
+      _id: "",
+      value_grade_personnel: "",
+      grade_fr: "",
+      grade_ar: "",
+    },
+    categorie: {
+      _id: "",
+      value: "",
+      categorie_fr: "",
+      categorie_ar: "",
+    },
+    service: {
+      _id: "",
+      value: "",
+      service_fr: "",
+      service_ar: "",
+    },
+
+    date_affectation: "",
+    compte_courant: "",
+    identifinat_unique: "",
+    num_cin: "",
+    date_delivrance: "",
+    state: "",
+    dependence: "",
+    code_postale: "",
+    adress_ar: "",
+    adress_fr: "",
+    email: "",
+    num_phone1: "",
+    num_phone2: "",
+    nom_conjoint: "",
+    job_conjoint: "",
+    nombre_fils: "",
+    photo_profil: "",
+    PhotoProfilFileExtension: "",
+    PhotoProfilFileBase64String: "",
+  });
+
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [e.target.id]: e.target.value,
+    }));
   };
 
+  const handleChange = (e: any) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  // change state
+  const handleWilayaChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const wilaya = event.target.value as Wilaya;
+    setSelectedWilaya(wilaya);
+    setFormData({
+      ...formData,
+      state: wilaya,
+      dependence: "",
+    });
+    setSelectedDelegation("");
+  };
+  // change dependance
   const handleDelegationChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    setSelectedDelegation(event.target.value);
+    const delegation = event.target.value;
+    setSelectedDelegation(delegation);
+    setFormData({
+      ...formData,
+      dependence: delegation,
+    });
   };
-  // change gender
-
-  // This function is triggered when the select changes
-  const selectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value;
-    setSelectedOption(value);
+  // change date affectation
+  const handleDateChangeAffectation = (selectedDates: Date[]) => {
+    const selectedDateAffectation = selectedDates[0];
+    setSelectedDateAffectation(selectedDateAffectation);
+    setFormData((prevState) => ({
+      ...prevState,
+      date_affectation: selectedDateAffectation
+        ? selectedDateAffectation.toISOString()
+        : "",
+    }));
   };
 
+  // change date naissance
+  const handleDateChangeNaissance = (selectedDates: Date[]) => {
+    const selectedDate = selectedDates[0];
+    setSelectedDate(selectedDate);
+    setFormData((prevState) => ({
+      ...prevState,
+      date_naissance: selectedDate ? selectedDate.toISOString() : "",
+    }));
+  };
+  // change date delivrance
+  const handleDateChangeDelivrance = (selectedDates: Date[]) => {
+    const selectedDateDelivrance = selectedDates[0];
+    setSelectedDateDelivrance(selectedDateDelivrance);
+    setFormData((prevState) => ({
+      ...prevState,
+      date_delivrance: selectedDateDelivrance
+        ? selectedDateDelivrance.toISOString()
+        : "",
+    }));
+  };
+
+  // change date designation grade /categorie
+  const handleDateChangeDesignation = (selectedDates: Date[]) => {
+    const selectedDateDesignation = selectedDates[0];
+    setSelectedDateDesignation(selectedDateDesignation);
+    setFormData((prevState) => ({
+      ...prevState,
+      date_designation: selectedDateDesignation
+        ? selectedDateDesignation.toISOString()
+        : "",
+    }));
+  };
   //change civil status
-  const [selectedStatus, setSelectedStatus] = useState<string>("");
 
   const selectChangeStatus = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
+    setFormData((prevState) => ({
+      ...prevState,
+      etat_civil: value,
+    }));
     setSelectedStatus(value);
   };
 
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
-  //change station
-  const [selectedStation, setSelectedStation] = useState<string>("");
-
-  const selectChangeStation = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  //change gender
+  const selectChangeGender = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
-    setSelectedStation(value);
+    setFormData((prevState) => ({
+      ...prevState,
+      sexe: value,
+    }));
+    setSelectedGender(value);
+  };
+  // changer nationalite
+  const handleCountrySelect = (country: any) => {
+    setSelectedCountry1(country);
+    setFormData((prevData) => ({
+      ...prevData,
+      nationalite: country.countryName,
+    }));
+  };
+  const onSubmitPersonnel = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      await createPersonnel(formData).unwrap();
+      notify();
+      navigate("/ListePersonnels");
+    } catch (error: any) {
+      console.log(error);
+    }
   };
 
-  //change group
-  const [selectedGroup, setSelectedGroup] = useState<string>("");
-
-  // const selectChangeGroup = (event: React.ChangeEvent<HTMLSelectElement>) => {
-  //   const value = event.target.value;
-  //   setSelectedGroup(value);
-  // };
-
-  const handleDateChange = (selectedDates: Date[]) => {
-    // Assuming you only need the first selected date
-    setSelectedDate(selectedDates[0]);
-  };
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const notify = () => {
     Swal.fire({
@@ -478,28 +609,6 @@ const AjouterPersonnels = () => {
       timer: 2000,
     });
   };
-
-  function handleAcceptedFiles(files: any) {
-    files.map((file: any) =>
-      Object.assign(file, {
-        preview: URL.createObjectURL(file),
-        formattedSize: formatBytes(file.size),
-      })
-    );
-    setselectedFiles(files);
-  }
-
-  /* Formats the size */
-  function formatBytes(bytes: any, decimals = 2) {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-  }
-
   function convertToBase64(
     file: File
   ): Promise<{ base64Data: string; extension: string }> {
@@ -519,6 +628,26 @@ const AjouterPersonnels = () => {
     });
   }
 
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = (
+      document.getElementById("PhotoProfilFileBase64String") as HTMLFormElement
+    ).files[0];
+    if (file) {
+      const { base64Data, extension } = await convertToBase64(file);
+      console.log(base64Data);
+      console.log(extension);
+      const newFile = base64Data + "." + extension;
+      console.log(newFile);
+      setFormData({
+        ...formData,
+        photo_profil: newFile,
+        PhotoProfilFileBase64String: base64Data,
+        PhotoProfilFileExtension: extension,
+      });
+    }
+  };
   return (
     <React.Fragment>
       <div className="page-content">
@@ -545,21 +674,24 @@ const AjouterPersonnels = () => {
                   </Card.Header>
                   <Card.Body></Card.Body>
                   <div className="mb-3">
-                    <Form className="tablelist-form">
+                    <Form
+                      className="tablelist-form"
+                      onSubmit={onSubmitPersonnel}
+                    >
                       <input type="hidden" id="id-field" />
                       <Row>
-                        <div className="text-center mb-3">
+                      <div className="text-center mb-3">
                           <div
                             className="position-relative d-inline-block"
                             style={{ marginBottom: "30px" }}
                           >
                             <div className="position-absolute top-100 start-100 translate-middle">
                               <label
-                                htmlFor="photosBase64String"
+                                htmlFor="PhotoProfilFileBase64String"
                                 className="mb-0"
                                 data-bs-toggle="tooltip"
                                 data-bs-placement="right"
-                                title="Select Employee Picture"
+                                title="Choisir Photo Personnel"
                               >
                                 <span className="avatar-xs d-inline-block">
                                   <span className="avatar-title bg-light border rounded-circle text-muted cursor-pointer">
@@ -570,16 +702,18 @@ const AjouterPersonnels = () => {
                               <input
                                 className="d-none"
                                 type="file"
-                                name="photosBase64String"
-                                id="photosBase64String"
+                                name="PhotoProfilFileBase64String"
+                                id="PhotoProfilFileBase64String"
                                 accept="image/*"
+                                onChange={(e) => handleFileUpload(e)}
                               />
                             </div>
                             <div className="avatar-xl">
                               <div className="avatar-title bg-light rounded-4">
                                 <img
-                                  // alt={formData.firstName}
-                                  id="photosBase64String"
+                                  src={`data:image/${formData.PhotoProfilFileExtension};base64,${formData.PhotoProfilFileBase64String}`}
+                                  alt={formData.prenom_fr}
+                                  id="PhotoProfilFileBase64String"
                                   className="avatar-xl h-auto rounded-4 object-fit-cover"
                                 />
                               </div>
@@ -590,26 +724,30 @@ const AjouterPersonnels = () => {
                         <Row>
                           <Col lg={3}>
                             <div className="mb-3">
-                              <Form.Label htmlFor="fullName">
+                              <Form.Label htmlFor="prenom_fr">
                                 Prénom (en français)
                               </Form.Label>
                               <Form.Control
                                 type="text"
-                                id="firstName"
+                                id="prenom_fr"
                                 placeholder=""
                                 // required
+                                onChange={onChange}
+                                value={formData.prenom_fr}
                               />
                             </div>
                           </Col>
                           <Col lg={3}>
                             <div className="mb-3">
-                              <Form.Label htmlFor="lastName">
+                              <Form.Label htmlFor="nom_fr">
                                 Nom (en français)
                               </Form.Label>
                               <Form.Control
                                 type="text"
-                                id="lastName"
+                                id="nom_fr"
                                 placeholder=""
+                                onChange={onChange}
+                                value={formData.nom_fr}
                               />
                             </div>
                           </Col>
@@ -620,16 +758,18 @@ const AjouterPersonnels = () => {
                               style={{ direction: "rtl", textAlign: "right" }}
                             >
                               <Form.Label
-                                htmlFor="lastName"
+                                htmlFor="nom_ar"
                                 style={{ direction: "rtl", textAlign: "right" }}
                               >
                                 اللقب (بالعربية)
                               </Form.Label>
                               <Form.Control
                                 type="text"
-                                id="lastName"
+                                id="nom_ar"
                                 placeholder=""
                                 dir="rtl"
+                                onChange={onChange}
+                                value={formData.nom_ar}
                               />
                             </div>
                           </Col>
@@ -639,17 +779,19 @@ const AjouterPersonnels = () => {
                               style={{ direction: "rtl", textAlign: "right" }}
                             >
                               <Form.Label
-                                htmlFor="fullName"
+                                htmlFor="prenom_ar"
                                 style={{ direction: "rtl", textAlign: "right" }}
                               >
                                 الإسم (بالعربية)
                               </Form.Label>
                               <Form.Control
                                 type="text"
-                                id="firstName"
+                                id="prenom_ar"
                                 placeholder=""
                                 dir="rtl"
                                 // required
+                                onChange={onChange}
+                                value={formData.prenom_ar}
                               />
                             </div>
                           </Col>
@@ -666,14 +808,14 @@ const AjouterPersonnels = () => {
                                   as="input"
                                   style={{
                                     backgroundImage: `url(${
-                                      seletedCountry1.flagImg &&
-                                      seletedCountry1.flagImg
+                                      selectedCountry1.flagImg &&
+                                      selectedCountry1.flagImg
                                     })`,
                                   }}
                                   className="form-control rounded-end flag-input form-select"
                                   placeholder="اختر دولة"
                                   readOnly
-                                  defaultValue={seletedCountry1.countryName}
+                                  defaultValue={selectedCountry1.countryName}
                                 ></Dropdown.Toggle>
                                 <Dropdown.Menu
                                   as="ul"
@@ -688,7 +830,7 @@ const AjouterPersonnels = () => {
                                         <Dropdown.Item
                                           as="li"
                                           onClick={() =>
-                                            setseletedCountry1(item)
+                                            handleCountrySelect(item)
                                           }
                                           key={key}
                                           className="dropdown-item d-flex"
@@ -726,17 +868,19 @@ const AjouterPersonnels = () => {
                               style={{ direction: "rtl", textAlign: "right" }}
                             >
                               <Form.Label
-                                htmlFor="fullName"
+                                htmlFor="lieu_naissance_fr"
                                 style={{ direction: "rtl", textAlign: "right" }}
                               >
                                 مكان الولادة (بالعربية)
                               </Form.Label>
                               <Form.Control
                                 type="text"
-                                id="firstName"
+                                id="lieu_naissance_fr"
                                 placeholder=""
                                 dir="rtl"
                                 // required
+                                onChange={onChange}
+                                value={formData.lieu_naissance_fr}
                               />
                             </div>
                           </Col>
@@ -746,17 +890,19 @@ const AjouterPersonnels = () => {
                               style={{ direction: "rtl", textAlign: "right" }}
                             >
                               <Form.Label
-                                htmlFor="fullName"
+                                htmlFor="lieu_naissance_ar"
                                 style={{ direction: "rtl", textAlign: "right" }}
                               >
                                 مكان الولادة (بالفرنسية)
                               </Form.Label>
                               <Form.Control
                                 type="text"
-                                id="firstName"
+                                id="lieu_naissance_ar"
                                 placeholder=""
                                 dir="rtl"
                                 // required
+                                onChange={onChange}
+                                value={formData.lieu_naissance_ar}
                               />
                             </div>
                           </Col>
@@ -766,18 +912,18 @@ const AjouterPersonnels = () => {
                               className="mb-3"
                               style={{ direction: "rtl", textAlign: "right" }}
                             >
-                              <Form.Label htmlFor="dateOfBirth">
+                              <Form.Label htmlFor="date_naissance">
                                 تاريخ الولادة
                               </Form.Label>
                               <Flatpickr
                                 value={selectedDate!}
-                                onChange={handleDateChange}
+                                onChange={handleDateChangeNaissance}
                                 className="form-control flatpickr-input"
                                 placeholder="اختر التاريخ"
                                 options={{
                                   dateFormat: "d M, Y",
                                 }}
-                                id="dateOfBirth"
+                                id="date_naissance"
                               />
                             </div>
                           </Col>
@@ -790,41 +936,40 @@ const AjouterPersonnels = () => {
                         >
                           <Col lg={3}>
                             <div className="mb-3">
-                              <Form.Label htmlFor="civilStatus">
+                              <Form.Label htmlFor="etat_civil">
                                 الحالة المدنية
                               </Form.Label>
                               <select
                                 className="form-select text-muted"
-                                name="civilStatus"
-                                id="civilStatus"
+                                name="etat_civil"
+                                id="etat_civil"
                                 // required
                                 onChange={selectChangeStatus}
                               >
                                 <option value="">الحالة</option>
-                                <option value="Married">متزوج</option>
-                                <option value="Single">أعزب</option>
-                                <option value="Divorced">مطلق</option>
-                                <option value="Widowed">أرمل</option>
+                                <option value="متزوج">متزوج</option>
+                                <option value="أعزب">أعزب</option>
+                                <option value="مطلق">مطلق</option>
+                                <option value="أرمل">أرمل</option>
                               </select>
                             </div>
                           </Col>
 
                           <Col lg={3}>
                             <div className="mb-3">
-                              <label htmlFor="gender" className="form-label">
+                              <label htmlFor="sexe" className="form-label">
                                 الجنس
                               </label>
                               <select
                                 className="form-select text-muted"
-                                name="gender"
-                                id="gender"
+                                name="sexe"
+                                id="sexe"
                                 // required
-                                // value={formData.gender}
-                                onChange={selectChange}
+                                onChange={selectChangeGender}
                               >
                                 <option value="">الجنس</option>
-                                <option value="male">ذكر</option>
-                                <option value="female">أنثى</option>
+                              <option value="ذكر">ذكر</option>
+                              <option value="أنثى">أنثى</option>
                               </select>
                             </div>
                           </Col>
@@ -851,7 +996,7 @@ const AjouterPersonnels = () => {
                             <Row
                               style={{ direction: "rtl", textAlign: "right" }}
                             >
-                              <Col lg={2}>
+                              <Col lg={3}>
                                 <div
                                   className="mb-3"
                                   style={{
@@ -859,29 +1004,30 @@ const AjouterPersonnels = () => {
                                     textAlign: "right",
                                   }}
                                 >
-                                  <Form.Label htmlFor="civilStatus">
+                                  <Form.Label htmlFor="poste">
                                     Poste / الخطة الوظيفية
                                   </Form.Label>
                                   <select
                                     className="form-select text-muted"
-                                    name="civilStatus"
-                                    id="civilStatus"
+                                    name="poste"
+                                    id="poste"
                                     // required
-                                    onChange={selectChangeStatus}
+                                    value={formData?.poste?.poste_fr!}
+                                    onChange={handleChange}
                                   >
                                     <option value="">
                                       Séléctionner la Poste / اختر الوظيفة
                                     </option>
-                                    <option value="Married"></option>
-                                    <option value="Single">عميد / Doyen</option>
-                                    <option value="Divorced"></option>
-                                    <option value="Widowed"></option>
-                                    <option value="Widowed"></option>
+                                    {poste.map((poste) => (
+                                      <option key={poste._id} value={poste._id}>
+                                        {poste.poste_fr}
+                                      </option>
+                                    ))}
                                   </select>
                                 </div>
                               </Col>
 
-                              <Col lg={2}>
+                              <Col lg={3}>
                                 <div
                                   className="mb-3"
                                   style={{
@@ -889,29 +1035,32 @@ const AjouterPersonnels = () => {
                                     textAlign: "right",
                                   }}
                                 >
-                                  <Form.Label htmlFor="civilStatus">
+                                  <Form.Label htmlFor="etat_compte">
                                     حالة الحساب
                                   </Form.Label>
                                   <select
                                     className="form-select text-muted"
-                                    name="civilStatus"
-                                    id="civilStatus"
+                                    name="etat_compte"
+                                    id="etat_compte"
                                     // required
-                                    onChange={selectChangeStatus}
+                                    value={formData?.etat_compte?.etat_fr!}
+                                    onChange={handleChange}
                                   >
                                     <option value="">
                                       Séléctionner Etat / اختر الحالة
                                     </option>
-                                    <option value="Married">
-                                      حساب غير مفعل / Désactiver
-                                    </option>
-                                    <option value="Single">
-                                      حساب مفعل / Activé
-                                    </option>
+                                    {etat_compte.map((etat_compte) => (
+                                      <option
+                                        key={etat_compte._id}
+                                        value={etat_compte._id}
+                                      >
+                                        {etat_compte.etat_fr}
+                                      </option>
+                                    ))}
                                   </select>
                                 </div>
                               </Col>
-                              <Col lg={2}>
+                              <Col lg={3}>
                                 <div
                                   className="mb-3"
                                   style={{
@@ -919,22 +1068,22 @@ const AjouterPersonnels = () => {
                                     textAlign: "right",
                                   }}
                                 >
-                                  <Form.Label htmlFor="dateOfBirth">
+                                  <Form.Label htmlFor="date_affectation">
                                     تاريخ الإنتداب
                                   </Form.Label>
                                   <Flatpickr
-                                    value={selectedDate!}
-                                    onChange={handleDateChange}
+                                    value={selectedDateAffectation!}
+                                    onChange={handleDateChangeAffectation}
                                     className="form-control flatpickr-input"
                                     placeholder="اختر التاريخ"
                                     options={{
                                       dateFormat: "d M, Y",
                                     }}
-                                    id="dateOfBirth"
+                                    id="date_affectation"
                                   />
                                 </div>
                               </Col>
-                              <Col lg={2}>
+                              <Col lg={3}>
                                 <div
                                   className="mb-3"
                                   style={{
@@ -942,28 +1091,29 @@ const AjouterPersonnels = () => {
                                     textAlign: "right",
                                   }}
                                 >
-                                  <Form.Label htmlFor="civilStatus">
+                                  <Form.Label htmlFor="grade">
                                     الرتبة
                                   </Form.Label>
                                   <select
                                     className="form-select text-muted"
-                                    name="civilStatus"
-                                    id="civilStatus"
+                                    name="grade"
+                                    id="grade"
                                     // required
-                                    onChange={selectChangeStatus}
+                                    value={formData?.grade?.grade_ar!}
+                                    onChange={handleChange}
                                   >
                                     <option value="">
                                       Séléctionner la Poste / اختر الوظيفة
                                     </option>
-                                    <option value="Married"></option>
-                                    <option value="Single">عميد / Doyen</option>
-                                    <option value="Divorced"></option>
-                                    <option value="Widowed"></option>
-                                    <option value="Widowed"></option>
+                                    {grade.map((grade) => (
+                                      <option key={grade._id} value={grade._id}>
+                                        {grade.grade_ar}
+                                      </option>
+                                    ))}
                                   </select>
                                 </div>
                               </Col>
-                              <Col lg={2}>
+                              <Col lg={3}>
                                 <div
                                   className="mb-3"
                                   style={{
@@ -971,28 +1121,29 @@ const AjouterPersonnels = () => {
                                     textAlign: "right",
                                   }}
                                 >
-                                  <Form.Label htmlFor="civilStatus">
+                                  <Form.Label htmlFor="categorie">
                                     الصنف / Catégorie
                                   </Form.Label>
                                   <select
                                     className="form-select text-muted"
-                                    name="civilStatus"
-                                    id="civilStatus"
+                                    name="categorie"
+                                    id="categorie"
                                     // required
-                                    onChange={selectChangeStatus}
+                                    value={formData?.categorie?.categorie_fr!}
+                                    onChange={handleChange}
                                   >
                                     <option value="">
-                                      Séléctionner la Poste / اختر الوظيفة
+                                      Séléctionner la Catégorie / اختر الصنف
                                     </option>
-                                    <option value="Married"></option>
-                                    <option value="Single">عميد / Doyen</option>
-                                    <option value="Divorced"></option>
-                                    <option value="Widowed"></option>
-                                    <option value="Widowed"></option>
+                                    {categorie.map((categorie) => (
+                                      <option key={categorie._id} value={categorie._id}>
+                                        {categorie.categorie_fr}
+                                      </option>
+                                    ))}
                                   </select>
                                 </div>
                               </Col>
-                              <Col lg={2}>
+                              <Col lg={3}>
                                 <div
                                   className="mb-3"
                                   style={{
@@ -1000,19 +1151,49 @@ const AjouterPersonnels = () => {
                                     textAlign: "right",
                                   }}
                                 >
-                                  <Form.Label htmlFor="dateOfBirth">
+                                  <Form.Label htmlFor="date_designation">
                                     تاريخ التسمية في الرتبة أو الصنف
                                   </Form.Label>
                                   <Flatpickr
-                                    value={selectedDate!}
-                                    onChange={handleDateChange}
+                                     value={selectedDateDesignation!}
+                                     onChange={handleDateChangeDesignation}
                                     className="form-control flatpickr-input"
                                     placeholder="اختر التاريخ"
                                     options={{
                                       dateFormat: "d M, Y",
                                     }}
-                                    id="dateOfBirth"
+                                    id="date_designation"
                                   />
+                                </div>
+                              </Col>
+                              <Col lg={3}>
+                                <div
+                                  className="mb-3"
+                                  style={{
+                                    direction: "rtl",
+                                    textAlign: "right",
+                                  }}
+                                >
+                                  <Form.Label htmlFor="service">
+                                    الخدمات/ Services
+                                  </Form.Label>
+                                  <select
+                                    className="form-select text-muted"
+                                    name="service"
+                                    id="service"
+                                    // required
+                                    value={formData?.service?.service_fr!}
+                                    onChange={handleChange}
+                                  >
+                                    <option value="">
+                                      Séléctionner la Service / اختر الخدمة
+                                    </option>
+                                    {service.map((service) => (
+                                      <option key={service._id} value={service._id}>
+                                        {service.service_fr}
+                                      </option>
+                                    ))}
+                                  </select>
                                 </div>
                               </Col>
                             </Row>
@@ -1045,18 +1226,18 @@ const AjouterPersonnels = () => {
                                     textAlign: "right",
                                   }}
                                 >
-                                  <Form.Label htmlFor="dateOfBirth">
+                                  <Form.Label htmlFor="date_delivrance">
                                     تاريخ إصدار بطاقة التعريف الوطنية
                                   </Form.Label>
                                   <Flatpickr
-                                    value={selectedDate!}
-                                    onChange={handleDateChange}
+                                     value={selectedDateDelivrance!}
+                                     onChange={handleDateChangeDelivrance}
                                     className="form-control flatpickr-input"
                                     placeholder="اختر التاريخ"
                                     options={{
                                       dateFormat: "d M, Y",
                                     }}
-                                    id="dateOfBirth"
+                                    id="date_delivrance"
                                   />
                                 </div>
                               </Col>
@@ -1067,13 +1248,15 @@ const AjouterPersonnels = () => {
                                     textAlign: "right",
                                   }}
                                 >
-                                  <label htmlFor="login" className="form-label">
+                                  <label htmlFor="num_cin" className="form-label">
                                     رقم بطاقة التعريف الوطنية
                                   </label>
                                   <Form.Control
                                     type="text"
-                                    id="login"
+                                    id="num_cin"
                                     placeholder=""
+                                    onChange={onChange}
+                                    value={formData.num_cin}
 
                                     // required
                                   />
@@ -1087,14 +1270,15 @@ const AjouterPersonnels = () => {
                                     textAlign: "right",
                                   }}
                                 >
-                                  <label htmlFor="login" className="form-label">
+                                  <label htmlFor="identifinat_unique" className="form-label">
                                     المعرف الوحيد
                                   </label>
                                   <Form.Control
                                     type="text"
-                                    id="login"
+                                    id="identifinat_unique"
                                     placeholder=""
-
+                                    onChange={onChange}
+                                    value={formData.identifinat_unique}    
                                     // required
                                   />
                                 </div>
@@ -1106,14 +1290,15 @@ const AjouterPersonnels = () => {
                                     textAlign: "right",
                                   }}
                                 >
-                                  <label htmlFor="login" className="form-label">
+                                  <label htmlFor="compte_courant" className="form-label">
                                     الحساب الجاري للعامل
                                   </label>
                                   <Form.Control
                                     type="text"
-                                    id="login"
+                                    id="compte_courant"
                                     placeholder=""
-
+                                    onChange={onChange}
+                                    value={formData.compte_courant}
                                     // required
                                   />
                                 </div>
@@ -1144,14 +1329,16 @@ const AjouterPersonnels = () => {
                             <Row>
                               <Col lg={3}>
                                 <div className="mb-3">
-                                  <Form.Label htmlFor="lastName">
+                                  <Form.Label htmlFor="adress_fr">
                                     Adresse (en français)
                                   </Form.Label>
                                   <Form.Control
                                     type="text"
-                                    id="lastName"
+                                    id="adress_fr"
                                     placeholder=""
                                     dir="rtl"
+                                    onChange={onChange}
+                                    value={formData.adress_fr}
                                   />
                                 </div>
                               </Col>
@@ -1164,7 +1351,7 @@ const AjouterPersonnels = () => {
                                   }}
                                 >
                                   <Form.Label
-                                    htmlFor="fullName"
+                                    htmlFor="adress_ar"
                                     style={{
                                       direction: "rtl",
                                       textAlign: "right",
@@ -1174,10 +1361,12 @@ const AjouterPersonnels = () => {
                                   </Form.Label>
                                   <Form.Control
                                     type="text"
-                                    id="firstName"
+                                    id="adress_ar"
                                     placeholder=""
                                     dir="rtl"
                                     // required
+                                    onChange={onChange}
+                                    value={formData.adress_ar}
                                   />
                                 </div>
                               </Col>
@@ -1190,7 +1379,7 @@ const AjouterPersonnels = () => {
                                   }}
                                 >
                                   <Form.Label
-                                    htmlFor="fullName"
+                                    htmlFor="code_postale"
                                     style={{
                                       direction: "rtl",
                                       textAlign: "right",
@@ -1200,10 +1389,12 @@ const AjouterPersonnels = () => {
                                   </Form.Label>
                                   <Form.Control
                                     type="text"
-                                    id="firstName"
+                                    id="code_postale"
                                     placeholder=""
                                     dir="rtl"
                                     // required
+                                    onChange={onChange}
+                                    value={formData.code_postale}
                                   />
                                 </div>
                               </Col>
@@ -1291,7 +1482,7 @@ const AjouterPersonnels = () => {
                                   }}
                                 >
                                   <Form.Label
-                                    htmlFor="fullName"
+                                    htmlFor="num_phone1"
                                     style={{
                                       direction: "rtl",
                                       textAlign: "right",
@@ -1301,10 +1492,12 @@ const AjouterPersonnels = () => {
                                   </Form.Label>
                                   <Form.Control
                                     type="text"
-                                    id="firstName"
+                                    id="num_phone1"
                                     placeholder=""
                                     dir="rtl"
                                     // required
+                                    onChange={onChange}
+                                    value={formData.num_phone1}
                                   />
                                 </div>
                               </Col>
@@ -1317,7 +1510,7 @@ const AjouterPersonnels = () => {
                                   }}
                                 >
                                   <Form.Label
-                                    htmlFor="lastName"
+                                    htmlFor="num_phone2"
                                     style={{
                                       direction: "rtl",
                                       textAlign: "right",
@@ -1327,9 +1520,11 @@ const AjouterPersonnels = () => {
                                   </Form.Label>
                                   <Form.Control
                                     type="text"
-                                    id="lastName"
+                                    id="num_phone2"
                                     placeholder=""
                                     dir="rtl"
+                                    onChange={onChange}
+                                    value={formData.num_phone2}
                                   />
                                 </div>
                               </Col>
@@ -1355,6 +1550,8 @@ const AjouterPersonnels = () => {
                                     id="email"
                                     placeholder=""
                                     // required
+                                    onChange={onChange}
+                                    value={formData.email}
                                   />
                                 </div>
                               </Col>
@@ -1391,7 +1588,7 @@ const AjouterPersonnels = () => {
                                   }}
                                 >
                                   <Form.Label
-                                    htmlFor="fullName"
+                                    htmlFor="nombre_fils"
                                     style={{
                                       direction: "rtl",
                                       textAlign: "right",
@@ -1401,10 +1598,12 @@ const AjouterPersonnels = () => {
                                   </Form.Label>
                                   <Form.Control
                                     type="text"
-                                    id="firstName"
+                                    id="nombre_fils"
                                     placeholder=""
                                     dir="rtl"
                                     // required
+                                    onChange={onChange}
+                                    value={formData.nombre_fils}
                                   />
                                 </div>
                               </Col>
@@ -1418,7 +1617,7 @@ const AjouterPersonnels = () => {
                                   }}
                                 >
                                   <Form.Label
-                                    htmlFor="lastName"
+                                    htmlFor="job_conjoint"
                                     style={{
                                       direction: "rtl",
                                       textAlign: "right",
@@ -1428,9 +1627,11 @@ const AjouterPersonnels = () => {
                                   </Form.Label>
                                   <Form.Control
                                     type="text"
-                                    id="lastName"
+                                    id="job_conjoint"
                                     placeholder=""
                                     dir="rtl"
+                                    onChange={onChange}
+                                    value={formData.job_conjoint}
                                   />
                                 </div>
                               </Col>
@@ -1443,7 +1644,7 @@ const AjouterPersonnels = () => {
                                   }}
                                 >
                                   <Form.Label
-                                    htmlFor="lastName"
+                                    htmlFor="nom_conjoint"
                                     style={{
                                       direction: "rtl",
                                       textAlign: "right",
@@ -1453,9 +1654,11 @@ const AjouterPersonnels = () => {
                                   </Form.Label>
                                   <Form.Control
                                     type="text"
-                                    id="lastName"
+                                    id="nom_conjoint"
                                     placeholder=""
                                     dir="rtl"
+                                    onChange={onChange}
+                                    value={formData.nom_conjoint}
                                   />
                                 </div>
                               </Col>

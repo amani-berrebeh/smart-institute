@@ -7,9 +7,65 @@ import { demandeEtudiant } from "Common/data/demandeEtudiant";
 import Flatpickr from "react-flatpickr";
 import dummyImg from "../../assets/images/users/user-dummy-img.jpg"
 import { Link } from 'react-router-dom';
+import { actionAuthorization } from 'utils/pathVerification';
+import { RootState } from 'app/store';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from 'features/account/authSlice'; 
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+import {
+    useFetchDemandePersonnelQuery,
+    useAddDemandePersonnelMutation,
+    useUpdateDemandePersonnelMutation,
+    useDeleteDemandePersonnelMutation,
+  } from 'features/demandePersonnel/demandePersonnelSlice';
 
 const ListeDemandePersonnel = () => {
-    document.title = "Demande Etudiant | Smart Institute";
+    document.title = "Demande Personnel | Smart Institute";
+
+    const user = useSelector((state: RootState) => selectCurrentUser(state));
+    const MySwal = withReactContent(Swal);
+
+    // Fetch reclamations query hook
+const { data: demandesPersonnel, error, isLoading } = useFetchDemandePersonnelQuery();
+
+// Mutation hooks
+const [addReclamation] = useAddDemandePersonnelMutation();
+const [updateReclamation] = useUpdateDemandePersonnelMutation();
+const [deleteDemandeEtudiant] = useDeleteDemandePersonnelMutation();
+
+
+const handleDeleteDemande = async (id: string) => {
+ try {
+     await MySwal.fire({
+         title: 'Êtes-vous sûr ?',
+         text: "Vous ne pourrez pas annuler cela !",
+         icon: 'warning',
+         showCancelButton: true,
+         confirmButtonColor: '#3085d6',
+         cancelButtonColor: '#d33',
+         confirmButtonText: 'Yes, delete it!'
+     }).then(async (result) => {
+         if (result.isConfirmed) {
+             await deleteDemandeEtudiant(id).unwrap();
+             MySwal.fire(
+                 'Deleted!',
+                 'The reclamation has been deleted.',
+                 'success'
+             );
+         }
+     });
+ } catch (error) {
+     console.error('Failed to delete reclamation:', error);
+     MySwal.fire(
+         'Error!',
+         'There was an error deleting the reclamation.',
+         'error'
+     );
+ }
+};
+
+
     const [modal_AddUserModals, setmodal_AddUserModals] = useState<boolean>(false);
     const [isMultiDeleteButton, setIsMultiDeleteButton] = useState<boolean>(false)
     function tog_AddUserModals() {
@@ -61,20 +117,20 @@ const ListeDemandePersonnel = () => {
             // },
             {
                 Header: "Pièce demandée",
-                accessor: "soustype",
+                accessor: "title",
                 disableFilters: true,
                 filterable: true,
             },
            
             {
                 Header: "Personnel",
-                accessor: "etudiant",
+                accessor: (row: any) => row.personnelId?.nom_fr || "",
                 disableFilters: true,
                 filterable: true,
             },
             {
                 Header: "CIN",
-                accessor: "CIN",
+                accessor: (row: any) => row.personnelId?.num_CIN || "",
                 disableFilters: true,
                 filterable: true,
             },
@@ -86,10 +142,16 @@ const ListeDemandePersonnel = () => {
             // },
             {
                      Header: "Date d'Envoi",
-                     accessor: "date",
+                     accessor: "createdAt",
                      disableFilters: true,
                      filterable: true,
                  },
+                 {
+                    Header: "Date de modification",
+                    accessor: "updatedAt",
+                    disableFilters: true,
+                    filterable: true,
+                },
             // {
             //     Header: "Image",
             //     disableFilters: true,
@@ -146,9 +208,10 @@ const ListeDemandePersonnel = () => {
                 accessor: (cellProps: any) => {
                     return (
                         <ul className="hstack gap-2 list-unstyled mb-0">
+    {actionAuthorization("/demandes-personnel/single-demande-personnel",user?.permissions!)?
               <li>
                 <Link
-                  to="/SingleDemandePersonnel"
+                  to="/demandes-personnel/single-demande-personnel"
                   state={cellProps}
                   className="badge bg-info-subtle text-info view-item-btn"
                   data-bs-toggle="offcanvas"
@@ -168,10 +231,12 @@ const ListeDemandePersonnel = () => {
                     }
                   ></i>
                 </Link>
-              </li>
+              </li>: <></>}
+              {actionAuthorization("/demandes-personnel/edit-demande-personnel",user?.permissions!)?
+
               <li>
                 <Link
-                  to="/EditDemandePersonnel"
+                  to="/demandes-personnel/edit-demande-personnel"
                   className="badge bg-success-subtle text-success edit-item-btn"
                   state={cellProps}
                 >
@@ -190,7 +255,9 @@ const ListeDemandePersonnel = () => {
                     }
                   ></i>
                 </Link>
-              </li>
+              </li> : <></>}
+              {actionAuthorization("/demandes-personnel/supprimer-demande-personnel",user?.permissions!)?
+
               <li>
                 <Link
                   to="#"
@@ -212,7 +279,7 @@ const ListeDemandePersonnel = () => {
                     }
                   ></i>
                 </Link>
-              </li>
+              </li> :<></>}
             </ul>
                     )
                 },
@@ -267,7 +334,7 @@ const ListeDemandePersonnel = () => {
                                     
                                         <TableContainer
                                             columns={(columns || [])}
-                                            data={(demandeEtudiant || [])}
+                                            data={(demandesPersonnel || [])}
                                             // isGlobalFilter={false}
                                             iscustomPageSize={false}
                                             isBordered={false}

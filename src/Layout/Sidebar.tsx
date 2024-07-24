@@ -11,8 +11,12 @@ import VerticalLayout from "./VerticalLayouts/index";
 import TwoColumnLayout from "./TwoColumnLayout";
 import { Button, Container } from "react-bootstrap";
 import HorizontalLayout from "./HorizontalLayout";
+import { RootState } from 'app/store';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from 'features/account/authSlice'; 
 
 const Sidebar = ({ layoutType }: any) => {
+  const user = useSelector((state: RootState) => selectCurrentUser(state));
 
   useEffect(() => {
     var verticalOverlay = document.getElementsByClassName("vertical-overlay");
@@ -55,6 +59,7 @@ const Sidebar = ({ layoutType }: any) => {
               <img src={logoLight} alt="" height="24" />
             </span>
           </Link>
+          <p>{user?.app_name}</p>
           <Button
             variant="link"
             size="sm"

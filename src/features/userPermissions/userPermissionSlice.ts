@@ -24,6 +24,14 @@ export interface User {
   status: string;
   permissions: Permission[];
 }
+export interface UserPermissionHistoryItem {
+  _id: string;
+  user_id: string;
+  permissions: Permission[];
+  assigned_at: string;
+  removed_at: string;
+  __v: number;
+}
 
 
 export const permissionSlice = createApi({
@@ -59,6 +67,24 @@ export const permissionSlice = createApi({
       }),
       invalidatesTags: ["UserPermissions"],
     }),
+    //updtae permissions to user 
+    updateUserPermissions: builder.mutation<void, { userId: string; permissionIds: string[] }>({
+      query: ({ userId, permissionIds }) => ({
+        url: `/update-permissions`,
+        method: "PUT",
+        body: { userId,permissionIds },
+      }),
+      invalidatesTags: ["UserPermissions"],
+    }),
+     //updtae permissions to user History
+     updateUserPermissionsHistory: builder.mutation<void, { userId: string; permissionIds: string[] }>({
+      query: ({ userId, permissionIds }) => ({
+        url: `/update-permissions-history`,
+        method: "PUT",
+        body: { userId,permissionIds },
+      }),
+      invalidatesTags: ["UserPermissions"],
+    }),
     // Fetch permissions by user ID
     fetchUserPermissionsByUserId: builder.query<Permission[], { userId: string }>({
       query: ({ userId }) => ({
@@ -67,6 +93,26 @@ export const permissionSlice = createApi({
       }),
       providesTags: ["UserPermissions"],
     }),
+// fetch permissions history by user id 
+ // Fetch permissions history by user id 
+ fetchUserPermissionsHistoryByUserId: builder.query<UserPermissionHistoryItem[], { userId: string }>({
+  query: ({ userId }) => ({
+    url: `/${userId}/permissions-history`,
+    method: "GET",
+  }),
+  providesTags: ["UserPermissions"],
+}),
+    deleteUserPermissions: builder.mutation<void, {userId:string ; permissionIds: string[] }>({
+      query(payload) {
+        return {
+          url: "/delete-user-permissions",
+          method: "POST",
+          body: payload,
+        };
+      },
+      invalidatesTags: ["UserPermissions"]
+    })
+    
   }),
 });
 
@@ -76,4 +122,8 @@ export const {
   useFetchAllPermissionsQuery,
   useAssignUserPermissionsMutation,
   useFetchUserPermissionsByUserIdQuery,
+  useDeleteUserPermissionsMutation,
+  useUpdateUserPermissionsMutation,
+  useUpdateUserPermissionsHistoryMutation,
+  useFetchUserPermissionsHistoryByUserIdQuery
 } = permissionSlice;

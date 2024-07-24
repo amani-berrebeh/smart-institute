@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Button,
   Card,
@@ -14,112 +14,160 @@ import CountUp from "react-countup";
 import { Link, useNavigate } from "react-router-dom";
 import { sellerList } from "Common/data";
 import TableContainer from "Common/TableContainer";
-import { actionAuthorization } from 'utils/pathVerification';
-import { RootState } from 'app/store';
-import { useSelector } from 'react-redux';
-import { selectCurrentUser } from 'features/account/authSlice'; 
+import { Etudiant, useFetchEtudiantsQuery } from "features/etudiant/etudiantSlice";
+import { format } from 'date-fns';
 
 const ListEtudiants = () => {
   document.title = "Liste des étudiants | Smart University";
-  const user = useSelector((state: RootState) => selectCurrentUser(state));
 
   const navigate = useNavigate();
 
   const [modal_AddEnseignantModals, setmodal_AddEnseignantModals] =
     useState<boolean>(false);
   function tog_AddEnseignantModals() {
-    navigate("/gestion-etudiant/ajouter-etudiant");
+    navigate("/AjouterEtudiant");
   }
+  function tog_AddEtudiant() {
+    navigate("/AjouterEtudiant");
+  }
+  const { data = [] } = useFetchEtudiantsQuery();
+  console.log("data",data)
+  const [studentCount, setStudentCount] = useState(0);
+
+  useEffect(() => {
+    if (data) {
+      setStudentCount(data.length);
+    }
+  }, [data]);
+
+  // const [deleteEtudiant] = useDeleteEtatEtudiantMutation();
+
+  // const swalWithBootstrapButtons = Swal.mixin({
+  //   customClass: {
+  //     confirmButton: "btn btn-success",
+  //     cancelButton: "btn btn-danger",
+  //   },
+  //   buttonsStyling: false,
+  // });
+  // const AlertDelete = async (_id: string) => {
+  //   swalWithBootstrapButtons
+  //     .fire({
+  //       title: "Êtes-vous sûr?",
+  //       text: "Vous ne pourrez pas revenir en arrière!",
+  //       icon: "warning",
+  //       showCancelButton: true,
+  //       confirmButtonText: "Oui, supprimez-le!",
+  //       cancelButtonText: "Non, annuler!",
+  //       reverseButtons: true,
+  //     })
+  //     .then((result) => {
+  //       if (result.isConfirmed) {
+  //         deleteEtatEtudiant(_id);
+  //         swalWithBootstrapButtons.fire(
+  //           "Supprimé!",
+  //           "Etat compte étudiant a été supprimé.",
+  //           "success"
+  //         );
+  //       } else if (result.dismiss === Swal.DismissReason.cancel) {
+  //         swalWithBootstrapButtons.fire(
+  //           "Annulé",
+  //           "Etat compte étudiant est en sécurité :)",
+  //           "error"
+  //         );
+  //       }
+  //     });
+  // };
+  const activatedStudentsCount = data.filter(student => student.etat_compte?.etat_fr === "Inscrit / Activé").length;
+const deactivatedStudentsCount = data.filter(student => student.etat_compte?.etat_fr === "Désactivé").length;
+
+
   const columns = useMemo(
     () => [
       {
-        Header: (
-          <div className="form-check">
-            {" "}
-            <input
-              className="form-check-input"
-              type="checkbox"
-              id="checkAll"
-              value="option"
-            />{" "}
-          </div>
-        ),
-        Cell: (cellProps: any) => {
+        Header: "Nom Etudiant",
+        disableFilters: true,
+        filterable: true,
+        accessor: (etudiants: Etudiant) => {
           return (
-            <div className="form-check">
-              {" "}
-              <input
-                className="form-check-input"
-                type="checkbox"
-                name="chk_child"
-                defaultValue="option1"
-              />{" "}
+            <div className="d-flex align-items-center gap-2">
+              <div className="flex-shrink-0">
+                <img
+                src={`http://localhost:5000/files/etudiantFiles/PhotoProfil/${etudiants.photo_profil}`}
+                  alt="etudiant-img"
+                  id="photo_profil"
+                  className="avatar-xs rounded-circle user-profile-img "
+                 
+                />
+              </div>
+              <div className="flex-grow-1 user_name">
+                {etudiants.nom_fr} {etudiants.prenom_fr}
+              </div>
             </div>
           );
         },
-        id: "#",
       },
       {
         Header: "CIN",
-        accessor: "itemStock",
+        accessor: "num_CIN",
         disableFilters: true,
         filterable: true,
       },
       {
         Header: "Nom et Prénom",
-        accessor: "sellerName",
+        accessor: (row:any) => `${row.prenom_fr} ${row.nom_fr}`,
         disableFilters: true,
         filterable: true,
       },
-
+      
       {
-        Header: "Classe",
-        accessor: "balance",
+        Header: "Groupe Classe",
+        accessor: (row: any) => row?.groupe_classe?.nom_classe_fr || "",
         disableFilters: true,
         filterable: true,
       },
       {
         Header: "Genre",
-        accessor: "email",
+        accessor: "sexe",
         disableFilters: true,
         filterable: true,
       },
       {
         Header: "Date d'inscription",
-        accessor: "createDate",
+        accessor: "createdAt",
         disableFilters: true,
         filterable: true,
+        Cell: ({ value }: { value: string }) => format(new Date(value), 'yyyy-MM-dd - HH:mm'),
       },
       {
         Header: "Activation",
         disableFilters: true,
         filterable: true,
-        accessor: (cellProps: any) => {
-          switch (cellProps.status) {
-            case "Activé":
+        accessor: (row: any) => row?.etat_compte?.etat_fr || "",
+        Cell: ({ value }: { value: string }) => {
+          switch (value) {
+            case "Inscrit / Activé":
               return (
-                <span className="badge bg-success-subtle text-success text-uppercase">
-                  {" "}
-                  {cellProps.status}
+                <span className="badge bg-success-subtle text-success">
+                  {value}
                 </span>
               );
-            case "Desactivé":
+            case "Non inscrit":
               return (
-                <span className="badge bg-danger-subtle text-danger text-uppercase">
-                  {" "}
-                  {cellProps.status}
+                <span className="badge bg-danger-subtle text-danger">
+                  {value}
                 </span>
               );
             default:
               return (
-                <span className="badge bg-success-subtle text-success text-uppercase">
-                  {" "}
-                  {cellProps.status}
+                <span className="badge bg-success-subtle text-info">
+                  {value}
                 </span>
               );
           }
         },
       },
+      
+      
       {
         Header: "Action",
         disableFilters: true,
@@ -127,30 +175,27 @@ const ListEtudiants = () => {
         accessor: (cellProps: any) => {
           return (
             <ul className="hstack gap-2 list-unstyled mb-0">
-              {actionAuthorization("/gestion-etudiant/compte-etudiant",user?.permissions!)?
               <li>
-              <Link
-                to="/gestion-etudiant/compte-etudiant"
-                className="badge bg-info-subtle text-info view-item-btn"
-              >
-                <i
-                  className="ph ph-eye"
-                  style={{
-                    transition: "transform 0.3s ease-in-out",
-                    cursor: "pointer",
-                    fontSize: "1.5em",
-                  }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.transform = "scale(1.4)")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.transform = "scale(1)")
-                  }
-                ></i>
-              </Link>
-            </li> : <></>
-              }
-              
+                <Link
+                  to="/profil-etudiant"
+                  className="badge bg-info-subtle text-info view-item-btn"
+                >
+                  <i
+                    className="ph ph-eye"
+                    style={{
+                      transition: "transform 0.3s ease-in-out",
+                      cursor: "pointer",
+                      fontSize: "1.5em",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.4)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  ></i>
+                </Link>
+              </li>
               <li>
                 <Link
                   to="#"
@@ -350,10 +395,10 @@ const ListEtudiants = () => {
                   <h4 className="fs-22 fw-semibold mb-3">
                     <CountUp
                       start={0}
-                      end={207}
+                      end={studentCount} 
                       duration={3}
-                      decimals={2}
-                      suffix="k"
+                      decimals={0}
+                      
                     />
                   </h4>
                   <p className="mb-0 fw-medium text-uppercase fs-14">
@@ -503,10 +548,10 @@ const ListEtudiants = () => {
                   <h4 className="fs-22 fw-semibold mb-3">
                     <CountUp
                       start={0}
-                      end={159}
+                      end={activatedStudentsCount}
                       duration={3}
-                      decimals={2}
-                      suffix="k"
+                      decimals={0}
+                     
                     />
                   </h4>
                   <p className="mb-0 fw-medium text-uppercase fs-14">
@@ -656,10 +701,10 @@ const ListEtudiants = () => {
                   <h4 className="fs-22 fw-semibold mb-3">
                     <CountUp
                       start={0}
-                      end={48}
+                      end={deactivatedStudentsCount}
                       duration={3}
-                      decimals={2}
-                      suffix="k"
+                      decimals={0}
+                      
                     />
                   </h4>
                   <p className="mb-0 fw-medium text-uppercase fs-14">
@@ -668,23 +713,6 @@ const ListEtudiants = () => {
                 </Card.Body>
               </Card>
             </Col>
-            {/* <Col xxl={3} md={6}>
-                            <Card className="bg-light border-0">
-                                <Card.Body className="p-3">
-                                    <div className="p-3 bg-white rounded">
-                                        <div className="d-flex align-items-center gap-2">
-                                            <div className="flex-shrink-0">
-                                                <img src={avatar2} alt="" className="avatar-sm rounded-circle" />
-                                            </div>
-                                            <div className="flex-grow-1">
-                                                <Link to="#!"><h6 className="fs-16"><span className="text-success">#1</span> Amanda Harvey</h6></Link>
-                                                <p className="text-muted mb-0">To reach if you need to sell 200+ orders.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Card.Body>
-                            </Card>
-                        </Col> */}
           </Row>
 
           <Row id="sellersList">
@@ -714,106 +742,20 @@ const ListEtudiants = () => {
                         <option value="Inactive">Desactivé</option>
                       </select>
                     </Col>
-                    {/* <Col className="col-lg-auto">
-                                            <select className="form-select" data-choices data-choices-search-false name="choices-single-default">
-                                                <option defaultValue="all">All</option>
-                                                <option value="Today">Today</option>
-                                                <option value="Yesterday">Yesterday</option>
-                                                <option value="Last 7 Days">Last 7 Days</option>
-                                                <option value="Last 30 Days">Last 30 Days</option>
-                                                <option value="This Month">This Month</option>
-                                                <option value="Last Month">Last Month</option>
-                                            </select>
-                                        </Col> */}
                     <Col className="col-lg-auto ms-auto">
                       <div className="hstack gap-2">
-                        {
-                          actionAuthorization("/gestion-etudiant/ajouter-etudiant",user?.permissions!)?
                         <Button
                           variant="primary"
                           className="add-btn"
-                          onClick={() => tog_AddEnseignantModals()}
+                          onClick={() => tog_AddEtudiant()}
                         >
                           Ajouter Etudiant
-                        </Button> : <></>
-                        }
-                        
-                        {/* <Dropdown>
-                                                    <Dropdown.Toggle className="btn-icon btn btn-soft-dark arrow-none" data-bs-toggle="dropdown" aria-expanded="false">
-                                                        <i className="ph-dots-three-outline"></i>
-                                                    </Dropdown.Toggle>
-                                                    <Dropdown.Menu as="ul">
-                                                        <li><Link className="dropdown-item" to="#">Action</Link></li>
-                                                        <li><Link className="dropdown-item" to="#">Another action</Link></li>
-                                                        <li><Link className="dropdown-item" to="#">Something else here</Link></li>
-                                                    </Dropdown.Menu>
-                                                </Dropdown> */}
+                        </Button>
                       </div>
                     </Col>
                   </Row>
                 </Card.Body>
               </Card>
-
-              {/* <Modal className="fade modal-fullscreen" show={modal_AddSellerModals} onHide={() => { tog_AddSellerModals(); }} centered>
-                                <Modal.Header className="px-4 pt-4" closeButton>
-                                    <h5 className="modal-title" id="exampleModalLabel">Add Seller</h5>
-                                </Modal.Header>
-                                <Form className="tablelist-form">
-                                    <Modal.Body className="p-4">
-                                        <div id="alert-error-msg" className="d-none alert alert-danger py-2"></div>
-                                        <input type="hidden" id="id-field" />
-
-                                        <div className="mb-3">
-                                            <Form.Label htmlFor="seller-name-field">Seller Name</Form.Label>
-                                            <Form.Control type="text" id="seller-name-field" placeholder="Enter Seller Name" required />
-                                        </div>
-                                        <div className="mb-3">
-                                            <Form.Label htmlFor="item-stock-field">Item Stock</Form.Label>
-                                            <Form.Control type="text" id="item-stock-field" placeholder="Enter Item Stock" required />
-                                        </div>
-                                        <div className="mb-3">
-                                            <Form.Label htmlFor="balance-field">Balance</Form.Label>
-                                            <Form.Control type="text" id="balance-field" placeholder="Enter Balance" required />
-                                        </div>
-
-                                        <div className="mb-3">
-                                            <Form.Label htmlFor="email-field">Seller Email</Form.Label>
-                                            <Form.Control type="email" id="email-field" placeholder="Enter Email" required />
-                                        </div>
-
-                                        <div className="mb-3">
-                                            <Form.Label htmlFor="phone-field">Phone</Form.Label>
-                                            <Form.Control type="text" id="phone-field" placeholder="Enter Phone" required />
-                                        </div>
-
-                                        <div className="mb-3">
-                                            <Form.Label htmlFor="date-field">Create Date</Form.Label>
-                                            <Flatpickr
-                                                className="form-control flatpickr-input"
-                                                placeholder='Select Date-time'
-                                                options={{
-                                                    dateFormat: "d M, Y",
-                                                }}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label htmlFor="account-status-field" className="form-label">Account Status</label>
-                                            <select className="form-select" required id="account-status-field">
-                                                <option defaultValue="">Select account Status</option>
-                                                <option value="Active">Active</option>
-                                                <option value="Inactive">Inactive</option>
-                                            </select>
-                                        </div>
-                                    </Modal.Body>
-                                    <div className="modal-footer">
-                                        <div className="hstack gap-2 justify-content-end">
-                                            <Button className="btn-ghost-danger" onClick={() => { tog_AddSellerModals(); }}>Close</Button>
-                                            <Button variant='success' id="add-btn">Add Seller</Button>
-                                        </div>
-                                    </div>
-                                </Form>
-                            </Modal> */}
 
               <Card>
                 <Card.Body className="p-0">
@@ -824,7 +766,7 @@ const ListEtudiants = () => {
                   >
                     <TableContainer
                       columns={columns || []}
-                      data={sellerList || []}
+                      data={data || []}
                       // isGlobalFilter={false}
                       iscustomPageSize={false}
                       isBordered={false}

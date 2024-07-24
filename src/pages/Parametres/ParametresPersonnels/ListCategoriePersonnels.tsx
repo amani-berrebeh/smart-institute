@@ -10,13 +10,18 @@ import {
   Row,
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
-import CountUp from "react-countup";
 import { Link, useNavigate } from "react-router-dom";
 import TableContainer from "Common/TableContainer";
-import { sellerList } from "Common/data";
+import Swal from "sweetalert2";
+import { CategoriePersonnel, useDeleteCategoriePersonnelMutation, useFetchCategoriesPersonnelQuery } from "features/categoriePersonnel/categoriePersonnel";
+import { actionAuthorization } from 'utils/pathVerification';
+import { RootState } from 'app/store';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from 'features/account/authSlice'; 
 
 const ListCategoriePersonnels = () => {
   document.title = "Liste catégories des personnels | Smart University";
+  const user = useSelector((state: RootState) => selectCurrentUser(state));
 
   const navigate = useNavigate();
 
@@ -25,6 +30,51 @@ const ListCategoriePersonnels = () => {
   function tog_AddParametreModals() {
     setmodal_AddParametreModals(!modal_AddParametreModals);
   }
+
+
+  function tog_AddCategoriePersonnel() {
+    navigate("/parametre-personnel/categorie/ajouter-categorie-personnel");
+  }
+  const { data = [] } = useFetchCategoriesPersonnelQuery();
+  const [deleteCategoriePersonnel] = useDeleteCategoriePersonnelMutation();
+
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger",
+    },
+    buttonsStyling: false,
+  });
+  const AlertDelete = async (_id: string) => {
+  
+    swalWithBootstrapButtons
+    .fire({
+      title: "Êtes-vous sûr?",
+      text: "Vous ne pourrez pas revenir en arrière!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Oui, supprimez-le!",
+      cancelButtonText: "Non, annuler!",
+      reverseButtons: true,
+    })
+    .then((result) => {
+      if (result.isConfirmed) {
+        deleteCategoriePersonnel(_id);
+        swalWithBootstrapButtons.fire(
+          "Supprimé!",
+          "Catégorie personnel a été supprimé.",
+          "success"
+        );
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        swalWithBootstrapButtons.fire(
+          "Annulé",
+          "Catégorie personnel est en sécurité :)",
+          "error"
+        );
+      }
+    });
+  }
+
   const columns = useMemo(
     () => [
       {
@@ -54,16 +104,22 @@ const ListCategoriePersonnels = () => {
         },
         id: "#",
       },
+      {
+        Header: "Valeur",
+        accessor: "value",
+        disableFilters: true,
+        filterable: true,
+      },
 
       {
         Header: "Catégorie (FR)",
-        accessor: "balance",
+        accessor: "categorie_fr",
         disableFilters: true,
         filterable: true,
       },
       {
-        Header: "Catégorie (FR)",
-        accessor: "email",
+        Header: "صنف الإداري",
+        accessor: "categorie_ar",
         disableFilters: true,
         filterable: true,
       },
@@ -72,33 +128,15 @@ const ListCategoriePersonnels = () => {
         Header: "Action",
         disableFilters: true,
         filterable: true,
-        accessor: (cellProps: any) => {
+        accessor: (categoriePersonnel: CategoriePersonnel) => {
           return (
             <ul className="hstack gap-2 list-unstyled mb-0">
+   {actionAuthorization("/parametre-personnel/categorie/edit-categorie-personnel",user?.permissions!)?
+
               <li>
                 <Link
-                  to="#"
-                  className="badge bg-info-subtle text-info view-item-btn"
-                >
-                  <i
-                    className="ph ph-eye"
-                    style={{
-                      transition: "transform 0.3s ease-in-out",
-                      cursor: "pointer",
-                      fontSize: "1.5em",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.transform = "scale(1.4)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.transform = "scale(1)")
-                    }
-                  ></i>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="#"
+                   to="/parametre-personnel/categorie/edit-categorie-personnel"
+                   state={categoriePersonnel}
                   className="badge bg-primary-subtle text-primary edit-item-btn"
                 >
                   <i
@@ -114,9 +152,12 @@ const ListCategoriePersonnels = () => {
                     onMouseLeave={(e) =>
                       (e.currentTarget.style.transform = "scale(1)")
                     }
+                  
                   ></i>
                 </Link>
-              </li>
+              </li> : <></>}
+              {actionAuthorization("/parametre-personnel/categorie/supprimer-categorie-personnel",user?.permissions!)?
+
               <li>
                 <Link
                   to="#"
@@ -135,9 +176,10 @@ const ListCategoriePersonnels = () => {
                     onMouseLeave={(e) =>
                       (e.currentTarget.style.transform = "scale(1)")
                     }
+                    onClick={() => AlertDelete(categoriePersonnel?._id!)}
                   ></i>
                 </Link>
-              </li>
+              </li> :<></>}
             </ul>
           );
         },
@@ -185,13 +227,15 @@ const ListCategoriePersonnels = () => {
 
                     <Col className="col-lg-auto ms-auto">
                       <div className="hstack gap-2">
+                      {actionAuthorization("/parametre-personnel/categorie/ajouter-categorie-personnel",user?.permissions!)?
+
                         <Button
                           variant="primary"
                           className="add-btn"
-                          onClick={() => tog_AddParametreModals()}
+                          onClick={() => tog_AddCategoriePersonnel()}
                         >
                           Ajouter Catégorie
-                        </Button>
+                        </Button> :<></>}
                       </div>
                     </Col>
                   </Row>
@@ -276,7 +320,7 @@ const ListCategoriePersonnels = () => {
                   >
                     <TableContainer
                       columns={columns || []}
-                      data={sellerList || []}
+                      data={data || []}
                       // isGlobalFilter={false}
                       iscustomPageSize={false}
                       isBordered={false}

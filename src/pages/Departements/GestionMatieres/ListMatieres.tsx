@@ -10,20 +10,21 @@ import {
   Row,
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
-import CountUp from "react-countup";
 import { Link, useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import FileSaver from 'file-saver';
 import TableContainer from "Common/TableContainer";
-import { matieres } from "Common/data/matiere";
+import Swal from "sweetalert2";
+import { useDeleteMatiereMutation, useFetchMatiereQuery } from "features/matiere/matiere";
 
 interface Matiere {
-  codeMatiere: string;
-  matiere: string;
-  type: string;
-  semestre: string;
-  volume: number;
-  nbrElimination: number;
+  _id: string;
+  code_matiere: string,
+  matiere: string,
+  type: string,
+  semestre: string,
+  volume: string,
+  nbr_elimination: string,
 }
 
 const ListMatieres = () => {
@@ -47,6 +48,50 @@ const ListMatieres = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Matieres");
     XLSX.writeFile(workbook, "Matieres.xlsx");
   };
+
+  function tog_AddMatiere() {
+    navigate("/departement/gestion-matieres/add-matiere");
+  }
+  const { data = [] } = useFetchMatiereQuery();
+  const [deleteMatiere] = useDeleteMatiereMutation();
+
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger",
+    },
+    buttonsStyling: false,
+  });
+  const AlertDelete = async (_id: string) => {
+    swalWithBootstrapButtons
+      .fire({
+        title: "Êtes-vous sûr?",
+        text: "Vous ne pourrez pas revenir en arrière!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Oui, supprimez-le!",
+        cancelButtonText: "Non, annuler!",
+        reverseButtons: true,
+      })
+      .then((result) => {
+        if (result.isConfirmed) {
+          deleteMatiere(_id);
+          swalWithBootstrapButtons.fire(
+            "Supprimé!",
+            "Matière a été supprimé.",
+            "success"
+          );
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          swalWithBootstrapButtons.fire(
+            "Annulé",
+            "Matière est en sécurité :)",
+            "error"
+          );
+        }
+      });
+  };
+
+
   const columns = useMemo(
     () => [
         {
@@ -56,15 +101,9 @@ const ListMatieres = () => {
             },
             id: '#',
         },
-        // {
-        //     Header: "ID",
-        //     accessor: "itemStock",
-        //     disableFilters: true,
-        //     filterable: true,
-        // },
         {
           Header: "Code matière",
-          accessor: "codeMatiere",
+          accessor: "code_matiere",
           disableFilters: true,
           filterable: true,
       },
@@ -95,58 +134,23 @@ const ListMatieres = () => {
         },
         {
             Header: "Nbr élimination ",
-            accessor: "nbrElimination",
+            accessor: "nbr_elimination",
             disableFilters: true,
             filterable: true,
         },
     
-        // {
-        //     Header: "Activation",
-        //     disableFilters: true,
-        //     filterable: true,
-        //     accessor: (cellProps: any) => {
-        //         switch (cellProps.status) {
-        //             case "Activé":
-        //                 return (<span className="badge bg-success-subtle text-success text-uppercase"> {cellProps.status}</span>)
-        //             case "Desactivé":
-        //                 return (<span className="badge bg-danger-subtle text-danger text-uppercase"> {cellProps.status}</span>)
-        //             default:
-        //                 return (<span className="badge bg-success-subtle text-success text-uppercase"> {cellProps.status}</span>)
-        //         }
-        //     },
-        // },
+       
         {
             Header: "Action",
             disableFilters: true,
             filterable: true,
-            accessor: (cellProps: any) => {
+            accessor: (matiere: Matiere) => {
                 return (
                     <ul className="hstack gap-2 list-unstyled mb-0">
                       <li>
                         <Link
-                          to="#"
-                          className="badge bg-info-subtle text-info view-item-btn"
-               
-                        >
-                          <i
-                            className="ph ph-eye"
-                            style={{
-                              transition: "transform 0.3s ease-in-out",
-                              cursor: "pointer",
-                              fontSize: "1.5em",
-                            }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.transform = "scale(1.4)")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.transform = "scale(1)")
-                            }
-                          ></i>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          to="#"
+                           to="/departement/gestion-matieres/edit-matiere"
+                           state={matiere}
                           className="badge bg-primary-subtle text-primary edit-item-btn"
                     
                         >
@@ -184,7 +188,7 @@ const ListMatieres = () => {
                             onMouseLeave={(e) =>
                               (e.currentTarget.style.transform = "scale(1)")
                             }
-                            
+                            onClick={() => AlertDelete(matiere?._id!)}
                           ></i>
                         </Link>
                       </li>
@@ -265,7 +269,7 @@ const createAndDownloadExcel = () => {
                         <Button
                           variant="primary"
                           className="add-btn"
-                          onClick={() => tog_AddParametreModals()}
+                          onClick={() => tog_AddMatiere()}
                         >
                           Ajouter matiére
                         </Button>
@@ -490,7 +494,7 @@ const createAndDownloadExcel = () => {
                   >
              <TableContainer
                 columns={(columns || [])}
-                data={(matieres || [])}
+                data={(data || [])}
                 // isGlobalFilter={false}
                 iscustomPageSize={false}
                 isBordered={false}

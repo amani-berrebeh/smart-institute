@@ -7,9 +7,64 @@ import { demandeEtudiant } from "Common/data/demandeEtudiant";
 import Flatpickr from "react-flatpickr";
 import dummyImg from "../../assets/images/users/user-dummy-img.jpg"
 import { Link } from 'react-router-dom';
+import { actionAuthorization } from 'utils/pathVerification';
+import { RootState } from 'app/store';
+import { useSelector } from 'react-redux';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+import { selectCurrentUser } from 'features/account/authSlice'; 
+import {
+    useFetchReclamationsQuery, Reclamation,
+    useAddReclamationMutation,
+    useUpdateReclamationMutation,
+    useDeleteReclamationMutation,
+  } from 'features/reclamationEtudiant/recalamationEtudiantSlice';
 
 const ListeReclamationEtudiant = () => {
     document.title = "Réclamation Etudiant | Smart University";
+
+    const user = useSelector((state: RootState) => selectCurrentUser(state));
+    const MySwal = withReactContent(Swal);
+
+     // Fetch reclamations query hook
+  const { data: reclamations, error, isLoading } = useFetchReclamationsQuery();
+
+  // Mutation hooks
+  const [addReclamation] = useAddReclamationMutation();
+  const [updateReclamation] = useUpdateReclamationMutation();
+  const [deleteReclamation] = useDeleteReclamationMutation();
+
+
+  const handleDeleteReclamation = async (id: string) => {
+    try {
+        await MySwal.fire({
+            title: 'Êtes-vous sûr ?',
+            text: "Vous ne pourrez pas annuler cela !",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                await deleteReclamation(id).unwrap();
+                MySwal.fire(
+                    'Deleted!',
+                    'The reclamation has been deleted.',
+                    'success'
+                );
+            }
+        });
+    } catch (error) {
+        console.error('Failed to delete reclamation:', error);
+        MySwal.fire(
+            'Error!',
+            'There was an error deleting the reclamation.',
+            'error'
+        );
+    }
+};
+
     const [modal_AddUserModals, setmodal_AddUserModals] = useState<boolean>(false);
     const [isMultiDeleteButton, setIsMultiDeleteButton] = useState<boolean>(false)
     function tog_AddUserModals() {
@@ -60,21 +115,21 @@ const ListeReclamationEtudiant = () => {
             //     filterable: true,
             // },
             {
-                Header: "Réclamation",
-                accessor: "soustype",
+                Header: "Titre",
+                accessor: "title",
                 disableFilters: true,
                 filterable: true,
             },
            
             {
                 Header: "Etudiant",
-                accessor: "etudiant",
+                accessor: (row: any) => row.studentId?.nom_fr || "",
                 disableFilters: true,
                 filterable: true,
             },
             {
                 Header: "CIN",
-                accessor: "CIN",
+                accessor: (row: any) => row.studentId?.num_CIN || "",
                 disableFilters: true,
                 filterable: true,
             },
@@ -86,13 +141,13 @@ const ListeReclamationEtudiant = () => {
             },
             {
                      Header: "Date d'envoi",
-                     accessor: "date",
+                     accessor: "createdAt",
                      disableFilters: true,
                      filterable: true,
                  },
                  {
                     Header: "Date de modification",
-                    accessor: "",
+                    accessor: "updatedAt",
                     disableFilters: true,
                     filterable: true,
                 },
@@ -135,9 +190,9 @@ const ListeReclamationEtudiant = () => {
                    filterable: true,
                    accessor: (cellProps: any) => {
                       switch (cellProps.status) {
-                           case "en cours":
-                              return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
-                           case "Inactive":
+                           case "pending":
+                              return (<span className="badge bg-warning-subtle text-warning"> {cellProps.status}</span>)
+                           case "rejected":
                                return (<span className="badge bg-danger-subtle text-danger"> {cellProps.status}</span>)
                            default:
                                return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
@@ -152,9 +207,11 @@ const ListeReclamationEtudiant = () => {
                 accessor: (cellProps: any) => {
                     return (
                         <ul className="hstack gap-2 list-unstyled mb-0">
+ {actionAuthorization("/reclamation-etudiant/single-reclamation-etudiant",user?.permissions!)?
+
               <li>
                 <Link
-                  to="/SingleReclamationEtudiant"
+                  to="/reclamation-etudiant/single-reclamation-etudiant"
                   state={cellProps}
                   className="badge bg-info-subtle text-info view-item-btn"
                   data-bs-toggle="offcanvas"
@@ -174,10 +231,12 @@ const ListeReclamationEtudiant = () => {
                     }
                   ></i>
                 </Link>
-              </li>
+              </li> :<></>}
+              {actionAuthorization("/reclamation-etudiant/edit-reclamation-etudiant",user?.permissions!)?
+
               <li>
                 <Link
-                  to="/EditReclamationEtudiant"
+                  to="/reclamation-etudiant/edit-reclamation-etudiant"
                   className="badge bg-success-subtle text-success edit-item-btn"
                   state={cellProps}
                 >
@@ -196,12 +255,14 @@ const ListeReclamationEtudiant = () => {
                     }
                   ></i>
                 </Link>
-              </li>
+              </li> :<></>}
+              {actionAuthorization("/reclamation-etudiant/supprimer-reclamation-etudiant",user?.permissions!)?
+
               <li>
                 <Link
                   to="#"
                   className="badge bg-danger-subtle text-danger remove-item-btn"
-                 
+                  onClick={() => handleDeleteReclamation(cellProps._id)}
                 >
                   <i
                     className="ph ph-trash"
@@ -218,7 +279,7 @@ const ListeReclamationEtudiant = () => {
                     }
                   ></i>
                 </Link>
-              </li>
+              </li> :<></>}
             </ul>
                     )
                 },
@@ -273,7 +334,7 @@ const ListeReclamationEtudiant = () => {
                                     
                                         <TableContainer
                                             columns={(columns || [])}
-                                            data={(demandeEtudiant || [])}
+                                            data={(reclamations || [])}
                                             // isGlobalFilter={false}
                                             iscustomPageSize={false}
                                             isBordered={false}

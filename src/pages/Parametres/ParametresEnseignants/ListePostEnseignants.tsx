@@ -4,22 +4,26 @@ import {
   Card,
   Col,
   Container,
-  Dropdown,
   Form,
   Modal,
   Row,
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
-import CountUp from "react-countup";
 import { Link, useNavigate } from "react-router-dom";
 import TableContainer from "Common/TableContainer";
-import { sellerList } from "Common/data";
+import Swal from "sweetalert2";
+import { PosteEnseignant, useDeletePosteEnseignantMutation, useFetchPostesEnseignantQuery } from "features/posteEnseignant/posteEnseignant";
 
+import { actionAuthorization } from 'utils/pathVerification';
+import { RootState } from 'app/store';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from 'features/account/authSlice'; 
 
-
-const ListEtatPersonnels = () => {
+const ListePostEnseignants = () => {
   document.title =
-    "Liste états des personnels | Smart University";
+    "Liste postes des enseignants | Smart University";
+
+    const user = useSelector((state: RootState) => selectCurrentUser(state));
 
   const navigate = useNavigate();
 
@@ -28,6 +32,52 @@ const ListEtatPersonnels = () => {
   function tog_AddParametreModals() {
     setmodal_AddParametreModals(!modal_AddParametreModals);
   }
+
+
+  function tog_AddPosteEnseignant() {
+    navigate("/parametre-enseignant/poste/ajouter-poste-enseignant");
+  }
+  const { data = [] } = useFetchPostesEnseignantQuery();
+  const [deletePosteEnseignant] = useDeletePosteEnseignantMutation();
+
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger",
+    },
+    buttonsStyling: false,
+  });
+  const AlertDelete = async (_id: string) => {
+  
+    swalWithBootstrapButtons
+    .fire({
+      title: "Êtes-vous sûr?",
+      text: "Vous ne pourrez pas revenir en arrière!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Oui, supprimez-le!",
+      cancelButtonText: "Non, annuler!",
+      reverseButtons: true,
+    })
+    .then((result) => {
+      if (result.isConfirmed) {
+        deletePosteEnseignant(_id);
+        swalWithBootstrapButtons.fire(
+          "Supprimé!",
+          "Poste enseignant a été supprimé.",
+          "success"
+        );
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        swalWithBootstrapButtons.fire(
+          "Annulé",
+          "Poste enseignant est en sécurité :)",
+          "error"
+        );
+      }
+    });
+  }
+
+
   const columns = useMemo(
     () => [
         {
@@ -40,56 +90,37 @@ const ListEtatPersonnels = () => {
       
         {
             Header: "Value",
-            accessor: "sellerName",
+            accessor: "value_poste_enseignant",
             disableFilters: true,
             filterable: true,
         },
        
         {
-            Header: "Etat Personnel",
-            accessor: "balance",
+            Header: "Poste Enseignant",
+            accessor: "poste_fr",
             disableFilters: true,
             filterable: true,
         },
         {
-            Header: "حالة الإداري",
-            accessor: "email",
+            Header: "الخطة الوظيفية",
+            accessor: "poste_ar",
             disableFilters: true,
             filterable: true,
         },
-       
+      
         {
             Header: "Action",
             disableFilters: true,
             filterable: true,
-            accessor: (cellProps: any) => {
+            accessor: (posteEnseignant: PosteEnseignant) => {
                 return (
                     <ul className="hstack gap-2 list-unstyled mb-0">
+                 {actionAuthorization("/parametre-enseignant/poste/edit-poste-enseignant",user?.permissions!)?
+
                       <li>
                         <Link
-                          to="#"
-                          className="badge bg-info-subtle text-info view-item-btn"
-               
-                        >
-                          <i
-                            className="ph ph-eye"
-                            style={{
-                              transition: "transform 0.3s ease-in-out",
-                              cursor: "pointer",
-                              fontSize: "1.5em",
-                            }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.transform = "scale(1.4)")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.transform = "scale(1)")
-                            }
-                          ></i>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          to="#"
+                         to="/parametre-enseignant/poste/edit-poste-enseignant"
+                         state={posteEnseignant}
                           className="badge bg-primary-subtle text-primary edit-item-btn"
                     
                         >
@@ -108,7 +139,9 @@ const ListEtatPersonnels = () => {
                             }
                           ></i>
                         </Link>
-                      </li>
+                      </li> :<></>}
+                      {actionAuthorization("/parametre-enseignant/poste/supprimer-poste-enseignant",user?.permissions!)?
+
                       <li>
                         <Link
                           to="#"
@@ -127,10 +160,11 @@ const ListEtatPersonnels = () => {
                             onMouseLeave={(e) =>
                               (e.currentTarget.style.transform = "scale(1)")
                             }
+                            onClick={() => AlertDelete(posteEnseignant?._id!)}
                             
                           ></i>
                         </Link>
-                      </li>
+                      </li> :<></>}
                     </ul>
                   );
             },
@@ -142,8 +176,8 @@ const ListEtatPersonnels = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          <Breadcrumb title="Paramètres des personnels" pageTitle="Liste états des personnels" />
-         
+          <Breadcrumb title="Paramètres des enseignants" pageTitle="Liste postes des enseignants" />
+          
           <Row id="sellersList">
             <Col lg={12}>
               <Card>
@@ -171,24 +205,24 @@ const ListEtatPersonnels = () => {
                         <option value="Inactive">Desactivé</option>
                       </select>
                     </Col>
-                 
                     <Col className="col-lg-auto ms-auto">
                       <div className="hstack gap-2">
+                      {actionAuthorization("/parametre-enseignant/poste/ajouter-poste-enseignant",user?.permissions!)?
+
                         <Button
                           variant="primary"
                           className="add-btn"
-                          onClick={() => tog_AddParametreModals()}
+                          onClick={() => tog_AddPosteEnseignant()}
                         >
-                          Ajouter Etat
-                        </Button>
-                     
+                          Ajouter poste enseignant
+                        </Button> :  <p>not allowed</p> }
                       </div>
                     </Col>
                   </Row>
                 </Card.Body>
               </Card>
 
-              <Modal
+              {/* <Modal
                 className="fade modal-fullscreen"
                 show={modal_AddParametreModals}
                 onHide={() => {
@@ -198,7 +232,7 @@ const ListEtatPersonnels = () => {
               >
                 <Modal.Header className="px-4 pt-4" closeButton>
                   <h5 className="modal-title" id="exampleModalLabel">
-                    Ajouter Etat Personnel
+                    Ajouter Poste Enseignant
                   </h5>
                 </Modal.Header>
                 <Form className="tablelist-form">
@@ -222,7 +256,7 @@ const ListEtatPersonnels = () => {
                     </div>
                     <div className="mb-3">
                       <Form.Label htmlFor="item-stock-field">
-                        Etat Personnel
+                        Poste Enseignant
                       </Form.Label>
                       <Form.Control
                         type="text"
@@ -239,7 +273,7 @@ const ListEtatPersonnels = () => {
                         textAlign: "right",
                       }}
                     >
-                      <Form.Label htmlFor="phone-field">حالة الإداري</Form.Label>
+                      <Form.Label htmlFor="phone-field">الخطة الوظيفية</Form.Label>
                       <Form.Control
                         type="text"
                         id="phone-field"
@@ -264,7 +298,7 @@ const ListEtatPersonnels = () => {
                     </div>
                   </div>
                 </Form>
-              </Modal>
+              </Modal> */}
 
               <Card>
                 <Card.Body className="p-0">
@@ -275,7 +309,7 @@ const ListEtatPersonnels = () => {
                   >
                     <TableContainer
                 columns={(columns || [])}
-                data={(sellerList || [])}
+                data={(data || [])}
                 // isGlobalFilter={false}
                 iscustomPageSize={false}
                 isBordered={false}
@@ -311,7 +345,7 @@ const ListEtatPersonnels = () => {
   );
 };
 
-export default ListEtatPersonnels;
+export default ListePostEnseignants;
 
 
 

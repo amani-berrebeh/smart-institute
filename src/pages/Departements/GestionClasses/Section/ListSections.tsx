@@ -13,7 +13,12 @@ import Breadcrumb from "Common/BreadCrumb";
 import { Link, useNavigate } from "react-router-dom";
 import TableContainer from "Common/TableContainer";
 import { sellerList } from "Common/data";
-
+import Swal from "sweetalert2";
+import {
+  Section,
+  useDeleteSectionMutation,
+  useFetchSectionsQuery,
+} from "features/section/section";
 
 const ListSections = () => {
   document.title = "Liste des sections | Smart University";
@@ -25,142 +30,165 @@ const ListSections = () => {
   function tog_AddParametreModals() {
     setmodal_AddParametreModals(!modal_AddParametreModals);
   }
+
+  function tog_AddSection() {
+    navigate("/departement/gestion-classes/add-section");
+  }
+  const { data = [] } = useFetchSectionsQuery();
+  const [deleteSection] = useDeleteSectionMutation();
+
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger",
+    },
+    buttonsStyling: false,
+  });
+  const AlertDelete = async (_id: string) => {
+    swalWithBootstrapButtons
+      .fire({
+        title: "Êtes-vous sûr?",
+        text: "Vous ne pourrez pas revenir en arrière!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Oui, supprimez-le!",
+        cancelButtonText: "Non, annuler!",
+        reverseButtons: true,
+      })
+      .then((result) => {
+        if (result.isConfirmed) {
+          deleteSection(_id);
+          swalWithBootstrapButtons.fire(
+            "Supprimé!",
+            "Section a été supprimé.",
+            "success"
+          );
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          swalWithBootstrapButtons.fire(
+            "Annulé",
+            "Section est en sécurité :)",
+            "error"
+          );
+        }
+      });
+  };
   const columns = useMemo(
     () => [
-        {
-            Header: (<div className="form-check"> <input className="form-check-input" type="checkbox" id="checkAll" value="option" /> </div>),
-            Cell: (cellProps: any) => {
-                return (<div className="form-check"> <input className="form-check-input" type="checkbox" name="chk_child" defaultValue="option1" /> </div>);
-            },
-            id: '#',
+      {
+        Header: (
+          <div className="form-check">
+            {" "}
+            <input
+              className="form-check-input"
+              type="checkbox"
+              id="checkAll"
+              value="option"
+            />{" "}
+          </div>
+        ),
+        Cell: (cellProps: any) => {
+          return (
+            <div className="form-check">
+              {" "}
+              <input
+                className="form-check-input"
+                type="checkbox"
+                name="chk_child"
+                defaultValue="option1"
+              />{" "}
+            </div>
+          );
         },
-        {
-            Header: "ID",
-            accessor: "itemStock",
-            disableFilters: true,
-            filterable: true,
+        id: "#",
+      },
+     
+      {
+        Header: "Nom Section (FR)",
+        accessor: "name_section_fr",
+        disableFilters: true,
+        filterable: true,
+      },
+
+      {
+        Header: "Nom Section (AR)",
+        accessor: "name_section_ar",
+        disableFilters: true,
+        filterable: true,
+      },
+      {
+        Header: "Abréviation",
+        accessor: "abreviation",
+        disableFilters: true,
+        filterable: true,
+      },
+
+      {
+        Header: "Action",
+        disableFilters: true,
+        filterable: true,
+        accessor: (section: Section) => {
+          return (
+            <ul className="hstack gap-2 list-unstyled mb-0">
+              <li>
+                <Link
+                  to="/departement/gestion-salles/edit-section"
+                  state={section}
+                  className="badge bg-primary-subtle text-primary edit-item-btn"
+                >
+                  <i
+                    className="ph ph-pencil-line"
+                    style={{
+                      transition: "transform 0.3s ease-in-out",
+                      cursor: "pointer",
+                      fontSize: "1.5em",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.2)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  ></i>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="#"
+                  className="badge bg-danger-subtle text-danger remove-item-btn"
+                >
+                  <i
+                    className="ph ph-trash"
+                    style={{
+                      transition: "transform 0.3s ease-in-out",
+                      cursor: "pointer",
+                      fontSize: "1.5em",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.2)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                    onClick={() => AlertDelete(section?._id!)}
+                  ></i>
+                </Link>
+              </li>
+            </ul>
+          );
         },
-        {
-            Header: "Nom (AR)",
-            accessor: "sellerName",
-            disableFilters: true,
-            filterable: true,
-        },
-       
-        {
-            Header: "Nom (FR)",
-            accessor: "balance",
-            disableFilters: true,
-            filterable: true,
-        },
-        {
-            Header: "Abréviation",
-            accessor: "email",
-            disableFilters: true,
-            filterable: true,
-        },
-       
-        // {
-        //     Header: "Activation",
-        //     disableFilters: true,
-        //     filterable: true,
-        //     accessor: (cellProps: any) => {
-        //         switch (cellProps.status) {
-        //             case "Activé":
-        //                 return (<span className="badge bg-success-subtle text-success text-uppercase"> {cellProps.status}</span>)
-        //             case "Desactivé":
-        //                 return (<span className="badge bg-danger-subtle text-danger text-uppercase"> {cellProps.status}</span>)
-        //             default:
-        //                 return (<span className="badge bg-success-subtle text-success text-uppercase"> {cellProps.status}</span>)
-        //         }
-        //     },
-        // },
-        {
-            Header: "Action",
-            disableFilters: true,
-            filterable: true,
-            accessor: (cellProps: any) => {
-                return (
-                    <ul className="hstack gap-2 list-unstyled mb-0">
-                      {/* <li>
-                        <Link
-                          to="#"
-                          className="badge bg-info-subtle text-info view-item-btn"
-               
-                        >
-                          <i
-                            className="ph ph-eye"
-                            style={{
-                              transition: "transform 0.3s ease-in-out",
-                              cursor: "pointer",
-                              fontSize: "1.5em",
-                            }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.transform = "scale(1.4)")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.transform = "scale(1)")
-                            }
-                          ></i>
-                        </Link>
-                      </li> */}
-                      <li>
-                        <Link
-                          to="#"
-                          className="badge bg-primary-subtle text-primary edit-item-btn"
-                    
-                        >
-                          <i
-                            className="ph ph-pencil-line"
-                            style={{
-                              transition: "transform 0.3s ease-in-out",
-                              cursor: "pointer",
-                              fontSize: "1.5em",
-                            }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.transform = "scale(1.2)")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.transform = "scale(1)")
-                            }
-                          ></i>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          to="#"
-                          className="badge bg-danger-subtle text-danger remove-item-btn"
-                        >
-                          <i
-                            className="ph ph-trash"
-                            style={{
-                              transition: "transform 0.3s ease-in-out",
-                              cursor: "pointer",
-                              fontSize: "1.5em",
-                            }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.transform = "scale(1.2)")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.transform = "scale(1)")
-                            }
-                            
-                          ></i>
-                        </Link>
-                      </li>
-                    </ul>
-                  );
-            },
-        },
+      },
     ],
     []
-);
+  );
 
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          <Breadcrumb title="Gestion des départements" pageTitle="Liste des sections" />
+          <Breadcrumb
+            title="Gestion des départements"
+            pageTitle="Liste des sections"
+          />
 
           <Row id="sellersList">
             <Col lg={12}>
@@ -194,11 +222,10 @@ const ListSections = () => {
                         <Button
                           variant="primary"
                           className="add-btn"
-                          onClick={() => tog_AddParametreModals()}
+                          onClick={() => tog_AddSection()}
                         >
                           Ajouter section
                         </Button>
-                      
                       </div>
                     </Col>
                   </Row>
@@ -259,7 +286,6 @@ const ListSections = () => {
                         required
                       />
                     </div>
-
                   </Modal.Body>
                   <div className="modal-footer">
                     <div className="hstack gap-2 justify-content-end">
@@ -286,19 +312,18 @@ const ListSections = () => {
                     className="table align-middle table-nowrap"
                     id="customerTable"
                   >
-               
-            <TableContainer
-                columns={(columns || [])}
-                data={(sellerList || [])}
-                // isGlobalFilter={false}
-                iscustomPageSize={false}
-                isBordered={false}
-                customPageSize={10}
-                className="custom-header-css table align-middle table-nowrap"
-                tableClass="table-centered align-middle table-nowrap mb-0"
-                theadClass="text-muted table-light"
-                SearchPlaceholder='Search Products...'
-            />
+                    <TableContainer
+                      columns={columns || []}
+                      data={data || []}
+                      // isGlobalFilter={false}
+                      iscustomPageSize={false}
+                      isBordered={false}
+                      customPageSize={10}
+                      className="custom-header-css table align-middle table-nowrap"
+                      tableClass="table-centered align-middle table-nowrap mb-0"
+                      theadClass="text-muted table-light"
+                      SearchPlaceholder="Search Products..."
+                    />
                   </table>
                   <div className="noresult" style={{ display: "none" }}>
                     <div className="text-center py-4">

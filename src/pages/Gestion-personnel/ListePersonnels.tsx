@@ -1,19 +1,17 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Button,
   Card,
   Col,
   Container,
-  Dropdown,
-  Form,
-  Modal,
   Row,
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import CountUp from "react-countup";
 import { Link, useNavigate } from "react-router-dom";
-import { sellerList } from "Common/data";
 import TableContainer from "Common/TableContainer";
+import Swal from "sweetalert2";
+import { Personnel, useDeletePersonnelMutation, useFetchPersonnelsQuery } from "features/personnel/personnelSlice";
 
 const ListPersonnels = () => {
   document.title = "Liste des personnels | Smart University";
@@ -23,71 +21,127 @@ const ListPersonnels = () => {
   const [modal_AddEnseignantModals, setmodal_AddEnseignantModals] =
     useState<boolean>(false);
   function tog_AddEnseignantModals() {
-    navigate("/gestion-personnel/ajouter-personnel");
+    navigate("/AjouterPersonnel");
   }
+
+
+  function tog_AddPersonnel() {
+    navigate("/AjouterPersonnel");
+  }
+  const { data = [] } = useFetchPersonnelsQuery();
+  const [personnelCount, setPersonnelCount] = useState(0);
+
+  useEffect(() => {
+    if (data) {
+      setPersonnelCount(data.length);
+    }
+  }, [data]);
+
+
+  const [deletePersonnel] = useDeletePersonnelMutation();
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger",
+    },
+    buttonsStyling: false,
+  });
+  const AlertDelete = async (_id: string) => {
+    swalWithBootstrapButtons
+      .fire({
+        title: "Êtes-vous sûr?",
+        text: "Vous ne pourrez pas revenir en arrière!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Oui, supprimez-le!",
+        cancelButtonText: "Non, annuler!",
+        reverseButtons: true,
+      })
+      .then((result) => {
+        if (result.isConfirmed) {
+          deletePersonnel(_id);
+          swalWithBootstrapButtons.fire(
+            "Supprimé!",
+            "Personnel a été supprimé.",
+            "success"
+          );
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          swalWithBootstrapButtons.fire(
+            "Annulé",
+            "Personnel est en sécurité :)",
+            "error"
+          );
+        }
+      });
+  };
+  const activatedPersonnelsCount = data.filter(personnel => personnel.etat_compte?.etat_fr === "Compte Activé").length;
+  const deactivatedPersonnelsCount = data.filter(personnel => personnel.etat_compte?.etat_fr === "Compte désactivé").length;
+
   const columns = useMemo(
     () => [
       {
-        Header: (
-          <div className="form-check">
-            {" "}
-            <input
-              className="form-check-input"
-              type="checkbox"
-              id="checkAll"
-              value="option"
-            />{" "}
-          </div>
-        ),
-        Cell: (cellProps: any) => {
+        Header: "Nom Personnel",
+        disableFilters: true,
+        filterable: true,
+        accessor: (personnels: Personnel) => {
           return (
-            <div className="form-check">
-              {" "}
-              <input
-                className="form-check-input"
-                type="checkbox"
-                name="chk_child"
-                defaultValue="option1"
-              />{" "}
+            <div className="d-flex align-items-center gap-2">
+              <div className="flex-shrink-0">
+                <img
+                src={`http://localhost:5000/files/personnelFiles/PhotoProfil/${personnels.photo_profil}`}
+                  alt="personnel-img"
+                  id="photo_profil"
+                  className="avatar-xs rounded-circle user-profile-img "
+                 
+                />
+              </div>
+              <div className="flex-grow-1 user_name">
+                {personnels.nom_fr} {personnels.prenom_fr}
+              </div>
             </div>
           );
         },
-        id: "#",
       },
       {
         Header: "Matricule",
-        accessor: "itemStock",
+        accessor: "_id",
         disableFilters: true,
         filterable: true,
       },
       {
         Header: "Nom et Prénom",
-        accessor: "sellerName",
+        accessor: (row:any) => `${row.prenom_fr} ${row.nom_fr}`,
         disableFilters: true,
         filterable: true,
       },
 
       {
-        Header: "Spécialité",
-        accessor: "balance",
+        Header: "Service",
+        accessor: (row: any) => row?.service?.service_fr || "",
         disableFilters: true,
         filterable: true,
       },
       {
-        Header: "Département",
-        accessor: "email",
+        Header: "Poste",
+        accessor: (row: any) => row?.poste?.poste_fr || "",
         disableFilters: true,
         filterable: true,
       },
       {
         Header: "Grade",
-        accessor: "createDate",
+        accessor: (row: any) => row?.grade?.grade_fr || "",
+        disableFilters: true,
+        filterable: true,
+      },
+      {
+        Header: "Catégorie",
+        accessor: (row: any) => row?.categorie?.categorie_fr || "",
         disableFilters: true,
         filterable: true,
       },
       {
         Header: "Tél",
-        accessor: "phone",
+        accessor: "num_phone1",
         disableFilters: true,
         filterable: true,
       },
@@ -96,27 +150,25 @@ const ListPersonnels = () => {
         Header: "Activation",
         disableFilters: true,
         filterable: true,
-        accessor: (cellProps: any) => {
-          switch (cellProps.status) {
-            case "Activé":
+        accessor: (row: any) => row?.etat_compte?.etat_fr || "",
+        Cell: ({ value }: { value: string }) => {
+          switch (value) {
+            case "Inscrit / Activé":
               return (
-                <span className="badge bg-success-subtle text-success text-uppercase">
-                  {" "}
-                  {cellProps.status}
+                <span className="badge bg-success-subtle text-success">
+                  {value}
                 </span>
               );
-            case "Desactivé":
+            case "Non inscrit":
               return (
-                <span className="badge bg-danger-subtle text-danger text-uppercase">
-                  {" "}
-                  {cellProps.status}
+                <span className="badge bg-danger-subtle text-danger">
+                  {value}
                 </span>
               );
             default:
               return (
-                <span className="badge bg-success-subtle text-success text-uppercase">
-                  {" "}
-                  {cellProps.status}
+                <span className="badge bg-success-subtle text-info">
+                  {value}
                 </span>
               );
           }
@@ -126,12 +178,12 @@ const ListPersonnels = () => {
         Header: "Action",
         disableFilters: true,
         filterable: true,
-        accessor: (cellProps: any) => {
+        accessor: (personnel: Personnel) => {
           return (
             <ul className="hstack gap-2 list-unstyled mb-0">
               <li>
                 <Link
-                  to="/gestion-personnel/compte-personnel"
+                  to="#"
                   className="badge bg-info-subtle text-info view-item-btn"
                 >
                   <i
@@ -189,6 +241,7 @@ const ListPersonnels = () => {
                     onMouseLeave={(e) =>
                       (e.currentTarget.style.transform = "scale(1)")
                     }
+                    onClick={() => AlertDelete(personnel?._id!)}
                   ></i>
                 </Link>
               </li>
@@ -349,11 +402,10 @@ const ListPersonnels = () => {
                 <Card.Body className="p-4 z-1 position-relative">
                   <h4 className="fs-22 fw-semibold mb-3">
                     <CountUp
-                      start={0}
-                      end={207}
-                      duration={3}
-                      decimals={2}
-                      suffix="k"
+                       start={0}
+                       end={personnelCount} 
+                       duration={3}
+                       decimals={0}
                     />
                   </h4>
                   <p className="mb-0 fw-medium text-uppercase fs-14">
@@ -502,11 +554,10 @@ const ListPersonnels = () => {
                 <Card.Body className="p-4 z-1 position-relative">
                   <h4 className="fs-22 fw-semibold mb-3">
                     <CountUp
-                      start={0}
-                      end={159}
-                      duration={3}
-                      decimals={2}
-                      suffix="k"
+                       start={0}
+                       end={activatedPersonnelsCount} 
+                       duration={3}
+                       decimals={0}
                     />
                   </h4>
                   <p className="mb-0 fw-medium text-uppercase fs-14">
@@ -655,11 +706,10 @@ const ListPersonnels = () => {
                 <Card.Body className="p-4 z-1 position-relative">
                   <h4 className="fs-22 fw-semibold mb-3">
                     <CountUp
-                      start={0}
-                      end={48}
-                      duration={3}
-                      decimals={2}
-                      suffix="k"
+                     start={0}
+                     end={deactivatedPersonnelsCount} 
+                     duration={3}
+                     decimals={0}
                     />
                   </h4>
                   <p className="mb-0 fw-medium text-uppercase fs-14">
@@ -668,23 +718,6 @@ const ListPersonnels = () => {
                 </Card.Body>
               </Card>
             </Col>
-            {/* <Col xxl={3} md={6}>
-                            <Card className="bg-light border-0">
-                                <Card.Body className="p-3">
-                                    <div className="p-3 bg-white rounded">
-                                        <div className="d-flex align-items-center gap-2">
-                                            <div className="flex-shrink-0">
-                                                <img src={avatar2} alt="" className="avatar-sm rounded-circle" />
-                                            </div>
-                                            <div className="flex-grow-1">
-                                                <Link to="#!"><h6 className="fs-16"><span className="text-success">#1</span> Amanda Harvey</h6></Link>
-                                                <p className="text-muted mb-0">To reach if you need to sell 200+ orders.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Card.Body>
-                            </Card>
-                        </Col> */}
           </Row>
 
           <Row id="sellersList">
@@ -714,102 +747,21 @@ const ListPersonnels = () => {
                         <option value="Inactive">Desactivé</option>
                       </select>
                     </Col>
-                    {/* <Col className="col-lg-auto">
-                                            <select className="form-select" data-choices data-choices-search-false name="choices-single-default">
-                                                <option defaultValue="all">All</option>
-                                                <option value="Today">Today</option>
-                                                <option value="Yesterday">Yesterday</option>
-                                                <option value="Last 7 Days">Last 7 Days</option>
-                                                <option value="Last 30 Days">Last 30 Days</option>
-                                                <option value="This Month">This Month</option>
-                                                <option value="Last Month">Last Month</option>
-                                            </select>
-                                        </Col> */}
                     <Col className="col-lg-auto ms-auto">
                       <div className="hstack gap-2">
                         <Button
                           variant="primary"
                           className="add-btn"
-                          onClick={() => tog_AddEnseignantModals()}
+                          onClick={() => tog_AddPersonnel()}
                         >
                           Ajouter Personnel
                         </Button>
-                        {/* <Dropdown>
-                                                    <Dropdown.Toggle className="btn-icon btn btn-soft-dark arrow-none" data-bs-toggle="dropdown" aria-expanded="false">
-                                                        <i className="ph-dots-three-outline"></i>
-                                                    </Dropdown.Toggle>
-                                                    <Dropdown.Menu as="ul">
-                                                        <li><Link className="dropdown-item" to="#">Action</Link></li>
-                                                        <li><Link className="dropdown-item" to="#">Another action</Link></li>
-                                                        <li><Link className="dropdown-item" to="#">Something else here</Link></li>
-                                                    </Dropdown.Menu>
-                                                </Dropdown> */}
                       </div>
                     </Col>
                   </Row>
                 </Card.Body>
               </Card>
-
-              {/* <Modal className="fade modal-fullscreen" show={modal_AddSellerModals} onHide={() => { tog_AddSellerModals(); }} centered>
-                                <Modal.Header className="px-4 pt-4" closeButton>
-                                    <h5 className="modal-title" id="exampleModalLabel">Add Seller</h5>
-                                </Modal.Header>
-                                <Form className="tablelist-form">
-                                    <Modal.Body className="p-4">
-                                        <div id="alert-error-msg" className="d-none alert alert-danger py-2"></div>
-                                        <input type="hidden" id="id-field" />
-
-                                        <div className="mb-3">
-                                            <Form.Label htmlFor="seller-name-field">Seller Name</Form.Label>
-                                            <Form.Control type="text" id="seller-name-field" placeholder="Enter Seller Name" required />
-                                        </div>
-                                        <div className="mb-3">
-                                            <Form.Label htmlFor="item-stock-field">Item Stock</Form.Label>
-                                            <Form.Control type="text" id="item-stock-field" placeholder="Enter Item Stock" required />
-                                        </div>
-                                        <div className="mb-3">
-                                            <Form.Label htmlFor="balance-field">Balance</Form.Label>
-                                            <Form.Control type="text" id="balance-field" placeholder="Enter Balance" required />
-                                        </div>
-
-                                        <div className="mb-3">
-                                            <Form.Label htmlFor="email-field">Seller Email</Form.Label>
-                                            <Form.Control type="email" id="email-field" placeholder="Enter Email" required />
-                                        </div>
-
-                                        <div className="mb-3">
-                                            <Form.Label htmlFor="phone-field">Phone</Form.Label>
-                                            <Form.Control type="text" id="phone-field" placeholder="Enter Phone" required />
-                                        </div>
-
-                                        <div className="mb-3">
-                                            <Form.Label htmlFor="date-field">Create Date</Form.Label>
-                                            <Flatpickr
-                                                className="form-control flatpickr-input"
-                                                placeholder='Select Date-time'
-                                                options={{
-                                                    dateFormat: "d M, Y",
-                                                }}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label htmlFor="account-status-field" className="form-label">Account Status</label>
-                                            <select className="form-select" required id="account-status-field">
-                                                <option defaultValue="">Select account Status</option>
-                                                <option value="Active">Active</option>
-                                                <option value="Inactive">Inactive</option>
-                                            </select>
-                                        </div>
-                                    </Modal.Body>
-                                    <div className="modal-footer">
-                                        <div className="hstack gap-2 justify-content-end">
-                                            <Button className="btn-ghost-danger" onClick={() => { tog_AddSellerModals(); }}>Close</Button>
-                                            <Button variant='success' id="add-btn">Add Seller</Button>
-                                        </div>
-                                    </div>
-                                </Form>
-                            </Modal> */}
+    
 
               <Card>
                 <Card.Body className="p-0">
@@ -820,7 +772,7 @@ const ListPersonnels = () => {
                   >
                     <TableContainer
                       columns={columns || []}
-                      data={sellerList || []}
+                      data={data || []}
                       // isGlobalFilter={false}
                       iscustomPageSize={false}
                       isBordered={false}

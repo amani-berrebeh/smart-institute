@@ -1,99 +1,140 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Button,
   Card,
   Col,
   Container,
-  Dropdown,
-  Form,
-  Modal,
   Row,
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import CountUp from "react-countup";
 import { Link, useNavigate } from "react-router-dom";
 import TableContainer from "Common/TableContainer";
-import { sellerList } from "Common/data";
-import { actionAuthorization } from 'utils/pathVerification';
-import { RootState } from 'app/store';
-import { useSelector } from 'react-redux';
-import { selectCurrentUser } from 'features/account/authSlice'; 
+import Swal from "sweetalert2";
+import { Enseignant, useDeleteEnseignantMutation, useFetchEnseignantsQuery } from "features/enseignant/enseignantSlice";
 
 const ListEnseignants = () => {
   document.title = "Liste des enseignants | Smart University";
-
-  const user = useSelector((state: RootState) => selectCurrentUser(state));
 
   const navigate = useNavigate();
 
   const [modal_AddEnseignantModals, setmodal_AddEnseignantModals] =
     useState<boolean>(false);
   function tog_AddEnseignantModals() {
-    navigate("/gestion-enseignant/ajouter-enseignant");
+    navigate("/AjouterEnseignant");
   }
+
+  function tog_AddEnseignant() {
+    navigate("/AjouterEnseignant");
+  }
+  const { data = [] } = useFetchEnseignantsQuery();
+  console.log("data",data)
+  const [enseignantCount, setEnseignantCount] = useState(0);
+
+  useEffect(() => {
+    if (data) {
+      setEnseignantCount(data.length);
+    }
+  }, [data]);
+
+  const [deleteEnseignant] = useDeleteEnseignantMutation();
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger",
+    },
+    buttonsStyling: false,
+  });
+  const AlertDelete = async (_id: string) => {
+    swalWithBootstrapButtons
+      .fire({
+        title: "Êtes-vous sûr?",
+        text: "Vous ne pourrez pas revenir en arrière!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Oui, supprimez-le!",
+        cancelButtonText: "Non, annuler!",
+        reverseButtons: true,
+      })
+      .then((result) => {
+        if (result.isConfirmed) {
+          deleteEnseignant(_id);
+          swalWithBootstrapButtons.fire(
+            "Supprimé!",
+            "Enseignant a été supprimé.",
+            "success"
+          );
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          swalWithBootstrapButtons.fire(
+            "Annulé",
+            "Enseignant est en sécurité :)",
+            "error"
+          );
+        }
+      });
+  };
+  const activatedEnseignantsCount = data.filter(enseignant => enseignant.etat_compte?.etat_fr === "Compte Activé").length;
+  const deactivatedEnseignantsCount = data.filter(enseignant => enseignant.etat_compte?.etat_fr === "Compte Désactivé").length;
+
   const columns = useMemo(
     () => [
       {
-        Header: (
-          <div className="form-check">
-            {" "}
-            <input
-              className="form-check-input"
-              type="checkbox"
-              id="checkAll"
-              value="option"
-            />{" "}
-          </div>
-        ),
-        Cell: (cellProps: any) => {
+        Header: "Nom Enseignant",
+        disableFilters: true,
+        filterable: true,
+        accessor: (enseignants: Enseignant) => {
           return (
-            <div className="form-check">
-              {" "}
-              <input
-                className="form-check-input"
-                type="checkbox"
-                name="chk_child"
-                defaultValue="option1"
-              />{" "}
+            <div className="d-flex align-items-center gap-2">
+              <div className="flex-shrink-0">
+                <img
+                src={`http://localhost:5000/files/enseignantFiles/PhotoProfil/${enseignants.photo_profil}`}
+                  alt="enseignant-img"
+                  id="photo_profil"
+                  className="avatar-xs rounded-circle user-profile-img "
+                 
+                />
+              </div>
+              <div className="flex-grow-1 user_name">
+                {enseignants.nom_fr} {enseignants.prenom_fr}
+              </div>
             </div>
           );
         },
-        id: "#",
       },
       {
         Header: "Matricule",
-        accessor: "itemStock",
+        accessor: "_id",
         disableFilters: true,
         filterable: true,
       },
       {
         Header: "Nom et Prénom",
-        accessor: "sellerName",
+        accessor: (row:any) => `${row.prenom_fr} ${row.nom_fr}`,
         disableFilters: true,
         filterable: true,
       },
 
       {
         Header: "Spécialité",
-        accessor: "balance",
+        accessor: (row: any) => row?.specialite?.specialite_fr || "",
         disableFilters: true,
         filterable: true,
       },
       {
         Header: "Département",
-        accessor: "email",
+        accessor: (row: any) => row?.departements?.name_fr || "",
         disableFilters: true,
         filterable: true,
       },
       {
         Header: "Grade",
-        accessor: "createDate",
+        accessor: (row: any) => row?.grade.grade_fr || "",
         disableFilters: true,
         filterable: true,
       },
       {
         Header: "Tél",
-        accessor: "phone",
+        accessor: "num_phone1",
         disableFilters: true,
         filterable: true,
       },
@@ -102,63 +143,59 @@ const ListEnseignants = () => {
         Header: "Activation",
         disableFilters: true,
         filterable: true,
-        accessor: (cellProps: any) => {
-          switch (cellProps.status) {
-            case "Activé":
+        accessor: (row: any) => row?.etat_compte?.etat_fr || "",
+        Cell: ({ value }: { value: string }) => {
+          switch (value) {
+            case "Compte Activé":
               return (
-                <span className="badge bg-success-subtle text-success text-uppercase">
-                  {" "}
-                  {cellProps.status}
+                <span className="badge bg-success-subtle text-success">
+                  {value}
                 </span>
               );
-            case "Desactivé":
+            case "Compte Désactivé":
               return (
-                <span className="badge bg-danger-subtle text-danger text-uppercase">
-                  {" "}
-                  {cellProps.status}
+                <span className="badge bg-danger-subtle text-danger">
+                  {value}
                 </span>
               );
             default:
               return (
-                <span className="badge bg-success-subtle text-success text-uppercase">
-                  {" "}
-                  {cellProps.status}
+                <span className="badge bg-success-subtle text-info">
+                  {value}
                 </span>
               );
           }
         },
       },
+      
       {
         Header: "Action",
         disableFilters: true,
         filterable: true,
-        accessor: (cellProps: any) => {
+        accessor: (enseignant: Enseignant) => {
           return (
             <ul className="hstack gap-2 list-unstyled mb-0">
-              {actionAuthorization("/gestion-enseignant/ajouter-enseignant",user?.permissions!)?
-            <li>
-            <Link
-              to="/gestion-enseignant/compte-enseignant"
-              className="badge bg-info-subtle text-info view-item-btn"
-            >
-              <i
-                className="ph ph-eye"
-                style={{
-                  transition: "transform 0.3s ease-in-out",
-                  cursor: "pointer",
-                  fontSize: "1.5em",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.transform = "scale(1.4)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.transform = "scale(1)")
-                }
-              ></i>
-            </Link>
-          </li> : <p>not allowed</p>  
-            }
-              
+              <li>
+                <Link
+                  to="#"
+                  className="badge bg-info-subtle text-info view-item-btn"
+                >
+                  <i
+                    className="ph ph-eye"
+                    style={{
+                      transition: "transform 0.3s ease-in-out",
+                      cursor: "pointer",
+                      fontSize: "1.5em",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.4)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  ></i>
+                </Link>
+              </li>
               <li>
                 <Link
                   to="#"
@@ -198,6 +235,7 @@ const ListEnseignants = () => {
                     onMouseLeave={(e) =>
                       (e.currentTarget.style.transform = "scale(1)")
                     }
+                    onClick={() => AlertDelete(enseignant?._id!)}
                   ></i>
                 </Link>
               </li>
@@ -357,11 +395,10 @@ const ListEnseignants = () => {
                 <Card.Body className="p-4 z-1 position-relative">
                   <h4 className="fs-22 fw-semibold mb-3">
                     <CountUp
-                      start={0}
-                      end={207}
-                      duration={3}
-                      decimals={2}
-                      suffix="k"
+                       start={0}
+                       end={enseignantCount} 
+                       duration={3}
+                       decimals={0}
                     />
                   </h4>
                   <p className="mb-0 fw-medium text-uppercase fs-14">
@@ -511,10 +548,9 @@ const ListEnseignants = () => {
                   <h4 className="fs-22 fw-semibold mb-3">
                     <CountUp
                       start={0}
-                      end={159}
+                      end={activatedEnseignantsCount}
                       duration={3}
-                      decimals={2}
-                      suffix="k"
+                      decimals={0}
                     />
                   </h4>
                   <p className="mb-0 fw-medium text-uppercase fs-14">
@@ -663,11 +699,10 @@ const ListEnseignants = () => {
                 <Card.Body className="p-4 z-1 position-relative">
                   <h4 className="fs-22 fw-semibold mb-3">
                     <CountUp
-                      start={0}
-                      end={48}
-                      duration={3}
-                      decimals={2}
-                      suffix="k"
+                       start={0}
+                       end={deactivatedEnseignantsCount}
+                       duration={3}
+                       decimals={0}
                     />
                   </h4>
                   <p className="mb-0 fw-medium text-uppercase fs-14">
@@ -708,16 +743,13 @@ const ListEnseignants = () => {
 
                     <Col className="col-lg-auto ms-auto">
                       <div className="hstack gap-2">
-                        {actionAuthorization("/gestion-enseignant/ajouter-enseignant",user?.permissions!)?
                         <Button
-                        variant="primary"
-                        className="add-btn"
-                        onClick={() => tog_AddEnseignantModals()}
-                      >
-                        Ajouter Enseignant
-                      </Button> : <p>not allowed</p>
-                      }
-                        
+                          variant="primary"
+                          className="add-btn"
+                          onClick={() => tog_AddEnseignant()}
+                        >
+                          Ajouter Enseignant
+                        </Button>
                       </div>
                     </Col>
                   </Row>
@@ -733,7 +765,7 @@ const ListEnseignants = () => {
                   >
                     <TableContainer
                       columns={columns || []}
-                      data={sellerList || []}
+                      data={data || []}
                       // isGlobalFilter={false}
                       iscustomPageSize={false}
                       isBordered={false}

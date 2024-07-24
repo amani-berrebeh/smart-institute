@@ -4,21 +4,23 @@ import {
   Card,
   Col,
   Container,
-  Dropdown,
-  Form,
-  Modal,
   Row,
 } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
 import { Link, useNavigate } from "react-router-dom";
 import TableContainer from "Common/TableContainer";
-import { sellerList } from "Common/data";
+import Swal from "sweetalert2";
+import { EtatPersonnel, useDeleteEtatPersonnelMutation, useFetchEtatsPersonnelQuery } from "features/etatPersonnel/etatPersonnelSlice";
+import { actionAuthorization } from 'utils/pathVerification';
+import { RootState } from 'app/store';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from 'features/account/authSlice'; 
 
 
-
-const ListePostEnseignants = () => {
+const ListEtatPersonnels = () => {
   document.title =
-    "Liste postes des enseignants | Smart University";
+    "Liste états des personnels | Smart University";
+    const user = useSelector((state: RootState) => selectCurrentUser(state));
 
   const navigate = useNavigate();
 
@@ -27,6 +29,52 @@ const ListePostEnseignants = () => {
   function tog_AddParametreModals() {
     setmodal_AddParametreModals(!modal_AddParametreModals);
   }
+
+
+  function tog_AddEtatPersonnelModals() {
+    navigate("/parametre-personnel/etat/add-etat-personnel");
+  }
+  const { data = [] } = useFetchEtatsPersonnelQuery();
+  const [deleteEtatPersonnel] = useDeleteEtatPersonnelMutation();
+
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger",
+    },
+    buttonsStyling: false,
+  });
+  const AlertDelete = async (_id: string) => {
+  
+    swalWithBootstrapButtons
+    .fire({
+      title: "Êtes-vous sûr?",
+      text: "Vous ne pourrez pas revenir en arrière!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Oui, supprimez-le!",
+      cancelButtonText: "Non, annuler!",
+      reverseButtons: true,
+    })
+    .then((result) => {
+      if (result.isConfirmed) {
+        deleteEtatPersonnel(_id);
+        swalWithBootstrapButtons.fire(
+          "Supprimé!",
+          "L'état compte personnel a été supprimé.",
+          "success"
+        );
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        swalWithBootstrapButtons.fire(
+          "Annulé",
+          "L'état compte personnel est en sécurité :)",
+          "error"
+        );
+      }
+    });
+  }
+
+
   const columns = useMemo(
     () => [
         {
@@ -39,56 +87,37 @@ const ListePostEnseignants = () => {
       
         {
             Header: "Value",
-            accessor: "sellerName",
+            accessor: "value",
             disableFilters: true,
             filterable: true,
         },
        
         {
-            Header: "Poste Enseignant",
-            accessor: "balance",
+            Header: "Etat Compte Personnel",
+            accessor: "etat_fr",
             disableFilters: true,
             filterable: true,
         },
         {
-            Header: "الخطة الوظيفية",
-            accessor: "email",
+            Header: "حالة حساب الإداري",
+            accessor: "etat_ar",
             disableFilters: true,
             filterable: true,
         },
-      
+       
         {
             Header: "Action",
             disableFilters: true,
             filterable: true,
-            accessor: (cellProps: any) => {
+            accessor: (etatPersonnel: EtatPersonnel) => {
                 return (
                     <ul className="hstack gap-2 list-unstyled mb-0">
+                  {actionAuthorization("/parametre-personnel/etat/edit-etat-personnel",user?.permissions!)?
+
                       <li>
                         <Link
-                          to="#"
-                          className="badge bg-info-subtle text-info view-item-btn"
-               
-                        >
-                          <i
-                            className="ph ph-eye"
-                            style={{
-                              transition: "transform 0.3s ease-in-out",
-                              cursor: "pointer",
-                              fontSize: "1.5em",
-                            }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.transform = "scale(1.4)")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.transform = "scale(1)")
-                            }
-                          ></i>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          to="#"
+                          to="/parametre-personnel/etat/edit-etat-personnel"
+                          state={etatPersonnel}
                           className="badge bg-primary-subtle text-primary edit-item-btn"
                     
                         >
@@ -107,7 +136,9 @@ const ListePostEnseignants = () => {
                             }
                           ></i>
                         </Link>
-                      </li>
+                      </li> : <></>}
+                      {actionAuthorization("/parametre-personnel/etat/supprimer-etat-personnel",user?.permissions!)?
+
                       <li>
                         <Link
                           to="#"
@@ -126,10 +157,11 @@ const ListePostEnseignants = () => {
                             onMouseLeave={(e) =>
                               (e.currentTarget.style.transform = "scale(1)")
                             }
+                            onClick={() => AlertDelete(etatPersonnel?._id!)}
                             
                           ></i>
                         </Link>
-                      </li>
+                      </li> :<></>}
                     </ul>
                   );
             },
@@ -141,8 +173,8 @@ const ListePostEnseignants = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          <Breadcrumb title="Paramètres des enseignants" pageTitle="Liste postes des enseignants" />
-          
+          <Breadcrumb title="Paramètres des personnels" pageTitle="Liste états des personnels" />
+         
           <Row id="sellersList">
             <Col lg={12}>
               <Card>
@@ -170,43 +202,24 @@ const ListePostEnseignants = () => {
                         <option value="Inactive">Desactivé</option>
                       </select>
                     </Col>
-                    {/* <Col className="col-lg-auto">
-                                            <select className="form-select" data-choices data-choices-search-false name="choices-single-default">
-                                                <option defaultValue="all">All</option>
-                                                <option value="Today">Today</option>
-                                                <option value="Yesterday">Yesterday</option>
-                                                <option value="Last 7 Days">Last 7 Days</option>
-                                                <option value="Last 30 Days">Last 30 Days</option>
-                                                <option value="This Month">This Month</option>
-                                                <option value="Last Month">Last Month</option>
-                                            </select>
-                                        </Col> */}
+                 
                     <Col className="col-lg-auto ms-auto">
                       <div className="hstack gap-2">
                         <Button
                           variant="primary"
                           className="add-btn"
-                          onClick={() => tog_AddParametreModals()}
+                          onClick={() => tog_AddEtatPersonnelModals()}
                         >
-                          Ajouter Poste
+                          Ajouter Etat Personnel
                         </Button>
-                        {/* <Dropdown>
-                                                    <Dropdown.Toggle className="btn-icon btn btn-soft-dark arrow-none" data-bs-toggle="dropdown" aria-expanded="false">
-                                                        <i className="ph-dots-three-outline"></i>
-                                                    </Dropdown.Toggle>
-                                                    <Dropdown.Menu as="ul">
-                                                        <li><Link className="dropdown-item" to="#">Action</Link></li>
-                                                        <li><Link className="dropdown-item" to="#">Another action</Link></li>
-                                                        <li><Link className="dropdown-item" to="#">Something else here</Link></li>
-                                                    </Dropdown.Menu>
-                                                </Dropdown> */}
+                     
                       </div>
                     </Col>
                   </Row>
                 </Card.Body>
               </Card>
 
-              <Modal
+              {/* <Modal
                 className="fade modal-fullscreen"
                 show={modal_AddParametreModals}
                 onHide={() => {
@@ -216,7 +229,7 @@ const ListePostEnseignants = () => {
               >
                 <Modal.Header className="px-4 pt-4" closeButton>
                   <h5 className="modal-title" id="exampleModalLabel">
-                    Ajouter Poste Enseignant
+                    Ajouter Etat Personnel
                   </h5>
                 </Modal.Header>
                 <Form className="tablelist-form">
@@ -240,7 +253,7 @@ const ListePostEnseignants = () => {
                     </div>
                     <div className="mb-3">
                       <Form.Label htmlFor="item-stock-field">
-                        Poste Enseignant
+                        Etat Personnel
                       </Form.Label>
                       <Form.Control
                         type="text"
@@ -257,7 +270,7 @@ const ListePostEnseignants = () => {
                         textAlign: "right",
                       }}
                     >
-                      <Form.Label htmlFor="phone-field">الخطة الوظيفية</Form.Label>
+                      <Form.Label htmlFor="phone-field">حالة الإداري</Form.Label>
                       <Form.Control
                         type="text"
                         id="phone-field"
@@ -282,7 +295,7 @@ const ListePostEnseignants = () => {
                     </div>
                   </div>
                 </Form>
-              </Modal>
+              </Modal> */}
 
               <Card>
                 <Card.Body className="p-0">
@@ -293,7 +306,7 @@ const ListePostEnseignants = () => {
                   >
                     <TableContainer
                 columns={(columns || [])}
-                data={(sellerList || [])}
+                data={(data || [])}
                 // isGlobalFilter={false}
                 iscustomPageSize={false}
                 isBordered={false}
@@ -329,7 +342,7 @@ const ListePostEnseignants = () => {
   );
 };
 
-export default ListePostEnseignants;
+export default ListEtatPersonnels;
 
 
 

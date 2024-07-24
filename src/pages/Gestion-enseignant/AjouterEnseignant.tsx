@@ -9,20 +9,23 @@ import {
   Image,
   Row,
 } from "react-bootstrap";
-import Breadcrumb from "Common/BreadCrumb";
 import { Link, useNavigate } from "react-router-dom";
 import Flatpickr from "react-flatpickr";
-import Dropzone from "react-dropzone";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import SimpleBar from "simplebar-react";
 import country from "Common/country";
 import Swal from "sweetalert2";
 
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
-
-import { useSelector } from "react-redux";
+import {
+  Enseignant,
+  useAddEnseignantMutation,
+} from "features/enseignant/enseignantSlice";
+import { useFetchEtatsEnseignantQuery } from "features/etatEnseignant/etatEnseignant";
+import { useFetchPostesEnseignantQuery } from "features/posteEnseignant/posteEnseignant";
+import { useFetchGradesEnseignantQuery } from "features/gradeEnseignant/gradeEnseignant";
+import { useFetchSpecialitesEnseignantQuery } from "features/specialiteEnseignant/specialiteEnseignant";
+import { useFetchDepartementsQuery } from "features/departement/departement";
 
 type Wilaya =
   | "اريانة"
@@ -385,88 +388,263 @@ const delegationOptions: DelegationOptions = {
     "أولاد حفوز",
   ],
 };
+interface GradeOptions {
+  _id: string;
+  value_grade_enseignant: string;
+  grade_ar: string;
+  grade_fr: string;
+}
 
 const AjouterEnseignant = () => {
   document.title = " Ajouter Enseignant | Application Smart Institute";
   const navigate = useNavigate();
-  const [selectedFiles, setselectedFiles] = useState([]);
-  // Mutation to create account
-
-  // Account's Values and Functions
-  // groupId: "65def391137b93f458f52c1f",
-
-  const [seletedCountry, setseletedCountry] = useState<any>({});
   const [seletedCountry1, setseletedCountry1] = useState<any>({});
 
   const [selectedOption, setSelectedOption] = useState<string>("");
-
-  const handleCheckboxChange = (option: string) => {
-    setSelectedOption((prev) => (prev === option ? "" : option));
-  };
-
-  const fileInputs: { [key: string]: string[] } = {
-    جديد: [],
-    راسب: ["بطاقة أعداد السنة الفارطة"],
-    نقلة: ["بطاقة تعيين", "شهادة مغادرة", "بطاقة أعداد السنة الفارطة"],
-    "إعادة توجيه": ["وثيقة إعادة توجيه", "بطاقة أعداد السنة الفارطة"],
-    "إعادة إدماج": ["وثيقة إعادة ادماج"],
-    "ترسيم إستثنائي": [
-      "بطاقة أعداد السنة الفارطة",
-      "مطلب كتابي",
-      "وصل خلاص التسجيل كاملاً",
-    ],
-    "إجازة ثانية": ["بطاقة تعيين", "بطاقة أعداد السنة الفارطة"],
-  };
   const [selectedWilaya, setSelectedWilaya] = useState<Wilaya | "">("");
+  const [selectedCountry1, setSelectedCountry1] = useState<any>({});
   const [selectedDelegation, setSelectedDelegation] = useState<string>("");
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDateAffectation, setSelectedDateAffectation] =
+    useState<Date | null>(null);
+  const [selectedDateDelivrance, setSelectedDateDelivrance] =
+    useState<Date | null>(null);
+  const [selectedDateCertif1, setSelectedDateCertif1] = useState<Date | null>(
+    null
+  );
+  const [selectedDateCertif2, setSelectedDateCertif2] = useState<Date | null>(
+    null
+  );
+  const [selectedDateCertif3, setSelectedDateCertif3] = useState<Date | null>(
+    null
+  );
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [selectedGender, setSelectedGender] = useState<string>("");
+  const [createEnseignant] = useAddEnseignantMutation();
+  const { data: etat_compte = [] } = useFetchEtatsEnseignantQuery();
+  const { data: poste = [] } = useFetchPostesEnseignantQuery();
+  const { data: grade = [] } = useFetchGradesEnseignantQuery();
+  const { data: specilaite = [] } = useFetchSpecialitesEnseignantQuery();
+  const { data: departements = [] } = useFetchDepartementsQuery();
 
+  const [formData, setFormData] = useState<Enseignant>({
+    _id: "",
+    nom_fr: "",
+    nom_ar: "",
+    prenom_fr: "",
+    prenom_ar: "",
+    lieu_naissance_fr: "",
+    lieu_naissance_ar: "",
+    date_naissance: "",
+    nationalite: "",
+    etat_civil: "",
+    sexe: "",
+    etat_compte: {
+      _id: "",
+      value_etat_enseignant: "",
+      etat_ar: "",
+      etat_fr: "",
+    },
+    poste: {
+      _id: "",
+      value_poste_enseignant: "",
+      poste_ar: "",
+      poste_fr: "",
+    },
+    grade: {
+      _id: "",
+      value_grade_enseignant: "",
+      grade_ar: "",
+      grade_fr: "",
+    },
+    specilaite: {
+      _id: "",
+      value_specialite_enseignant: "",
+      specialite_ar: "",
+      specialite_fr: "",
+    },
+    departements: {
+      _id: "",
+      description: "",
+      volume_horaire: "",
+      nom_chef_dep: "",
+      name_ar: "",
+      name_fr: "",
+      SignatureFileExtension: "",
+      SignatureFileBase64String: "",
+      signature: "",
+    },
+    date_affectation: "",
+    compte_courant: "",
+    identifinat_unique: "",
+    num_cin: "",
+    date_delivrance: "",
+    state: "",
+    dependence: "",
+    code_postale: "",
+    adress_ar: "",
+    adress_fr: "",
+    email: "",
+    num_phone1: "",
+    num_phone2: "",
+    nom_conjoint: "",
+    job_conjoint: "",
+    nombre_fils: "",
+
+    entreprise1: "",
+    annee_certif1: "",
+    certif1: "",
+
+    entreprise2: "",
+    annee_certif2: "",
+    certif2: "",
+
+    entreprise3: "",
+    annee_certif3: "",
+    certif3: "",
+    photo_profil: "",
+    PhotoProfilFileExtension: "",
+    PhotoProfilFileBase64String: "",
+  });
+
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [e.target.id]: e.target.value,
+    }));
+  };
+
+  const handleChange = (e: any) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  // change state
   const handleWilayaChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedWilaya(event.target.value as Wilaya);
+    const wilaya = event.target.value as Wilaya;
+    setSelectedWilaya(wilaya);
+    setFormData({
+      ...formData,
+      state: wilaya,
+      dependence: "",
+    });
     setSelectedDelegation("");
   };
-
+  // change dependance
   const handleDelegationChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    setSelectedDelegation(event.target.value);
-  };
-  // change gender
-
-  // This function is triggered when the select changes
-  const selectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value;
-    setSelectedOption(value);
+    const delegation = event.target.value;
+    setSelectedDelegation(delegation);
+    setFormData({
+      ...formData,
+      dependence: delegation,
+    });
   };
 
+  // change date naissance
+  const handleDateChangeNaissance = (selectedDates: Date[]) => {
+    const selectedDate = selectedDates[0];
+    setSelectedDate(selectedDate);
+    setFormData((prevState) => ({
+      ...prevState,
+      date_naissance: selectedDate ? selectedDate.toISOString() : "",
+    }));
+  };
+  // change date affectation
+  const handleDateChangeAffectation = (selectedDates: Date[]) => {
+    const selectedDateAffectation = selectedDates[0];
+    setSelectedDateAffectation(selectedDateAffectation);
+    setFormData((prevState) => ({
+      ...prevState,
+      date_affectation: selectedDateAffectation
+        ? selectedDateAffectation.toISOString()
+        : "",
+    }));
+  };
+
+  // change date delivrance
+  const handleDateChangeDelivrance = (selectedDates: Date[]) => {
+    const selectedDateDelivrance = selectedDates[0];
+    setSelectedDateDelivrance(selectedDateDelivrance);
+    setFormData((prevState) => ({
+      ...prevState,
+      date_delivrance: selectedDateDelivrance
+        ? selectedDateDelivrance.toISOString()
+        : "",
+    }));
+  };
+  // change date certif 1
+  const handleDateChangeCertif1 = (selectedDates: Date[]) => {
+    const selectedDateCertif1 = selectedDates[0];
+    setSelectedDateCertif1(selectedDateCertif1);
+    setFormData((prevState) => ({
+      ...prevState,
+      annee_certif1: selectedDateCertif1
+        ? selectedDateCertif1.toISOString()
+        : "",
+    }));
+  };
+  // change date certif 3
+  const handleDateChangeCertif3 = (selectedDates: Date[]) => {
+    const selectedDateCerif3 = selectedDates[0];
+    setSelectedDateCertif3(selectedDateCertif3);
+    setFormData((prevState) => ({
+      ...prevState,
+      annee_certif3: selectedDateCerif3 ? selectedDateCerif3.toISOString() : "",
+    }));
+  };
+  // change date certif 2
+  const handleDateChangeCertif2 = (selectedDates: Date[]) => {
+    const selectedDateCertif2 = selectedDates[0];
+    setSelectedDateCertif2(selectedDateCertif2);
+    setFormData((prevState) => ({
+      ...prevState,
+      annee_certif2: selectedDateCertif2
+        ? selectedDateCertif2.toISOString()
+        : "",
+    }));
+  };
   //change civil status
-  const [selectedStatus, setSelectedStatus] = useState<string>("");
 
   const selectChangeStatus = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
+    setFormData((prevState) => ({
+      ...prevState,
+      etat_civil: value,
+    }));
     setSelectedStatus(value);
   };
 
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
-  //change station
-  const [selectedStation, setSelectedStation] = useState<string>("");
-
-  const selectChangeStation = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  //change gender
+  const selectChangeGender = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
-    setSelectedStation(value);
+    setFormData((prevState) => ({
+      ...prevState,
+      sexe: value,
+    }));
+    setSelectedGender(value);
   };
-
-  //change group
-  const [selectedGroup, setSelectedGroup] = useState<string>("");
-
-  // const selectChangeGroup = (event: React.ChangeEvent<HTMLSelectElement>) => {
-  //   const value = event.target.value;
-  //   setSelectedGroup(value);
-  // };
-
-  const handleDateChange = (selectedDates: Date[]) => {
-    // Assuming you only need the first selected date
-    setSelectedDate(selectedDates[0]);
+  // changer nationalite
+  const handleCountrySelect = (country: any) => {
+    setSelectedCountry1(country);
+    setFormData((prevData) => ({
+      ...prevData,
+      nationalite: country.countryName,
+    }));
+  };
+  const onSubmitEnseignant = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      await createEnseignant(formData).unwrap();
+      notify();
+      navigate("/ListeEnseignants");
+    } catch (error: any) {
+      console.log(error);
+    }
   };
 
   const notify = () => {
@@ -478,27 +656,8 @@ const AjouterEnseignant = () => {
       timer: 2000,
     });
   };
-
-  function handleAcceptedFiles(files: any) {
-    files.map((file: any) =>
-      Object.assign(file, {
-        preview: URL.createObjectURL(file),
-        formattedSize: formatBytes(file.size),
-      })
-    );
-    setselectedFiles(files);
-  }
-
-  /* Formats the size */
-  function formatBytes(bytes: any, decimals = 2) {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-  }
+  const getOptionLabel = (option: GradeOptions) =>
+    `${option.grade_fr} / ${option.grade_ar}`;
 
   function convertToBase64(
     file: File
@@ -519,6 +678,26 @@ const AjouterEnseignant = () => {
     });
   }
 
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = (
+      document.getElementById("PhotoProfilFileBase64String") as HTMLFormElement
+    ).files[0];
+    if (file) {
+      const { base64Data, extension } = await convertToBase64(file);
+      console.log(base64Data);
+      console.log(extension);
+      const newFile = base64Data + "." + extension;
+      console.log(newFile);
+      setFormData({
+        ...formData,
+        photo_profil: newFile,
+        PhotoProfilFileBase64String: base64Data,
+        PhotoProfilFileExtension: extension,
+      });
+    }
+  };
   return (
     <React.Fragment>
       <div className="page-content">
@@ -545,7 +724,10 @@ const AjouterEnseignant = () => {
                   </Card.Header>
                   <Card.Body></Card.Body>
                   <div className="mb-3">
-                    <Form className="tablelist-form">
+                    <Form
+                      className="tablelist-form"
+                      onSubmit={onSubmitEnseignant}
+                    >
                       <input type="hidden" id="id-field" />
                       <Row>
                         <div className="text-center mb-3">
@@ -555,11 +737,11 @@ const AjouterEnseignant = () => {
                           >
                             <div className="position-absolute top-100 start-100 translate-middle">
                               <label
-                                htmlFor="photosBase64String"
+                                htmlFor="PhotoProfilFileBase64String"
                                 className="mb-0"
                                 data-bs-toggle="tooltip"
                                 data-bs-placement="right"
-                                title="Select Employee Picture"
+                                title="Choisir Photo Enseignant"
                               >
                                 <span className="avatar-xs d-inline-block">
                                   <span className="avatar-title bg-light border rounded-circle text-muted cursor-pointer">
@@ -570,16 +752,18 @@ const AjouterEnseignant = () => {
                               <input
                                 className="d-none"
                                 type="file"
-                                name="photosBase64String"
-                                id="photosBase64String"
+                                name="PhotoProfilFileBase64String"
+                                id="PhotoProfilFileBase64String"
                                 accept="image/*"
+                                onChange={(e) => handleFileUpload(e)}
                               />
                             </div>
                             <div className="avatar-xl">
                               <div className="avatar-title bg-light rounded-4">
                                 <img
-                                  // alt={formData.firstName}
-                                  id="photosBase64String"
+                                  src={`data:image/${formData.PhotoProfilFileExtension};base64,${formData.PhotoProfilFileBase64String}`}
+                                  alt={formData.prenom_fr}
+                                  id="PhotoProfilFileBase64String"
                                   className="avatar-xl h-auto rounded-4 object-fit-cover"
                                 />
                               </div>
@@ -590,26 +774,30 @@ const AjouterEnseignant = () => {
                         <Row>
                           <Col lg={3}>
                             <div className="mb-3">
-                              <Form.Label htmlFor="fullName">
+                              <Form.Label htmlFor="prenom_fr">
                                 Prénom (en français)
                               </Form.Label>
                               <Form.Control
                                 type="text"
-                                id="firstName"
+                                id="prenom_fr"
                                 placeholder=""
                                 // required
+                                onChange={onChange}
+                                value={formData.prenom_fr}
                               />
                             </div>
                           </Col>
                           <Col lg={3}>
                             <div className="mb-3">
-                              <Form.Label htmlFor="lastName">
+                              <Form.Label htmlFor="nom_fr">
                                 Nom (en français)
                               </Form.Label>
                               <Form.Control
                                 type="text"
-                                id="lastName"
+                                id="nom_fr"
                                 placeholder=""
+                                onChange={onChange}
+                                value={formData.nom_fr}
                               />
                             </div>
                           </Col>
@@ -620,16 +808,18 @@ const AjouterEnseignant = () => {
                               style={{ direction: "rtl", textAlign: "right" }}
                             >
                               <Form.Label
-                                htmlFor="lastName"
+                                htmlFor="nom_ar"
                                 style={{ direction: "rtl", textAlign: "right" }}
                               >
                                 اللقب (بالعربية)
                               </Form.Label>
                               <Form.Control
                                 type="text"
-                                id="lastName"
+                                id="nom_ar"
                                 placeholder=""
                                 dir="rtl"
+                                onChange={onChange}
+                                value={formData.nom_ar}
                               />
                             </div>
                           </Col>
@@ -639,17 +829,19 @@ const AjouterEnseignant = () => {
                               style={{ direction: "rtl", textAlign: "right" }}
                             >
                               <Form.Label
-                                htmlFor="fullName"
+                                htmlFor="prenom_ar"
                                 style={{ direction: "rtl", textAlign: "right" }}
                               >
                                 الإسم (بالعربية)
                               </Form.Label>
                               <Form.Control
                                 type="text"
-                                id="firstName"
+                                id="prenom_ar"
                                 placeholder=""
                                 dir="rtl"
                                 // required
+                                onChange={onChange}
+                                value={formData.prenom_ar}
                               />
                             </div>
                           </Col>
@@ -666,14 +858,14 @@ const AjouterEnseignant = () => {
                                   as="input"
                                   style={{
                                     backgroundImage: `url(${
-                                      seletedCountry1.flagImg &&
-                                      seletedCountry1.flagImg
+                                      selectedCountry1.flagImg &&
+                                      selectedCountry1.flagImg
                                     })`,
                                   }}
                                   className="form-control rounded-end flag-input form-select"
                                   placeholder="اختر دولة"
                                   readOnly
-                                  defaultValue={seletedCountry1.countryName}
+                                  defaultValue={selectedCountry1.countryName}
                                 ></Dropdown.Toggle>
                                 <Dropdown.Menu
                                   as="ul"
@@ -688,7 +880,7 @@ const AjouterEnseignant = () => {
                                         <Dropdown.Item
                                           as="li"
                                           onClick={() =>
-                                            setseletedCountry1(item)
+                                            handleCountrySelect(item)
                                           }
                                           key={key}
                                           className="dropdown-item d-flex"
@@ -726,17 +918,19 @@ const AjouterEnseignant = () => {
                               style={{ direction: "rtl", textAlign: "right" }}
                             >
                               <Form.Label
-                                htmlFor="fullName"
+                                htmlFor="lieu_naissance_fr"
                                 style={{ direction: "rtl", textAlign: "right" }}
                               >
                                 مكان الولادة (بالعربية)
                               </Form.Label>
                               <Form.Control
                                 type="text"
-                                id="firstName"
+                                id="lieu_naissance_fr"
                                 placeholder=""
                                 dir="rtl"
                                 // required
+                                onChange={onChange}
+                                value={formData.lieu_naissance_fr}
                               />
                             </div>
                           </Col>
@@ -746,17 +940,19 @@ const AjouterEnseignant = () => {
                               style={{ direction: "rtl", textAlign: "right" }}
                             >
                               <Form.Label
-                                htmlFor="fullName"
+                                htmlFor="lieu_naissance_ar"
                                 style={{ direction: "rtl", textAlign: "right" }}
                               >
                                 مكان الولادة (بالفرنسية)
                               </Form.Label>
                               <Form.Control
                                 type="text"
-                                id="firstName"
+                                id="lieu_naissance_ar"
                                 placeholder=""
                                 dir="rtl"
                                 // required
+                                onChange={onChange}
+                                value={formData.lieu_naissance_ar}
                               />
                             </div>
                           </Col>
@@ -766,63 +962,65 @@ const AjouterEnseignant = () => {
                               className="mb-3"
                               style={{ direction: "rtl", textAlign: "right" }}
                             >
-                              <Form.Label htmlFor="dateOfBirth">
+                              <Form.Label htmlFor="date_naissance">
                                 تاريخ الولادة
                               </Form.Label>
                               <Flatpickr
                                 value={selectedDate!}
-                                onChange={handleDateChange}
+                                onChange={handleDateChangeNaissance}
                                 className="form-control flatpickr-input"
                                 placeholder="اختر التاريخ"
                                 options={{
                                   dateFormat: "d M, Y",
                                 }}
-                                id="dateOfBirth"
+                                id="date_naissance"
                               />
                             </div>
                           </Col>
                         </Row>
-                        <Row style={{
-                                    direction: "rtl",
-                                    textAlign: "right",
-                                  }}>
+                        <Row
+                          style={{
+                            direction: "rtl",
+                            textAlign: "right",
+                          }}
+                        >
                           <Col lg={3}>
                             <div className="mb-3">
-                              <Form.Label htmlFor="civilStatus">
+                              <Form.Label htmlFor="etat_civil">
                                 الحالة المدنية
                               </Form.Label>
                               <select
                                 className="form-select text-muted"
-                                name="civilStatus"
-                                id="civilStatus"
+                                name="etat_civil"
+                                id="etat_civil"
                                 // required
                                 onChange={selectChangeStatus}
                               >
                                 <option value="">الحالة</option>
-                                <option value="Married">متزوج</option>
-                                <option value="Single">أعزب</option>
-                                <option value="Divorced">مطلق</option>
-                                <option value="Widowed">أرمل</option>
+                                <option value="متزوج">متزوج</option>
+                                <option value="أعزب">أعزب</option>
+                                <option value="مطلق">مطلق</option>
+                                <option value="أرمل">أرمل</option>
                               </select>
                             </div>
                           </Col>
 
                           <Col lg={3}>
                             <div className="mb-3">
-                              <label htmlFor="gender" className="form-label">
+                              <label htmlFor="sexe" className="form-label">
                                 الجنس
                               </label>
                               <select
                                 className="form-select text-muted"
-                                name="gender"
-                                id="gender"
+                                name="sexe"
+                                id="sexe"
                                 // required
                                 // value={formData.gender}
-                                onChange={selectChange}
+                                onChange={selectChangeGender}
                               >
                                 <option value="">الجنس</option>
-                                <option value="male">ذكر</option>
-                                <option value="female">أنثى</option>
+                                <option value="ذكر">ذكر</option>
+                                <option value="أنثى">أنثى</option>
                               </select>
                             </div>
                           </Col>
@@ -854,18 +1052,18 @@ const AjouterEnseignant = () => {
                                     textAlign: "right",
                                   }}
                                 >
-                                  <Form.Label htmlFor="dateOfBirth">
+                                  <Form.Label htmlFor="date_affectation">
                                     تاريخ الإنتداب
                                   </Form.Label>
                                   <Flatpickr
-                                    value={selectedDate!}
-                                    onChange={handleDateChange}
+                                    value={selectedDateAffectation!}
+                                    onChange={handleDateChangeAffectation}
                                     className="form-control flatpickr-input"
                                     placeholder="اختر التاريخ"
                                     options={{
                                       dateFormat: "d M, Y",
                                     }}
-                                    id="dateOfBirth"
+                                    id="date_affectation"
                                   />
                                 </div>
                               </Col>
@@ -878,25 +1076,25 @@ const AjouterEnseignant = () => {
                                     textAlign: "right",
                                   }}
                                 >
-                                  <Form.Label htmlFor="civilStatus">
+                                  <Form.Label htmlFor="grade">
                                     الرتبة أو الصنف للأستاذ
                                   </Form.Label>
                                   <select
                                     className="form-select text-muted"
-                                    name="civilStatus"
-                                    id="civilStatus"
+                                    name="grade"
+                                    id="grade"
                                     // required
-                                    onChange={selectChangeStatus}
+                                    value={formData?.grade?.grade_ar!}
+                                    onChange={handleChange}
                                   >
                                     <option value="">
-                                      Séléctionner Grade / اختر الرتبة
+                                      Sélectionner Classe
                                     </option>
-                                    <option value="Married">
-                                      أستاذ تعليم ثانوي / PES
-                                    </option>
-                                    <option value="Single">
-                                      مدرس عرضي / Vacataire
-                                    </option>
+                                    {grade.map((grade) => (
+                                      <option key={grade._id} value={grade._id}>
+                                        {grade.grade_ar}
+                                      </option>
+                                    ))}
                                   </select>
                                 </div>
                               </Col>
@@ -908,25 +1106,26 @@ const AjouterEnseignant = () => {
                                     textAlign: "right",
                                   }}
                                 >
-                                  <Form.Label htmlFor="civilStatus">
+                                  <Form.Label htmlFor="etat_compte">
                                     (ة)حالة الأستاذ
                                   </Form.Label>
                                   <select
                                     className="form-select text-muted"
-                                    name="civilStatus"
-                                    id="civilStatus"
+                                    name="etat_compte"
+                                    id="etat_compte"
                                     // required
-                                    onChange={selectChangeStatus}
+                                    value={formData?.etat_compte?.etat_fr}
+                                    onChange={handleChange}
                                   >
-                                    <option value="">
-                                      Séléctionner Etat / اختر الحالة
-                                    </option>
-                                    <option value="Married">
-                                      حساب غير مفعل / Désactiver
-                                    </option>
-                                    <option value="Single">
-                                      حساب مفعل / Activé
-                                    </option>
+                                    <option value="">Sélectionner Etat</option>
+                                    {etat_compte.map((etat_compte) => (
+                                      <option
+                                        key={etat_compte._id}
+                                        value={etat_compte._id}
+                                      >
+                                        {etat_compte.etat_fr}
+                                      </option>
+                                    ))}
                                   </select>
                                 </div>
                               </Col>
@@ -938,32 +1137,23 @@ const AjouterEnseignant = () => {
                                     textAlign: "right",
                                   }}
                                 >
-                                  <Form.Label htmlFor="civilStatus">
+                                  <Form.Label htmlFor="poste">
                                     Poste / الخطة الوظيفية
                                   </Form.Label>
                                   <select
                                     className="form-select text-muted"
-                                    name="civilStatus"
-                                    id="civilStatus"
+                                    name="poste"
+                                    id="poste"
                                     // required
-                                    onChange={selectChangeStatus}
+                                    value={formData?.poste?.poste_fr!}
+                                    onChange={handleChange}
                                   >
-                                    <option value="">
-                                      Séléctionner la Poste / اختر الوظيفة
-                                    </option>
-                                    <option value="Married">
-                                      مدير / Directeur
-                                    </option>
-                                    <option value="Single">عميد / Doyen</option>
-                                    <option value="Divorced">
-                                      رئيس قسم / Chef de Département
-                                    </option>
-                                    <option value="Widowed">
-                                      مدير الدراسات / Directeur des études
-                                    </option>
-                                    <option value="Widowed">
-                                      مدير التربصات / Directeur des stages
-                                    </option>
+                                    <option value="">Sélectionner Poste</option>
+                                    {poste.map((poste) => (
+                                      <option key={poste._id} value={poste._id}>
+                                        {poste.poste_fr}
+                                      </option>
+                                    ))}
                                   </select>
                                 </div>
                               </Col>
@@ -997,18 +1187,18 @@ const AjouterEnseignant = () => {
                                     textAlign: "right",
                                   }}
                                 >
-                                  <Form.Label htmlFor="dateOfBirth">
+                                  <Form.Label htmlFor="date_delivrance">
                                     تاريخ إصدار بطاقة التعريف الوطنية
                                   </Form.Label>
                                   <Flatpickr
-                                    value={selectedDate!}
-                                    onChange={handleDateChange}
+                                    value={selectedDateDelivrance!}
+                                    onChange={handleDateChangeDelivrance}
                                     className="form-control flatpickr-input"
                                     placeholder="اختر التاريخ"
                                     options={{
                                       dateFormat: "d M, Y",
                                     }}
-                                    id="dateOfBirth"
+                                    id="date_delivrance"
                                   />
                                 </div>
                               </Col>
@@ -1019,15 +1209,18 @@ const AjouterEnseignant = () => {
                                     textAlign: "right",
                                   }}
                                 >
-                                  <label htmlFor="login" className="form-label">
+                                  <label
+                                    htmlFor="num_cin"
+                                    className="form-label"
+                                  >
                                     رقم بطاقة التعريف الوطنية
                                   </label>
                                   <Form.Control
                                     type="text"
-                                    id="login"
+                                    id="num_cin"
                                     placeholder=""
-
-                                    // required
+                                    onChange={onChange}
+                                    value={formData.num_cin}
                                   />
                                 </div>
                               </Col>
@@ -1039,15 +1232,18 @@ const AjouterEnseignant = () => {
                                     textAlign: "right",
                                   }}
                                 >
-                                  <label htmlFor="login" className="form-label">
+                                  <label
+                                    htmlFor="identifinat_unique"
+                                    className="form-label"
+                                  >
                                     المعرف الوحيد
                                   </label>
                                   <Form.Control
                                     type="text"
-                                    id="login"
+                                    id="identifinat_unique"
                                     placeholder=""
-
-                                    // required
+                                    onChange={onChange}
+                                    value={formData.identifinat_unique}
                                   />
                                 </div>
                               </Col>
@@ -1058,13 +1254,18 @@ const AjouterEnseignant = () => {
                                     textAlign: "right",
                                   }}
                                 >
-                                  <label htmlFor="login" className="form-label">
+                                  <label
+                                    htmlFor="compte_courant"
+                                    className="form-label"
+                                  >
                                     الحساب الجاري للأستاذ
                                   </label>
                                   <Form.Control
                                     type="text"
-                                    id="login"
+                                    id="compte_courant"
                                     placeholder=""
+                                    onChange={onChange}
+                                    value={formData.compte_courant}
 
                                     // required
                                   />
@@ -1096,14 +1297,16 @@ const AjouterEnseignant = () => {
                             <Row>
                               <Col lg={3}>
                                 <div className="mb-3">
-                                  <Form.Label htmlFor="lastName">
+                                  <Form.Label htmlFor="adress_fr">
                                     Adresse (en français)
                                   </Form.Label>
                                   <Form.Control
                                     type="text"
-                                    id="lastName"
+                                    id="adress_fr"
                                     placeholder=""
                                     dir="rtl"
+                                    onChange={onChange}
+                                    value={formData.adress_fr}
                                   />
                                 </div>
                               </Col>
@@ -1116,7 +1319,7 @@ const AjouterEnseignant = () => {
                                   }}
                                 >
                                   <Form.Label
-                                    htmlFor="fullName"
+                                    htmlFor="adress_ar"
                                     style={{
                                       direction: "rtl",
                                       textAlign: "right",
@@ -1126,10 +1329,12 @@ const AjouterEnseignant = () => {
                                   </Form.Label>
                                   <Form.Control
                                     type="text"
-                                    id="firstName"
+                                    id="adress_ar"
                                     placeholder=""
                                     dir="rtl"
                                     // required
+                                    onChange={onChange}
+                                    value={formData.adress_ar}
                                   />
                                 </div>
                               </Col>
@@ -1142,7 +1347,7 @@ const AjouterEnseignant = () => {
                                   }}
                                 >
                                   <Form.Label
-                                    htmlFor="fullName"
+                                    htmlFor="code_postale"
                                     style={{
                                       direction: "rtl",
                                       textAlign: "right",
@@ -1152,10 +1357,12 @@ const AjouterEnseignant = () => {
                                   </Form.Label>
                                   <Form.Control
                                     type="text"
-                                    id="firstName"
+                                    id="code_postale"
                                     placeholder=""
                                     dir="rtl"
                                     // required
+                                    onChange={onChange}
+                                    value={formData.code_postale}
                                   />
                                 </div>
                               </Col>
@@ -1242,7 +1449,7 @@ const AjouterEnseignant = () => {
                                   }}
                                 >
                                   <Form.Label
-                                    htmlFor="fullName"
+                                    htmlFor="num_phone1"
                                     style={{
                                       direction: "rtl",
                                       textAlign: "right",
@@ -1252,10 +1459,12 @@ const AjouterEnseignant = () => {
                                   </Form.Label>
                                   <Form.Control
                                     type="text"
-                                    id="firstName"
+                                    id="num_phone1"
                                     placeholder=""
                                     dir="rtl"
                                     // required
+                                    onChange={onChange}
+                                    value={formData.num_phone1}
                                   />
                                 </div>
                               </Col>
@@ -1268,7 +1477,7 @@ const AjouterEnseignant = () => {
                                   }}
                                 >
                                   <Form.Label
-                                    htmlFor="lastName"
+                                    htmlFor="num_phone2"
                                     style={{
                                       direction: "rtl",
                                       textAlign: "right",
@@ -1278,9 +1487,11 @@ const AjouterEnseignant = () => {
                                   </Form.Label>
                                   <Form.Control
                                     type="text"
-                                    id="lastName"
+                                    id="num_phone2"
                                     placeholder=""
                                     dir="rtl"
+                                    onChange={onChange}
+                                    value={formData.num_phone2}
                                   />
                                 </div>
                               </Col>
@@ -1306,6 +1517,8 @@ const AjouterEnseignant = () => {
                                     id="email"
                                     placeholder=""
                                     // required
+                                    onChange={onChange}
+                                    value={formData.email}
                                   />
                                 </div>
                               </Col>
@@ -1342,7 +1555,7 @@ const AjouterEnseignant = () => {
                                   }}
                                 >
                                   <Form.Label
-                                    htmlFor="fullName"
+                                    htmlFor="nombre_fils"
                                     style={{
                                       direction: "rtl",
                                       textAlign: "right",
@@ -1352,10 +1565,12 @@ const AjouterEnseignant = () => {
                                   </Form.Label>
                                   <Form.Control
                                     type="text"
-                                    id="firstName"
+                                    id="nombre_fils"
                                     placeholder=""
                                     dir="rtl"
                                     // required
+                                    onChange={onChange}
+                                    value={formData.nombre_fils}
                                   />
                                 </div>
                               </Col>
@@ -1369,7 +1584,7 @@ const AjouterEnseignant = () => {
                                   }}
                                 >
                                   <Form.Label
-                                    htmlFor="lastName"
+                                    htmlFor="job_conjoint"
                                     style={{
                                       direction: "rtl",
                                       textAlign: "right",
@@ -1379,9 +1594,11 @@ const AjouterEnseignant = () => {
                                   </Form.Label>
                                   <Form.Control
                                     type="text"
-                                    id="lastName"
+                                    id="job_conjoint"
                                     placeholder=""
                                     dir="rtl"
+                                    onChange={onChange}
+                                    value={formData.job_conjoint}
                                   />
                                 </div>
                               </Col>
@@ -1394,7 +1611,7 @@ const AjouterEnseignant = () => {
                                   }}
                                 >
                                   <Form.Label
-                                    htmlFor="lastName"
+                                    htmlFor="nom_conjoint"
                                     style={{
                                       direction: "rtl",
                                       textAlign: "right",
@@ -1404,9 +1621,11 @@ const AjouterEnseignant = () => {
                                   </Form.Label>
                                   <Form.Control
                                     type="text"
-                                    id="lastName"
+                                    id="nom_conjoint"
                                     placeholder=""
                                     dir="rtl"
+                                    onChange={onChange}
+                                    value={formData.nom_conjoint}
                                   />
                                 </div>
                               </Col>
@@ -1442,39 +1661,30 @@ const AjouterEnseignant = () => {
                                   }}
                                 >
                                   <label
-                                    htmlFor="الدورة"
+                                    htmlFor="departements"
                                     className="form-label"
                                   >
                                     (Département) القسم
                                   </label>
                                   <select
                                     className="form-select text-muted"
-                                    name="الدورة"
-                                    id="الدورة"
+                                    name="departements"
+                                    id="departements"
                                     // required
-                                    // value={formData.gender}
-                                    onChange={selectChange}
+                                    value={formData?.departements?.name_fr!}
+                                    onChange={handleChange}
                                   >
                                     <option value="">
-                                      Choisir Département / إختر القسم
+                                      Sélectionner Département
                                     </option>
-                                    <option value="Principale">
-                                      Tous les départements / جميع الأقسام
-                                    </option>
-                                    <option value="Controle">
-                                      Département Maintenance des Engins Lourds
-                                      / قسم صيانة المعدات الثقيلة
-                                    </option>
-                                    <option value="Controle">
-                                      Département informatique et
-                                      télécommunications / قسم الحاسوب
-                                      والاتصالات
-                                    </option>
-                                    <option value="Controle">
-                                      Département Automatique et systèmes
-                                      industriels / قسم الأتمتة والأنظمة
-                                      الصناعية
-                                    </option>
+                                    {departements.map((departements) => (
+                                      <option
+                                        key={departements._id}
+                                        value={departements._id}
+                                      >
+                                        {departements.name_fr}
+                                      </option>
+                                    ))}
                                   </select>
                                 </div>
                               </Col>
@@ -1487,36 +1697,30 @@ const AjouterEnseignant = () => {
                                   }}
                                 >
                                   <label
-                                    htmlFor="الشعبة"
+                                    htmlFor="specilaite"
                                     className="form-label"
                                   >
                                     إختصاص الأستاذ
                                   </label>
                                   <select
                                     className="form-select text-muted"
-                                    name="الشعبة"
-                                    id="الشعبة"
+                                    name="specilaite"
+                                    id="specilaite"
                                     // required
-                                    // value={formData.gender}
-                                    onChange={selectChange}
+                                    value={formData?.specilaite.specialite_fr!}
+                                    onChange={handleChange}
                                   >
                                     <option value="">
-                                      {" "}
                                       Choisir Spécialité / إختر الإختصاص
                                     </option>
-                                    <option value="آداب ">
-                                      هندسة ميكانيكية
-                                    </option>
-                                    <option value="رياضيات">
-                                      هندسة صناعية
-                                    </option>
-                                    <option value="علوم تجريبية">
-                                      أنظمة كهربائية
-                                    </option>
-                                    <option value="اقتصاد وتصرف">
-                                      الآلية و الإعلامية الصناعية
-                                    </option>
-                                    <option value="أخرى">Autres /أخرى</option>
+                                    {specilaite.map((specilaite) => (
+                                      <option
+                                        key={specilaite._id}
+                                        value={specilaite._id}
+                                      >
+                                        {specilaite.specialite_fr}
+                                      </option>
+                                    ))}
                                   </select>
                                 </div>
                               </Col>
@@ -1546,7 +1750,7 @@ const AjouterEnseignant = () => {
                                     }}
                                   >
                                     <Form.Label
-                                      htmlFor="lastName"
+                                      htmlFor="certif1"
                                       style={{
                                         direction: "rtl",
                                         textAlign: "right",
@@ -1556,9 +1760,11 @@ const AjouterEnseignant = () => {
                                     </Form.Label>
                                     <Form.Control
                                       type="text"
-                                      id="lastName"
+                                      id="certif1"
                                       placeholder=""
                                       dir="rtl"
+                                      onChange={onChange}
+                                      value={formData.certif1}
                                     />
                                   </div>
                                 </Col>
@@ -1570,18 +1776,18 @@ const AjouterEnseignant = () => {
                                       textAlign: "right",
                                     }}
                                   >
-                                    <Form.Label htmlFor="dateOfBirth">
+                                    <Form.Label htmlFor="annee_certif1">
                                       سنة الشهادة
                                     </Form.Label>
                                     <Flatpickr
-                                      value={selectedDate!}
-                                      onChange={handleDateChange}
+                                      value={selectedDateCertif1!}
+                                      onChange={handleDateChangeCertif1}
                                       className="form-control flatpickr-input"
                                       placeholder="اختر التاريخ"
                                       options={{
                                         dateFormat: "d M, Y",
                                       }}
-                                      id="dateOfBirth"
+                                      id="annee_certif1"
                                     />
                                   </div>
                                 </Col>
@@ -1594,7 +1800,7 @@ const AjouterEnseignant = () => {
                                     }}
                                   >
                                     <Form.Label
-                                      htmlFor="lastName"
+                                      htmlFor="entreprise1"
                                       style={{
                                         direction: "rtl",
                                         textAlign: "right",
@@ -1604,9 +1810,11 @@ const AjouterEnseignant = () => {
                                     </Form.Label>
                                     <Form.Control
                                       type="text"
-                                      id="lastName"
+                                      id="entreprise1"
                                       placeholder=""
                                       dir="rtl"
+                                      onChange={onChange}
+                                      value={formData.entreprise1}
                                     />
                                   </div>
                                 </Col>
@@ -1636,7 +1844,7 @@ const AjouterEnseignant = () => {
                                     }}
                                   >
                                     <Form.Label
-                                      htmlFor="lastName"
+                                      htmlFor="certif2"
                                       style={{
                                         direction: "rtl",
                                         textAlign: "right",
@@ -1646,9 +1854,11 @@ const AjouterEnseignant = () => {
                                     </Form.Label>
                                     <Form.Control
                                       type="text"
-                                      id="lastName"
+                                      id="certif2"
                                       placeholder=""
                                       dir="rtl"
+                                      onChange={onChange}
+                                      value={formData.certif2}
                                     />
                                   </div>
                                 </Col>
@@ -1660,18 +1870,18 @@ const AjouterEnseignant = () => {
                                       textAlign: "right",
                                     }}
                                   >
-                                    <Form.Label htmlFor="dateOfBirth">
+                                    <Form.Label htmlFor="annee_certif2">
                                       سنة الشهادة (2)
                                     </Form.Label>
                                     <Flatpickr
-                                      value={selectedDate!}
-                                      onChange={handleDateChange}
+                                      value={selectedDateCertif2!}
+                                      onChange={handleDateChangeCertif2}
                                       className="form-control flatpickr-input"
                                       placeholder="اختر التاريخ"
                                       options={{
                                         dateFormat: "d M, Y",
                                       }}
-                                      id="dateOfBirth"
+                                      id="annee_certif2"
                                     />
                                   </div>
                                 </Col>
@@ -1684,7 +1894,7 @@ const AjouterEnseignant = () => {
                                     }}
                                   >
                                     <Form.Label
-                                      htmlFor="lastName"
+                                      htmlFor="entreprise2"
                                       style={{
                                         direction: "rtl",
                                         textAlign: "right",
@@ -1694,9 +1904,11 @@ const AjouterEnseignant = () => {
                                     </Form.Label>
                                     <Form.Control
                                       type="text"
-                                      id="lastName"
+                                      id="entreprise2"
                                       placeholder=""
                                       dir="rtl"
+                                      onChange={onChange}
+                                      value={formData.entreprise2}
                                     />
                                   </div>
                                 </Col>
@@ -1727,7 +1939,7 @@ const AjouterEnseignant = () => {
                                     }}
                                   >
                                     <Form.Label
-                                      htmlFor="lastName"
+                                      htmlFor="certif3"
                                       style={{
                                         direction: "rtl",
                                         textAlign: "right",
@@ -1737,9 +1949,11 @@ const AjouterEnseignant = () => {
                                     </Form.Label>
                                     <Form.Control
                                       type="text"
-                                      id="lastName"
+                                      id="certif3"
                                       placeholder=""
                                       dir="rtl"
+                                      onChange={onChange}
+                                      value={formData.certif3}
                                     />
                                   </div>
                                 </Col>
@@ -1751,18 +1965,18 @@ const AjouterEnseignant = () => {
                                       textAlign: "right",
                                     }}
                                   >
-                                    <Form.Label htmlFor="dateOfBirth">
+                                    <Form.Label htmlFor="annee_certif3">
                                       سنة الشهادة (3)
                                     </Form.Label>
                                     <Flatpickr
-                                      value={selectedDate!}
-                                      onChange={handleDateChange}
+                                      value={selectedDateCertif3!}
+                                      onChange={handleDateChangeCertif3}
                                       className="form-control flatpickr-input"
                                       placeholder="اختر التاريخ"
                                       options={{
                                         dateFormat: "d M, Y",
                                       }}
-                                      id="dateOfBirth"
+                                      id="annee_certif3"
                                     />
                                   </div>
                                 </Col>
@@ -1775,7 +1989,7 @@ const AjouterEnseignant = () => {
                                     }}
                                   >
                                     <Form.Label
-                                      htmlFor="lastName"
+                                      htmlFor="entreprise3"
                                       style={{
                                         direction: "rtl",
                                         textAlign: "right",
@@ -1785,9 +1999,11 @@ const AjouterEnseignant = () => {
                                     </Form.Label>
                                     <Form.Control
                                       type="text"
-                                      id="lastName"
+                                      id="entreprise3"
                                       placeholder=""
                                       dir="rtl"
+                                      onChange={onChange}
+                                      value={formData.entreprise3}
                                     />
                                   </div>
                                 </Col>

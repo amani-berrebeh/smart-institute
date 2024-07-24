@@ -7,9 +7,60 @@ import { demandeEtudiant } from "Common/data/demandeEtudiant";
 import Flatpickr from "react-flatpickr";
 import dummyImg from "../../assets/images/users/user-dummy-img.jpg"
 import { Link } from 'react-router-dom';
-
+import { actionAuthorization } from 'utils/pathVerification';
+import { RootState } from 'app/store';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from 'features/account/authSlice'; 
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+import {
+    useFetchReclamationsPersonnelQuery, 
+    useAddReclamationPersonnelMutation,
+    useUpdateReclamationPersonnelMutation,
+    useDeleteReclamationPersonnelMutation,
+  } from 'features/reclamationPersonnel/reclamationPersonnelSlice';
 const ListeReclamationPersonnel = () => {
     document.title = "Réclamation Personnel | Smart University";
+    const user = useSelector((state: RootState) => selectCurrentUser(state));
+    const MySwal = withReactContent(Swal);
+       // Fetch reclamations query hook
+  const { data: reclamations, error, isLoading } = useFetchReclamationsPersonnelQuery();
+
+  // Mutation hooks
+  const [addReclamation] = useAddReclamationPersonnelMutation();
+  const [updateReclamation] = useUpdateReclamationPersonnelMutation();
+  const [deleteReclamation] = useDeleteReclamationPersonnelMutation();
+
+
+  const handleDeleteReclamation = async (id: string) => {
+    try {
+        await MySwal.fire({
+            title: 'Êtes-vous sûr ?',
+            text: "Vous ne pourrez pas annuler cela !",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                await deleteReclamation(id).unwrap();
+                MySwal.fire(
+                    'Deleted!',
+                    'The reclamation has been deleted.',
+                    'success'
+                );
+            }
+        });
+    } catch (error) {
+        console.error('Failed to delete reclamation:', error);
+        MySwal.fire(
+            'Error!',
+            'There was an error deleting the reclamation.',
+            'error'
+        );
+    }
+};
     const [modal_AddUserModals, setmodal_AddUserModals] = useState<boolean>(false);
     const [isMultiDeleteButton, setIsMultiDeleteButton] = useState<boolean>(false)
     function tog_AddUserModals() {
@@ -60,27 +111,27 @@ const ListeReclamationPersonnel = () => {
             //     filterable: true,
             // },
             {
-                Header: "Réclamation",
-                accessor: "soustype",
+                Header: "Titre",
+                accessor: "title",
                 disableFilters: true,
                 filterable: true,
             },
            
             {
                 Header: "Personnel",
-                accessor: "etudiant",
+                accessor: (row: any) => row.personnelId?.nom_fr || "",
                 disableFilters: true,
                 filterable: true,
             },
             {
                 Header: "CIN",
-                accessor: "CIN",
+                accessor: (row: any) => row.personnelId?.num_CIN || "",
                 disableFilters: true,
                 filterable: true,
             },
             {
-                Header: "Classe",
-                accessor: "classe",
+                Header: "email",
+                accessor: (row: any) => row.personnelId?.email || "",
                 disableFilters: true,
                 filterable: true,
             },
@@ -152,9 +203,11 @@ const ListeReclamationPersonnel = () => {
                 accessor: (cellProps: any) => {
                     return (
                         <ul className="hstack gap-2 list-unstyled mb-0">
+              {actionAuthorization("/reclamation-personnel/single-reclamation-personnel",user?.permissions!)?
+                
               <li>
                 <Link
-                  to="/SingleReclamationPersonnel"
+                  to="/reclamation-personnel/single-reclamation-personnel"
                   state={cellProps}
                   className="badge bg-info-subtle text-info view-item-btn"
                   data-bs-toggle="offcanvas"
@@ -174,10 +227,12 @@ const ListeReclamationPersonnel = () => {
                     }
                   ></i>
                 </Link>
-              </li>
+              </li> :<></>}
+              {actionAuthorization("/reclamation-personnel/edit-reclamation-personnel",user?.permissions!)?
+
               <li>
                 <Link
-                  to="/EditReclamationPersonnel"
+                  to="/reclamation-personnel/edit-reclamation-personnel"
                   className="badge bg-success-subtle text-success edit-item-btn"
                   state={cellProps}
                 >
@@ -196,12 +251,15 @@ const ListeReclamationPersonnel = () => {
                     }
                   ></i>
                 </Link>
-              </li>
+              </li> :<></>}
+              {actionAuthorization("/reclamation-personnel/supprimer-reclamation-personnel",user?.permissions!)?
+
               <li>
                 <Link
                   to="#"
                   className="badge bg-danger-subtle text-danger remove-item-btn"
-                 
+                  onClick={() => handleDeleteReclamation(cellProps._id)}
+
                 >
                   <i
                     className="ph ph-trash"
@@ -218,7 +276,7 @@ const ListeReclamationPersonnel = () => {
                     }
                   ></i>
                 </Link>
-              </li>
+              </li> :<></>}
             </ul>
                     )
                 },
@@ -273,7 +331,7 @@ const ListeReclamationPersonnel = () => {
                                     
                                         <TableContainer
                                             columns={(columns || [])}
-                                            data={(demandeEtudiant || [])}
+                                            data={(reclamations || [])}
                                             // isGlobalFilter={false}
                                             iscustomPageSize={false}
                                             isBordered={false}

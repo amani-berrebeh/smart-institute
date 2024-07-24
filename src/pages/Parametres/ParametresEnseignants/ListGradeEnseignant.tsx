@@ -4,7 +4,6 @@ import {
   Card,
   Col,
   Container,
-  Dropdown,
   Form,
   Modal,
   Row,
@@ -13,9 +12,16 @@ import Breadcrumb from "Common/BreadCrumb";
 import { Link, useNavigate } from "react-router-dom";
 import TableContainer from "Common/TableContainer";
 import { sellerList } from "Common/data";
+import Swal from "sweetalert2";
+import { GradeEnseignant, useDeleteGradeEnseignantMutation, useFetchGradesEnseignantQuery } from "features/gradeEnseignant/gradeEnseignant";
+import { actionAuthorization } from 'utils/pathVerification';
+import { RootState } from 'app/store';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from 'features/account/authSlice'; 
+const ListGradeEnseignants = () => {
+  document.title = "Liste grades des enseignants | Smart University";
+  const user = useSelector((state: RootState) => selectCurrentUser(state));
 
-const ListGradePersonnels = () => {
-  document.title = "Liste grades des personnels | Smart University";
 
   const navigate = useNavigate();
 
@@ -24,6 +30,51 @@ const ListGradePersonnels = () => {
   function tog_AddParametreModals() {
     setmodal_AddParametreModals(!modal_AddParametreModals);
   }
+
+  function tog_AddGradeEnseignant() {
+    navigate("/parametre-enseignant/grade/ajouter-grade-enseignant");
+  }
+  const { data = [] } = useFetchGradesEnseignantQuery();
+  const [deleteGradeEnseignant] = useDeleteGradeEnseignantMutation();
+
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger",
+    },
+    buttonsStyling: false,
+  });
+  const AlertDelete = async (_id: string) => {
+  
+    swalWithBootstrapButtons
+    .fire({
+      title: "Êtes-vous sûr?",
+      text: "Vous ne pourrez pas revenir en arrière!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Oui, supprimez-le!",
+      cancelButtonText: "Non, annuler!",
+      reverseButtons: true,
+    })
+    .then((result) => {
+      if (result.isConfirmed) {
+        deleteGradeEnseignant(_id);
+        swalWithBootstrapButtons.fire(
+          "Supprimé!",
+          "Grade enseignant a été supprimé.",
+          "success"
+        );
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        swalWithBootstrapButtons.fire(
+          "Annulé",
+          "Grade enseignant est en sécurité :)",
+          "error"
+        );
+      }
+    });
+  }
+
+
   const columns = useMemo(
     () => [
       {
@@ -55,14 +106,21 @@ const ListGradePersonnels = () => {
       },
 
       {
-        Header: "Grade (FR)",
-        accessor: "balance",
+        Header: "Valeur",
+        accessor: "value_grade_enseignant",
+        disableFilters: true,
+        filterable: true,
+      },
+
+      {
+        Header: "Grade Enseignant",
+        accessor: "grade_fr",
         disableFilters: true,
         filterable: true,
       },
       {
-        Header: "Grade (AR)",
-        accessor: "email",
+        Header: "رتبة الأستاذ",
+        accessor: "grade_ar",
         disableFilters: true,
         filterable: true,
       },
@@ -70,33 +128,15 @@ const ListGradePersonnels = () => {
         Header: "Action",
         disableFilters: true,
         filterable: true,
-        accessor: (cellProps: any) => {
+        accessor: (gradeEnseignant: GradeEnseignant) => {
           return (
             <ul className="hstack gap-2 list-unstyled mb-0">
+           {actionAuthorization("/parametre-enseignant/grade/edit-grade-enseignant",user?.permissions!)?
+
               <li>
                 <Link
-                  to="#"
-                  className="badge bg-info-subtle text-info view-item-btn"
-                >
-                  <i
-                    className="ph ph-eye"
-                    style={{
-                      transition: "transform 0.3s ease-in-out",
-                      cursor: "pointer",
-                      fontSize: "1.5em",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.transform = "scale(1.4)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.transform = "scale(1)")
-                    }
-                  ></i>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="#"
+                  to="/parametre-enseignant/grade/edit-grade-enseignant"
+                  state={gradeEnseignant}
                   className="badge bg-primary-subtle text-primary edit-item-btn"
                 >
                   <i
@@ -114,7 +154,9 @@ const ListGradePersonnels = () => {
                     }
                   ></i>
                 </Link>
-              </li>
+              </li> :<></> }
+              {actionAuthorization("/parametre-enseignant/grade/supprimer-grade-enseignant",user?.permissions!)?
+
               <li>
                 <Link
                   to="#"
@@ -133,9 +175,10 @@ const ListGradePersonnels = () => {
                     onMouseLeave={(e) =>
                       (e.currentTarget.style.transform = "scale(1)")
                     }
+                    onClick={() => AlertDelete(gradeEnseignant?._id!)}
                   ></i>
                 </Link>
-              </li>
+              </li> :<></>}
             </ul>
           );
         },
@@ -143,15 +186,16 @@ const ListGradePersonnels = () => {
     ],
     []
   );
+
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
           <Breadcrumb
-            title="Paramètres des personnels"
-            pageTitle="Liste grades des personnels"
+            title="Paramètres des enseignants"
+            pageTitle="Liste grades des enseignants"
           />
-
+          
           <Row id="sellersList">
             <Col lg={12}>
               <Card>
@@ -179,33 +223,36 @@ const ListGradePersonnels = () => {
                         <option value="Inactive">Desactivé</option>
                       </select>
                     </Col>
-
+                  
                     <Col className="col-lg-auto ms-auto">
                       <div className="hstack gap-2">
+                      {actionAuthorization("/parametre-enseignant/grade/ajouter-grade-enseignant",user?.permissions!)?
+
                         <Button
                           variant="primary"
                           className="add-btn"
-                          onClick={() => tog_AddParametreModals()}
+                          onClick={() => tog_AddGradeEnseignant()}
                         >
-                          Ajouter Grade
-                        </Button>
+                          Ajouter grade enseignant
+                        </Button> :<></>}
+                       
                       </div>
                     </Col>
                   </Row>
                 </Card.Body>
               </Card>
 
-              <Modal
+              {/* <Modal
                 className="fade modal-fullscreen"
                 show={modal_AddParametreModals}
                 onHide={() => {
-                  tog_AddParametreModals();
+                  tog_AddGradeEnseignant();
                 }}
                 centered
               >
                 <Modal.Header className="px-4 pt-4" closeButton>
                   <h5 className="modal-title" id="exampleModalLabel">
-                    Ajouter Grade Personnel
+                    Ajouter Grade Enseignant
                   </h5>
                 </Modal.Header>
                 <Form className="tablelist-form">
@@ -217,7 +264,20 @@ const ListGradePersonnels = () => {
                     <input type="hidden" id="id-field" />
 
                     <div className="mb-3">
-                      <Form.Label htmlFor="item-stock-field">Grade</Form.Label>
+                      <Form.Label htmlFor="seller-name-field">
+                        Valeur
+                      </Form.Label>
+                      <Form.Control
+                        type="text"
+                        id="seller-name-field"
+                        placeholder=""
+                        required
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <Form.Label htmlFor="item-stock-field">
+                        Grade Enseignant
+                      </Form.Label>
                       <Form.Control
                         type="text"
                         id="item-stock-field"
@@ -258,7 +318,7 @@ const ListGradePersonnels = () => {
                     </div>
                   </div>
                 </Form>
-              </Modal>
+              </Modal> */}
 
               <Card>
                 <Card.Body className="p-0">
@@ -269,7 +329,7 @@ const ListGradePersonnels = () => {
                   >
                     <TableContainer
                       columns={columns || []}
-                      data={sellerList || []}
+                      data={data || []}
                       // isGlobalFilter={false}
                       iscustomPageSize={false}
                       isBordered={false}
@@ -305,4 +365,4 @@ const ListGradePersonnels = () => {
   );
 };
 
-export default ListGradePersonnels;
+export default ListGradeEnseignants;

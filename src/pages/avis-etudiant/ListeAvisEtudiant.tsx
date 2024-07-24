@@ -7,9 +7,16 @@ import { userList } from "Common/data";
 import Flatpickr from "react-flatpickr";
 import dummyImg from "../../assets/images/users/user-dummy-img.jpg"
 import { Link } from 'react-router-dom';
+import { RootState } from 'app/store';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from 'features/account/authSlice'; 
+import { actionAuthorization } from 'utils/pathVerification';
 
 const ListeAvisEtudiant = () => {
     document.title = "Avis Etudiant | Smart Institute";
+
+    const user = useSelector((state: RootState) => selectCurrentUser(state));
+
     const [modal_AddUserModals, setmodal_AddUserModals] = useState<boolean>(false);
     const [isMultiDeleteButton, setIsMultiDeleteButton] = useState<boolean>(false)
     function tog_AddUserModals() {
@@ -114,6 +121,7 @@ const ListeAvisEtudiant = () => {
                 accessor: (cellProps: any) => {
                     return (
                         <ul className="hstack gap-2 list-unstyled mb-0">
+              {actionAuthorization("/avis-etudiant/single-avis-etudiant",user?.permissions!)?
               <li>
                 <Link
                   to="/avis-etudiant/single-avis-etudiant"
@@ -136,8 +144,10 @@ const ListeAvisEtudiant = () => {
                     }
                   ></i>
                 </Link>
-              </li>
-              <li>
+              </li> : <></>
+                } 
+                  {actionAuthorization("/avis-etudiant/edit-avis-etudiant",user?.permissions!)?
+             <li>
                 <Link
                   to="#GroupDetails"
                   className="badge bg-success-subtle text-success edit-item-btn"
@@ -158,6 +168,8 @@ const ListeAvisEtudiant = () => {
                   ></i>
                 </Link>
               </li>
+              :<></> }
+              {actionAuthorization("/avis-etudiant/supprimer-avis-etudiant",user?.permissions!)?
               <li>
                 <Link
                   to="#"
@@ -179,7 +191,7 @@ const ListeAvisEtudiant = () => {
                     }
                   ></i>
                 </Link>
-              </li>
+              </li> :<></> }
             </ul>
                     )
                 },

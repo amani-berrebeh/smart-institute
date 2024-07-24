@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Button,
   Card,
@@ -9,9 +9,10 @@ import {
   Row,
   Tab,
 } from "react-bootstrap";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Carousel, Image } from "react-bootstrap";
 import Breadcrumb from "Common/BreadCrumb";
+import "./style.css"
 
 // Import images
 import img1 from "assets/images/small/img-1.jpg";
@@ -21,30 +22,36 @@ import img4 from "assets/images/small/img-4.jpg";
 import img5 from "assets/images/small/img-5.jpg";
 import img6 from "assets/images/small/img-6.jpg";
 import avatar1 from "assets/images/users/avatar-1.jpg";
+import student from "assets/images/etudiant.png";
+import file from "assets/images/demande.png";
+
 
 const EditReclamationEtudiant = () => {
-  document.title = "Modifier demande Etudiant | Smart Institute";
-  const state = useLocation();
-  console.log("state", state);
+  document.title = "Modifier Réclamation Etudiant | Smart University";
+  const location = useLocation();
+  console.log("state", location);
+  const studentId= location.state?.studentId?._id!
+  const navigate = useNavigate();
+  const Navigate = (studentId: any) => {
+    navigate("/reclamation-etudiant/single-reclamation-etudiant");
+  };
 
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
           <Breadcrumb
-            title="demande Etudiant"
-            pageTitle="Modifier La Demande"
+            title="Réclamation Etudiant"
+            pageTitle="Modifier la réclamation"
           />
           <Row>
             <Col lg={12}>
               <Card>
-                {/* <Card.Header>
-                                <h5 className="card-title mb-0">Basic Example</h5>
-                            </Card.Header> */}
+              
                 <Card.Body>
                   <Card className="border-0 shadow-none mb-0">
                     <Card.Body
-                      className="rounded profile-basic"
+                      className="rounded profile-basic mb-n5"
                       style={{
                         backgroundImage: `url(${img4})`,
                         backgroundSize: "cover",
@@ -55,110 +62,164 @@ const EditReclamationEtudiant = () => {
                         <Image
                           src={avatar1}
                           alt=""
-                          className="avatar-lg rounded-circle p-1 bg-body mt-n3"
+                          className="avatar-xxl rounded-circle p-1 bg-body mt-n5"
                         />
                       </div>
                     </Card.Body>
-                    <Card.Body className="pt-0">
-                      <Row className="justify-content-between gy-4">
-                        <Col xl={3} md={5}>
-                          <h5 className="fs-20">{state.state?.etudiant!}</h5>
-                          <div className="mb-3 text-muted">
-                            <i className="bi bi-geo-alt"></i>{" "}
-                            {state.state?.classe!}
+                    <Row>
+            <Col xxl={6} lg={6}>
+              <Card className="categrory-widgets overflow-hidden">
+                <div className="card-header d-flex align-items-center">
+                  <h5 className="card-title flex-grow-1 mb-0">
+                    Détails de l'étudiant{" "}
+                    {/* <i className="bi bi-mortarboard-fill"></i> */}
+                  </h5>
+                  <div className="flex-shrink-0">
+                    <Button
+                      onClick={() => Navigate(studentId)}
+                      type="button"
+                      className="btn btn-info btn-label m-1"
+                    >
+                      <i className="bi bi-eye label-icon align-middle fs-16 me-2"></i>
+                      Voir étudiant{" "}
+                    </Button>
+                  </div>
+                </div>
+                <div className="card-body">
+                  <div className="text-center">
+                    <i className="bi bi-mortarboard fs-1 text-muted"></i>
+                  </div>
+                  <div className="table-responsive">
+                    <table className="table table-sm table-borderless align-middle description-table mb-0">
+                      <tbody>
+                        <tr>
+                          <td className="">Nom et prénom:</td>
+                          <td>
+                            <span className="mb-1 ">
+                              {location.state?.studentId?.nom_fr!} {location.state?.studentId?.prenom_fr!}
+                            </span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="">CIN:</td>
+                          <td>
+                            <span className="mb-1 ">{location.state?.studentId?.num_CIN!}</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="">Classe:</td>
+                          <td>
+                            <span className="mb-1 ">
+                            {location.state?.studentId?.groupe_classe!}
+                            </span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="">E-mail:</td>
+                          <td>
+                            <span className="mb-1 ">
+                            {location.state?.studentId?.email!}
+                            </span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="">Téléphone:</td>
+                          <td>
+                            <span className="mb-1 ">{location.state?.studentId?.num_phone!}</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <img
+                  src={student}
+                  alt=""
+                  className="img-fluid category-img object-fit-cover"
+                />
+              </Card>
+            </Col>
+            <Col xxl={6} lg={6}>
+                        <Card className="categrory-widgets overflow-hidden">
+                          <div className="card-header d-flex align-items-center">
+                            <h5 className="card-title flex-grow-1 mb-0">
+                              Détails de la réclamation
+                            </h5>
+                            <div className="flex-shrink-0">
+                              <Button
+                                type="button"
+                                className="btn btn-warning btn-label m-1"
+                              >
+                                <i className="bi bi-file-earmark-arrow-down label-icon align-middle fs-16 me-2"></i>
+                                Pièce-jointe
+                              </Button>
+                            </div>
                           </div>
-                          <h6 className="fs-16">
-                            CIN: <span className="text-muted">{state.state?.CIN!}</span>
-                          </h6>
-                          <h6 className="fs-16">
-                            Tél: <span className="text-muted">{state.state?.CIN!}</span>
-                          </h6>
-
-                          {/* <div className="hstack gap-2">
-                                                    <Button variant="primary">Invite to Project</Button>
-                                                    <Button variant='soft-info' className="btn-icon"><i className="bi bi-chat-left-text"></i></Button>
-
-                                                    <Dropdown role="button">
-                                                        <Dropdown.Toggle as="a" className="btn btn-soft-danger btn-icon arrow-none">
-                                                            <i className="bi bi-three-dots-vertical"></i>
-                                                        </Dropdown.Toggle>
-                                                        <Dropdown.Menu as="ul" className="dropdown-menu">
-                                                            <li><Link className="dropdown-item" to="#">Action</Link></li>
-                                                            <li><Link className="dropdown-item" to="#">Another action</Link></li>
-                                                            <li><Link className="dropdown-item" to="#">Something else here</Link></li>
-                                                        </Dropdown.Menu>
-                                                    </Dropdown>
-                                                </div> */}
-                        </Col>
-                        <Col xl={4} md={7}>
-                          <div>
-                            <h5 className="fs-20">Demande</h5>
-                            <ul className="list-inline mb-4">
-                              <li className="list-inline-item">
-                                <h6 className="fs-16 ">
-                                  Type:{" "}
-                                  <span className="text-muted">
-                                    {state.state?.type!}/
-                                    {state.state?.soustype!}
-                                  </span>
-                                </h6>
-                                <h6 className="fs-16" >
-                                  Langue:{" "}
-                                  <span className="badge bg-info-subtle text-info">
-                                    Francais
-                                  </span>
-                                </h6>
-                                <h6 className="fs-16">
-                                  Nombre de copie:{" "}
-                                  <span className="badge bg-secondary-subtle text-info">
-                                    1
-                                  </span>
-                                </h6>
-                                <h6 className="fs-16">
-                                  Date de création:{" "}
-                                  <span className="text-muted">
-                                    {state.state?.date!}
-                                  </span>
-                                </h6>
-                                <div className="d-flex align-items-center">
-                                <h6 className="fs-16 mr-2">
-                                    Statut: </h6><select
-                                  className="form-select mb-3 fs-16"
-                                  aria-label="Default select example"
-                                >
-                                  <option selected>
-                                   {state.state?.status!}
-                                  </option>
-                                  <option value="1">En cours</option>
-                                  <option value="2">Traité</option>
-                                </select>
-                                
-                                </div>
-                              </li>
-                            </ul>
+                          <div className="card-body">
+                            <div className="text-center">
+                              <i className="bi bi-card-list fs-1 text-muted"></i>
+                            </div>
+                            <div className="table-responsive">
+                              <table className="table table-sm table-borderless align-middle description-table mb-0">
+                                <tbody>
+                                  <tr>
+                                    <td className="">Description:</td>
+                                    <td>
+                                      <span className="mb-1 ">
+                                       {location.state.description}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td className="">Date de création</td>
+                                    <td>{location.state.createdAt}</td>
+                                  </tr>
+                                  <tr>
+                                    <td className="">Date d'exécution</td>
+                                    <td>{location.state.updatedAt}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>Réponse :</td>
+                                    <td className="d-flex align-items-center">
+                                      <textarea
+                                        className="form-control  muted-placeholder me-2"
+                                        id="basiInput"
+                                        placeholder="Taper votre réponse"
+                                        rows={2}
+                                      ></textarea>
+                                      <button
+                                        type="button"
+                                        className="btn btn-success btn-icon"
+                                      >
+                                        <i className="bi bi-send"></i>
+                                      </button>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td className="">Etat:</td>
+                                    <span className="badge bg-danger-subtle text-danger">
+                                      en cours
+                                    </span>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
                           </div>
-                        </Col>
-                      </Row>
-                    </Card.Body>
+                          {/* <img
+                  src={file}
+                  alt=""
+                  className="img-fluid category-img object-fit-cover"
+                /> */}
+                        </Card>
+                      </Col>
+          </Row>
                   </Card>
                 </Card.Body>
               </Card>
             </Col>
-            
           </Row>
-          <Row>
-          <Col lg={12}>
-                          <div className="hstack gap-2 justify-content-end">
-                            <Button
-                              variant="primary"
-                              id="add-btn"
-                              type="submit"
-                            >
-                              Modifier la Demande
-                            </Button>
-                          </div>
-                        </Col>
-          </Row>
+          
+         
         </Container>
       </div>
     </React.Fragment>
