@@ -4,87 +4,155 @@ import {
   Card,
   Col,
   Container,
-  Dropdown,
   Form,
-  Image,
   InputGroup,
   Row,
 } from "react-bootstrap";
-import Breadcrumb from "Common/BreadCrumb";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Flatpickr from "react-flatpickr";
 import Dropzone from "react-dropzone";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import SimpleBar from "simplebar-react";
-import country from "Common/country";
 import Swal from "sweetalert2";
-
-import flatpickr from "flatpickr";
+import { useAddAvisEnseignantMutation, AvisEnseignant } from "features/avisEnseignant/avisEnseignantSlice";
+import { useFetchDepartementsQuery, Departement} from "features/departement/departement"
 import "flatpickr/dist/flatpickr.min.css";
-
-import { useSelector } from "react-redux";
 import Select from "react-select";
+import { RootState } from 'app/store';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from 'features/account/authSlice'; 
 
-const AjouterAvisPersonnel = () => {
-  document.title = "Ajouter Avis Personnel | Smart Institute";
+
+const AjouterAvisEnseignant = () => {
+  document.title = "Ajouter Avis Enseignant | Smart University";
+
+  const user = useSelector((state: RootState) => selectCurrentUser(state));
+
   const navigate = useNavigate();
+const [addAvisEnseignant] = useAddAvisEnseignantMutation();
+const { data: departements } = useFetchDepartementsQuery();
+const departement: Departement[] = Array.isArray(departements) ? departements : [];
 
-  // description editor
-  const editorRef = useRef<any>();
-  const [editor, setEditor] = useState(false);
-  const { CKEditor, ClassicEditor }: any = editorRef.current || {};
 
-  useEffect(() => {
-    editorRef.current = {
-      CKEditor: require("@ckeditor/ckeditor5-react").CKEditor,
-      ClassicEditor: require("@ckeditor/ckeditor5-build-classic"),
-    };
-    setEditor(true);
-  }, []);
 
-  const [data, setData] = useState("");
-  // end description editor
-  // dropZone
-  const [selectedFiles, setSelectedFiles] = useState([]);
+const [formData, setFormData] = useState<Partial<AvisEnseignant>>({
+  _id: "",
+  title: "",
+  description: "",
+  auteurId:user?._id,
+  date_avis: "",
+  lien: "",
+  pdf: "",
+  pdfBase64String: "",
+  pdfExtension: "",
+  gallery: [],
+  galleryBase64Strings: [],
+  galleryExtensions: [],
+  createdAt:""
+});
+const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  setFormData((prevState) => ({
+    ...prevState,
+    [e.target.id]: e.target.value,
+  }));
+};
 
-  function handleAcceptedFiles(files: any) {
-    files.map((file: any) =>
-      Object.assign(file, {
-        preview: URL.createObjectURL(file),
-        formattedSize: formatBytes(file.size),
-      })
-    );
-    setSelectedFiles(files);
-  }
+const onSelectChange = (selectedOption: any) => {
+  setFormData((prevState) => ({
+    ...prevState,
+    departement: selectedOption.value,
+  }));
+};
 
-  function formatBytes(bytes: any, decimals = 2) {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+const onDescriptionChange = (event: any, editor: any) => {
+  const data = editor.getData();
+  setFormData((prevState) => ({
+    ...prevState,
+    description: data,
+  }));
+};
 
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-  }
+const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-  const handleDeleteFile = (indexToRemove: number) => {
-    setSelectedFiles((prevFiles) => {
-      // Create a new array excluding the file at the specified index
-      const updatedFiles = prevFiles.filter(
-        (file, index) => index !== indexToRemove
-      );
-      return updatedFiles;
-    });
-  };
-  // end dropZone
-
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const handleDateChange = (selectedDates: Date[]) => {
-    // Assuming you only need the first selected date
+const handleDateChange = (selectedDates: Date[]) => {
+  if (selectedDates.length > 0) {
     setSelectedDate(selectedDates[0]);
-  };
+  } else {
+    setSelectedDate(null);
+  }
+};
 
+const onSubmitAvisEnseignant = (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  addAvisEnseignant(formData).then(() => setFormData(formData));
+  notify();
+  navigate("/avis-personnel/liste-avis-personnel");
+};
+
+const notify = () => {
+  Swal.fire({
+    position: "center",
+    icon: "success",
+    title: "Avis has been created successfully",
+    showConfirmButton: false,
+    timer: 2000,
+  });
+};
+
+function convertToBase64(file: File): Promise<{ base64Data: string; extension: string }> {
+  return new Promise((resolve, reject) => {
+    const fileReader = new FileReader();
+    fileReader.onload = () => {
+      const base64String = fileReader.result as string;
+      const [, base64Data] = base64String.split(","); // Extract only the Base64 data
+      const extension = file.name.split(".").pop() ?? ""; // Get the file extension
+      resolve({ base64Data, extension });
+    };
+    fileReader.onerror = (error) => {
+      reject(error);
+    };
+    fileReader.readAsDataURL(file);
+  });
+}
+
+const handleAcceptedFiles = async (files: File[]) => {
+  const base64Images = await Promise.all(
+    files.map(async (file: File) => {
+      const { base64Data, extension } = await convertToBase64(file);
+     
+      return {
+        base64Data,
+        extension,
+        fileName: file.name
+      };
+    })
+  );
+  
+  setFormData((prevState) => ({
+    ...prevState,
+    gallery: base64Images.map(img => img.base64Data + "." + img.extension),
+    galleryBase64Strings: base64Images.map(img => img.base64Data),
+    galleryExtensions: base64Images.map(img => img.extension)
+  }));
+};
+console.log("galleryExtension", formData)
+const handleDeleteFile = (indexToRemove: number) => {
+  setFormData((prevData) => {
+    const newGallery = prevData.gallery?.filter((_, index) => index !== indexToRemove);
+    const newGalleryBase64Strings = prevData.galleryBase64Strings?.filter((_, index) => index !== indexToRemove);
+    const newGalleryExtension = prevData.galleryExtensions?.filter((_, index) => index !== indexToRemove);
+
+    return {
+      ...prevData,
+      gallery: newGallery,
+      galleryBase64Strings: newGalleryBase64Strings,
+      galleryExtensions: newGalleryExtension
+    };
+  });
+};
+
+ 
+  
   return (
     <React.Fragment>
       <div className="page-content">
@@ -92,20 +160,6 @@ const AjouterAvisPersonnel = () => {
           <Row>
             <Col lg={12}>
               <Card>
-                {/* <Card.Header>
-                  <div className="d-flex">
-                    <div className="flex-shrink-0 me-3">
-                      <div className="avatar-sm">
-                        <div className="avatar-title rounded-circle bg-light text-primary fs-20">
-                          <i className="bi bi-person-workspace"></i>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex-grow-1">
-                      <h5 className="card-title mb-1">Employee's Account</h5>
-                    </div>
-                  </div>
-                </Card.Header> */}
                 <Card.Body>
                   <Card.Header>
                     <div className="d-flex">
@@ -117,31 +171,33 @@ const AjouterAvisPersonnel = () => {
                         </div>
                       </div>
                       <div className="flex-grow-1">
-                        <h5 className="card-title">Nouvel Avis Personnel</h5>
+                        <h5 className="card-title">Nouvel Avis Enseignant</h5>
                       </div>
                     </div>
                   </Card.Header>
                   <Card.Body></Card.Body>
                   <div className="mb-3">
-                    <Form className="tablelist-form">
-                      <input type="hidden" id="id-field" />
+                    <Form className="tablelist-form"  onSubmit={onSubmitAvisEnseignant}>
+                      <input type="hidden" id="id-field" value={formData._id} />
                       <Row>
                         <Row>
                           {/* First Name  == Done */}
-                          <Col lg={6}>
+                          <Col lg={4}>
                             <div className="mb-3">
-                              <Form.Label htmlFor="titre">
+                              <Form.Label htmlFor="title">
                                 <h4 className="card-title mb-0">Titre</h4>
                               </Form.Label>
                               <Form.Control
                                 type="text"
-                                id="Titre"
+                                id="title"
+                                value={formData.title ?? ""}
+                                onChange={onChange}
                                 placeholder="Titre"
                                 // required
                               />
                             </div>
                           </Col>
-                          <Col lg={6}>
+                          <Col lg={4}>
                             <div className="mb-3">
                               <Form.Label htmlFor="dateOfBirth">
                                 <h4 className="card-title mb-0">Date</h4>
@@ -158,39 +214,30 @@ const AjouterAvisPersonnel = () => {
                               />
                             </div>
                           </Col>
+                          <Col lg={4} md={6}>
+                            <div className="mb-3">
+                              <Form.Label htmlFor="choices-multiple-remove-button">
+                                <h4 className="card-title mb-0">Département</h4>
+                              </Form.Label>
+                              <Select
+                          options={departement.map(c => ({ value: c._id, label: c.name_fr }))}
+                          onChange={onSelectChange}
+                          isMulti
+                        />
+                            </div>
+                          </Col>
                         </Row>
                         <Row>
                           <Col lg={12}>
-                            <Card>
-                              <Card.Header>
-                                <h4 className="card-title mb-0">Description</h4>
-                              </Card.Header>
-                              <Card.Body>
-                                {editor ? (
-                                  <CKEditor
-                                    editor={ClassicEditor}
-                                    data={data}
-                                    onReady={(editor: any) => {
-                                      // You can store the "editor" and use when it is needed.
-                                      console.log(
-                                        "Editor is ready to use!",
-                                        editor
-                                      );
-                                    }}
-                                    onChange={(event: any, editor: any) => {
-                                      const data = editor.getData();
-                                      setData(data);
-                                    }}
-                                  />
-                                ) : (
-                                  <p>ckeditor5</p>
-                                )}
-
-                                {/* <div className="snow-editor" style={{ height: 300 }}>
-                                        <div ref={quillRef} />
-                                    </div> */}
-                              </Card.Body>
-                            </Card>
+                          <div className="mb-3">
+                          <Form.Label>Description</Form.Label>
+                        <CKEditor
+                          editor={ClassicEditor}
+                          data={formData.description}
+                          onChange={onDescriptionChange}
+                          id="description"
+                        />
+                          </div>
                           </Col>
                         </Row>
 
@@ -201,17 +248,25 @@ const AjouterAvisPersonnel = () => {
                                 htmlFor="legalcardBase64String"
                                 className="form-label"
                               >
-                                <h4 className="card-title mb-0">
-                                  Fichier (pdf)
-                                </h4>
+                                Fichier (pdf)
                               </label>
                               <Form.Control
-                                name="legalcardBase64String"
                                 type="file"
-                                id="legalcardBase64String"
                                 accept=".pdf"
-                                placeholder="Choose File"
+                                
                                 className="text-muted"
+                                onChange={async (e) => {
+                                  const input = e.target as HTMLInputElement;
+                                  const file = input.files?.[0];
+                                  if (file) {
+                                    const { base64Data, extension } = await convertToBase64(file);
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      pdfBase64String: base64Data,
+                                      pdfExtension: extension,
+                                    }));
+                                  }
+                                }}
 
                                 // required
                               />
@@ -229,16 +284,19 @@ const AjouterAvisPersonnel = () => {
                                 className="input-group-text"
                                 id="basic-addon3"
                               >
-                                Insérer un lien
+                               Insérer un lien
                               </span>
                               <Form.Control
                                 type="text"
-                                id="basic-url"
+                                id="lien"
+                                value={formData.lien}
+                                onChange={onChange}
                                 aria-describedby="basic-addon3"
                               />
                             </InputGroup>
                           </Col>
                         </Row>
+
                         <Row>
                           <Col lg={12}>
                             <Card>
@@ -263,83 +321,37 @@ const AjouterAvisPersonnel = () => {
                               </Card.Header>
                               <Card.Body>
                                 <div className="dropzone my-dropzone">
-                                  <Dropzone
-                                    onDrop={(acceptedFiles) => {
-                                      handleAcceptedFiles(acceptedFiles);
-                                    }}
-                                  >
-                                    {({ getRootProps, getInputProps }) => (
-                                      <div className="dropzone dz-clickable text-center">
-                                        <div
-                                          className="dz-message needsclick"
-                                          {...getRootProps()}
-                                        >
-                                          <div className="mb-3">
-                                            <i className="display-4 text-muted ri-upload-cloud-2-fill" />
-                                          </div>
-                                          <h5>
-                                          Déposez des photos ici ou cliquez pour télécharger.
-                                          </h5>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </Dropzone>
-                                  <div
-                                    className="list-unstyled mb-0"
-                                    id="file-previews"
-                                  >
-                                    {selectedFiles.map((f: any, i: number) => {
-                                      return (
-                                        <Card
-                                          className="mt-1 mb-0 shadow-none border dz-preview dz-processing dz-image-preview dz-success dz-image  dz-complete"
-                                          key={i + "-file"}
-                                        >
-                                          <div className="p-2">
-                                            <Row className="align-items-center">
-                                              <Col className="col-auto">
-                                                <div className="image">
-                                                  <img
-                                                    // data-dz-thumbnail=""
-                                                    className="avatar-sm rounded bg-light"
-                                                    alt={f.name}
-                                                    src={f.preview}
-                                                  />
-                                                </div>
-                                              </Col>
-                                              <Col>
-                                                <Link
-                                                  to="#"
-                                                  className="text-muted font-weight-bold"
-                                                >
-                                                  {f.name}
-                                                </Link>
-                                                <p className="mb-0">
-                                                  <strong>
-                                                    {f.formattedSize}
-                                                  </strong>
-                                                </p>
-                                              </Col>
-                                              <Col className="col-auto">
-                                                <button
-                                                  type="button"
-                                                  className="btn btn-danger btn-sm"
-                                                  onClick={() =>
-                                                    handleDeleteFile(i)
-                                                  }
-                                                >
-                                                  Delete
-                                                </button>
-                                              </Col>
-                                            </Row>
-                                          </div>
-                                        </Card>
-                                      );
-                                    })}
-                                  </div>
+                                <Dropzone onDrop={(acceptedFiles) => handleAcceptedFiles(acceptedFiles)}>
+                          {({ getRootProps, getInputProps }) => (
+                            <div className="dropzone dz-clickable text-center" {...getRootProps()}>
+                              <div className="dz-message needsclick">
+                                <div className="mb-3">
+                                  <i className="display-4 text-muted ri-upload-cloud-2-fill" />
                                 </div>
-                                <div className="error-msg mt-1">
-                                  Please add a product images.
+                                <h5>
+                                  Déposez des photos ici ou cliquez pour télécharger.
+                                </h5>
+                              </div>
+                              <input {...getInputProps()} />
+                            </div>
+                          )}
+                        </Dropzone>
+                        <div className="mt-3">
+                          {formData.gallery?.map((image, index) => (
+                            <div key={index} className="image-preview">
+                              <img src={image} alt={`Image ${index + 1}`} className="img-thumbnail" />
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                onClick={() => handleDeleteFile(index)}
+                              >
+                                Supprimer
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
                                 </div>
+                               
                               </Card.Body>
                             </Card>
                           </Col>
@@ -352,7 +364,7 @@ const AjouterAvisPersonnel = () => {
                               id="add-btn"
                               type="submit"
                             >
-                              Ajouter Avis Etudiant
+                              Enregistrer
                             </Button>
                           </div>
                         </Col>
@@ -369,4 +381,6 @@ const AjouterAvisPersonnel = () => {
   );
 };
 
-export default AjouterAvisPersonnel;
+export default AjouterAvisEnseignant;
+
+

@@ -26,8 +26,8 @@ import file from "assets/images/demande.png";
 
 const SingleReclamationEnseignant = () => {
   document.title = "Réclamation Enseignant | Smart University";
-  const state = useLocation();
-  console.log("state", state);
+  const location = useLocation();
+  console.log("state", location);
   const navigate = useNavigate();
   const Navigate = () => {
     navigate("/accountEnseignant");
@@ -94,7 +94,7 @@ const SingleReclamationEnseignant = () => {
                                     <td className="">Nom et prénom:</td>
                                     <td>
                                       <span className="mb-1 ">
-                                        {state.state?.etudiant!}
+                                      {location.state?.enseignantId?.nom_fr!} {location.state?.enseignantId?.prenom_fr!}
                                       </span>
                                     </td>
                                   </tr>
@@ -102,7 +102,7 @@ const SingleReclamationEnseignant = () => {
                                     <td className="">Matricule:</td>
                                     <td>
                                       <span className="mb-1 ">
-                                        {state.state?.CIN!}
+                                      {location.state?.enseignantId?.identifinat_unique!}
                                       </span>
                                     </td>
                                   </tr>
@@ -110,7 +110,7 @@ const SingleReclamationEnseignant = () => {
                                     <td className="">Département:</td>
                                     <td>
                                       <span className="mb-1 ">
-                                        {state.state?.classe!}
+                                      {location.state?.enseignantId?.departements?.name_fr!}
                                       </span>
                                     </td>
                                   </tr>
@@ -118,7 +118,7 @@ const SingleReclamationEnseignant = () => {
                                     <td className="">Téléphone</td>
                                     <td>
                                       <span className="mb-1 ">
-                                        {state.state?.CIN!}
+                                      {location.state?.enseignantId?.num_phone1!}
                                       </span>
                                     </td>
                                   </tr>

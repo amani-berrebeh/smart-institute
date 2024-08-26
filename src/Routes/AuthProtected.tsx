@@ -38,7 +38,6 @@ useEffect(() => {
         user: res 
       };
       dispatch(setCredentials(user));
-      console.log(res);
       if(urlPath === "/"){
         setCanAccess(true);
       } else if(urlPath !== "/"){

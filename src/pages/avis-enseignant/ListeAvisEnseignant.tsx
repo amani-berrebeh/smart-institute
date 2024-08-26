@@ -7,19 +7,28 @@ import { userList } from "Common/data";
 import Flatpickr from "react-flatpickr";
 import dummyImg from "../../assets/images/users/user-dummy-img.jpg"
 import { Link } from 'react-router-dom';
-
-import { actionAuthorization } from 'utils/pathVerification';
 import { RootState } from 'app/store';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from 'features/account/authSlice'; 
+import { actionAuthorization } from 'utils/pathVerification';
+import { useFetchAvisEnseignantQuery, AvisEnseignant } from "features/avisEnseignant/avisEnseignantSlice";
 
 
-const ListeAvisEnseignant = () => {
+const ListeAvisEtudiant = () => {
     document.title = "Avis Enseignant | Smart Institute";
+
     const user = useSelector((state: RootState) => selectCurrentUser(state));
+
+    const { data: avisEnseignant, error, isLoading } = useFetchAvisEnseignantQuery();
+console.log("avisenseignat", avisEnseignant)
 
     const [modal_AddUserModals, setmodal_AddUserModals] = useState<boolean>(false);
     const [isMultiDeleteButton, setIsMultiDeleteButton] = useState<boolean>(false)
+ // State for PDF modal
+ const [showPdfModal, setShowPdfModal] = useState<boolean>(false);
+ const [pdfUrl, setPdfUrl] = useState<string>("");
+
+
     function tog_AddUserModals() {
         setmodal_AddUserModals(!modal_AddUserModals);
     }
@@ -46,75 +55,68 @@ const ListeAvisEnseignant = () => {
         ele.length > 0 ? setIsMultiDeleteButton(true) : setIsMultiDeleteButton(false);
     }
 
+    const handleShowPdfModal = (fileName: string) => {
+      let link= 'http://localhost:5000/files/avisEnseignantFiles/pdf/'+fileName
+    
+        setPdfUrl(link);
+        setShowPdfModal(true);
+    }
+
+    const handleClosePdfModal = () => {
+        setShowPdfModal(false);
+        setPdfUrl("");}
+
     const columns = useMemo(
         () => [
-            // {
-            //     Header: (<div className="form-check">
-            //         <input className="form-check-input" type="checkbox" id="checkAll" onClick={() => checkedAll()} />
-            //     </div>),
-            //     Cell: (cellProps: any) => {
-            //         return (
-            //             <div className="form-check">
-            //                 <input className="userCheckBox form-check-input" type="checkbox" name="chk_child" value={cellProps.row.original.id} onChange={() => checkedbox()} />
-            //             </div>
-            //         );
-            //     },
-            //     id: '#',
-            // },
-            // {
-            //     Header: "ID",
-            //     accessor: "id",
-            //     disableFilters: true,
-            //     filterable: true,
-            // },
-            // {
-            //     Header: "Image",
-            //     disableFilters: true,
-            //     filterable: true,
-            //     accessor: (cellProps: any) => {
-            //         return (<div className="d-flex align-items-center gap-2">
-            //             <div className="flex-shrink-0">
-            //                 <img src={cellProps.user_img} alt="" className="avatar-xs rounded-circle user-profile-img" />
-            //             </div>
-            //             {/* <div className="flex-grow-1 ms-2 user_name">{cellProps.user_name}</div> */}
-            //         </div>)
-            //     }
-            // },
-
-           
+        
             {
                 Header: "Titre",
                 accessor: "title",
                 disableFilters: true,
                 filterable: true,
             },
-            {
-                Header: "Description",
-                accessor: "",
-                disableFilters: true,
-                filterable: true,
-            },
-            {
-                Header: "Date",
-                accessor: "",
-                disableFilters: true,
-                filterable: true,
-            },
+          
             // {
-            //     Header: "Account Status",
+            //     Header: "Date",
+            //     accessor: "date_avis",
             //     disableFilters: true,
             //     filterable: true,
-            //     accessor: (cellProps: any) => {
-            //         switch (cellProps.status) {
-            //             case "Active":
-            //                 return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
-            //             case "Inactive":
-            //                 return (<span className="badge bg-danger-subtle text-danger"> {cellProps.status}</span>)
-            //             default:
-            //                 return (<span className="badge bg-success-subtle text-success"> {cellProps.status}</span>)
-            //         }
-            //     },
             // },
+            {
+                Header: "Auteur",
+                accessor: (row: any) => row.auteurId?.name || "",
+                disableFilters: true,
+                filterable: true,
+            },
+            {
+                Header: "PDF",
+                accessor: "pdf",
+                disableFilters: true,
+                filterable: true,
+                Cell: ({ row }: any) => (
+                    <Button
+                        variant="link"
+                        onClick={() => handleShowPdfModal(row.original.pdf)}
+                    >
+                        Ouvrir PDF
+                    </Button>
+                )
+            },
+            {
+                Header: "Lien",
+                accessor: "lien",
+                disableFilters: true,
+                filterable: true,
+                Cell: ({ cell: { value } }: any) => (
+                    <Button
+                        variant="link"
+                        onClick={() => window.open(value, "_blank")}
+                    >
+                        Aller au lien
+                    </Button>
+                )
+            },
+      
             {
                 Header: "Action",
                 disableFilters: true,
@@ -122,78 +124,77 @@ const ListeAvisEnseignant = () => {
                 accessor: (cellProps: any) => {
                     return (
                         <ul className="hstack gap-2 list-unstyled mb-0">
-                             {actionAuthorization("/avis-enseignant/single-avis-enseignant",user?.permissions!)?
-                             <li>
-                             <Link
-                               to="/avis-enseignant/single-avis-enseignant"
-                               state={cellProps}
-                               className="badge bg-info-subtle text-info view-item-btn"
-                               data-bs-toggle="offcanvas"
-                             >
-                               <i
-                                 className="ph ph-eye"
-                                 style={{
-                                   transition: "transform 0.3s ease-in-out",
-                                   cursor: "pointer",
-                                   fontSize: "1.5em",
-                                 }}
-                                 onMouseEnter={(e) =>
-                                   (e.currentTarget.style.transform = "scale(1.4)")
-                                 }
-                                 onMouseLeave={(e) =>
-                                   (e.currentTarget.style.transform = "scale(1)")
-                                 }
-                               ></i>
-                             </Link>
-                           </li> : <></>
-                            }
-              
+              {actionAuthorization("/avis-enseignant/single-avis-enseignant",user?.permissions!)?
               <li>
-              <Link
-                to="#"
-                className="badge bg-success-subtle text-success edit-item-btn"
-              >
-                <i
-                  className="ph ph-pencil-line"
-                  style={{
-                    transition: "transform 0.3s ease-in-out",
-                    cursor: "pointer",
-                    fontSize: "1.5em",
-                  }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.transform = "scale(1.4)")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.transform = "scale(1)")
-                  }
-                ></i>
-              </Link>
-            </li>
-            {actionAuthorization("/avis-enseignant/supprimer-avis-enseignant",user?.permissions!)?
-            <li>
-            <Link
-              to="#"
-              className="badge bg-danger-subtle text-danger remove-item-btn"
-             
-            >
-              <i
-                className="ph ph-trash"
-                style={{
-                  transition: "transform 0.3s ease-in-out",
-                  cursor: "pointer",
-                  fontSize: "1.5em",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.transform = "scale(1.4)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.transform = "scale(1)")
-                }
-              ></i>
-            </Link>
-          </li> : <></>
-        }
-              
+                <Link
+                  to="/avis-enseignant/single-avis-enseignant"
+                  state={cellProps}
+                  className="badge bg-info-subtle text-info view-item-btn"
+                  data-bs-toggle="offcanvas"
+                >
+                  <i
+                    className="ph ph-eye"
+                    style={{
+                      transition: "transform 0.3s ease-in-out",
+                      cursor: "pointer",
+                      fontSize: "1.5em",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.4)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  ></i>
+                </Link>
+              </li> : <></>
+                } 
+                  {actionAuthorization("/avis-enseignant/edit-avis-enseignant",user?.permissions!)?
+             <li>
+                <Link
+                  to="#GroupDetails"
+                  className="badge bg-success-subtle text-success edit-item-btn"
+                >
+                  <i
+                    className="ph ph-pencil-line"
+                    style={{
+                      transition: "transform 0.3s ease-in-out",
+                      cursor: "pointer",
+                      fontSize: "1.5em",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.4)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  ></i>
+                </Link>
+              </li>
+              :<></> }
+              {actionAuthorization("/avis-enseignant/supprimer-avis-enseignant",user?.permissions!)?
+              <li>
+                <Link
+                  to="#"
+                  className="badge bg-danger-subtle text-danger remove-item-btn"
+                 
+                >
+                  <i
+                    className="ph ph-trash"
+                    style={{
+                      transition: "transform 0.3s ease-in-out",
+                      cursor: "pointer",
+                      fontSize: "1.5em",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.4)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  ></i>
+                </Link>
+              </li> :<></> }
             </ul>
                     )
                 },
@@ -207,6 +208,8 @@ const ListeAvisEnseignant = () => {
             <div className="page-content">
                 <Container fluid={true}>
                     <Breadcrumb title="Liste des Avis" pageTitle="More" />
+
+                  
 
                     <Row id="usersList">
                         <Col lg={12}>
@@ -222,22 +225,7 @@ const ListeAvisEnseignant = () => {
 
                                         {isMultiDeleteButton && <Button variant="danger" className="btn-icon"><i className="ri-delete-bin-2-line"></i></Button>}
 
-                                        {/* <Col sm={3} className="col-lg-auto ms-auto">
-                                            <Button onClick={() => tog_AddUserModals()} variant='primary' type="button" className="w-100 add-btn">
-                                                Add User
-                                            </Button>
-                                        </Col> */}
-                                        {/* <Col sm={9} className="col-lg-auto">
-                                            <select className="form-select" data-choices data-choices-search-false name="choices-single-default" id="idStatus">
-                                                <option value="all">Tous</option>
-                                                <option value="Today">Today</option>
-                                                <option value="Yesterday">Yesterday</option>
-                                                <option value="Last 7 Days">Last 7 Days</option>
-                                                <option value="Last 30 Days">Last 30 Days</option>
-                                                <option defaultValue="This Month">This Month</option>
-                                                <option value="Last Month">Last Month</option>
-                                            </select>
-                                        </Col> */}
+                                     
                                     </Row>
                                 </Card.Body>
                             </Card>
@@ -246,7 +234,7 @@ const ListeAvisEnseignant = () => {
                                     
                                         <TableContainer
                                             columns={(columns || [])}
-                                            data={(userList || [])}
+                                            data={(avisEnseignant || [])}
                                             // isGlobalFilter={false}
                                             iscustomPageSize={false}
                                             isBordered={false}
@@ -268,79 +256,28 @@ const ListeAvisEnseignant = () => {
                         </Col>
                     </Row>
 
-                    <Modal className="fade" show={modal_AddUserModals} onHide={() => { tog_AddUserModals(); }} centered>
-                        <Modal.Header className="px-4 pt-4" closeButton>
-                            <h5 className="modal-title" id="exampleModalLabel">Add User</h5>
-                        </Modal.Header>
-                        <Form className="tablelist-form">
-                            <Modal.Body className="p-4">
-                                <div id="alert-error-msg" className="d-none alert alert-danger py-2"></div>
-                                <input type="hidden" id="id-field" />
-
-                                <div className="text-center">
-                                    <div className="position-relative d-inline-block">
-                                        <div className="position-absolute  bottom-0 end-0">
-                                            <label htmlFor="customer-image-input" className="mb-0" data-bs-toggle="tooltip" data-bs-placement="right" title="Select Image">
-                                                <div className="avatar-xs cursor-pointer">
-                                                    <div className="avatar-title bg-light border rounded-circle text-muted">
-                                                        <i className="ri-image-fill"></i>
-                                                    </div>
-                                                </div>
-                                            </label>
-                                            <Form.Control className="d-none" defaultValue="" id="users-image-input" type="file" accept="image/png, image/gif, image/jpeg" />
-                                        </div>
-                                        <div className="avatar-lg p-1">
-                                            <div className="avatar-title bg-light rounded-circle">
-                                                <img src={dummyImg} alt="dummyImg" id="users-img-field" className="avatar-md rounded-circle object-cover" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="mb-3">
-                                    <Form.Label htmlFor="user-name">User Name</Form.Label>
-                                    <Form.Control type="text" id="user-name-field" placeholder="Enter Name" required />
-                                </div>
-                                <div className="mb-3">
-                                    <Form.Label htmlFor="email-field">User Email</Form.Label>
-                                    <Form.Control type="email" id="email-field" placeholder="Enter Email" required />
-                                </div>
-
-                                <div className="mb-3">
-                                    <Form.Label htmlFor="date-field">Date</Form.Label>
-                                    <Flatpickr
-                                        className="form-control flatpickr-input"
-                                        placeholder='Select Date'
-                                        options={{
-                                            mode: "range",
-                                            dateFormat: "d M, Y",
-                                        }}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label htmlFor="account-status" className="form-label">Account Status</label>
-                                    <select className="form-select" required id="account-status-field">
-                                        <option defaultValue="">Account Status</option>
-                                        <option value="Active">Active</option>
-                                        <option value="Inactive">inactive</option>
-                                    </select>
-                                </div>
-                            </Modal.Body>
-                            <div className="modal-footer">
-                                <div className="hstack gap-2 justify-content-end">
-                                    <Button className="btn-ghost-danger" onClick={() => { tog_AddUserModals(); }}>Close</Button>
-                                    <Button variant='success' id="add-btn">Add User</Button>
-                                </div>
-                            </div>
-                        </Form>
-                    </Modal>
-
+                  
                 </Container >
                 
             </div >
+
+            {/* PDF Modal */}
+            <Modal show={showPdfModal} onHide={handleClosePdfModal} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>PDF Viewer</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <iframe
+                        src={pdfUrl}
+                        width="100%"
+                        height="600px"
+                        style={{ border: 'none' }}
+                        title="PDF Viewer"
+                    ></iframe>
+                </Modal.Body>
+            </Modal>
         </React.Fragment >
     );
 };
 
-export default ListeAvisEnseignant;
+export default ListeAvisEtudiant;

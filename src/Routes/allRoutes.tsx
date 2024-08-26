@@ -175,6 +175,12 @@ import EditDepartement from "pages/Departements/GestionDepartements/EditDepartem
 import SingleAdmin from "pages/Permissions/SingleAdmin";
 import EditAdmin from "pages/Permissions/EditAdmin";
 import HistoryAdmin from "pages/Permissions/HistoryAdmin";
+import TemplateBody from "pages/TemplateBody";
+import NewTemplateBody from "pages/TemplateBody/NewTemplateBody";
+import ShortCode from "pages/ShortCode";
+import NewShortCode from "pages/ShortCode/NewShortCode";
+import AjouterVariablesGlobales from "pages/VariableGlobal/AjouterVariableGlobale";
+import EditActualite from "pages/actualite/EditActualite";
 
 const authProtectedRoutes = [
     { path: "/dashboard", component: <Dashboard /> },
@@ -199,6 +205,9 @@ const authProtectedRoutes = [
     { path: "/actualite/liste-actualite", component: <ListeActualite /> },
     { path: "/actualite/ajouter-actualite", component: <AjouterActualite /> },
     { path: "/actualite/details-actualite", component: <SingleActualite /> },
+    { path: "/actualite/edit-actualite", component: <EditActualite /> },
+
+
 
    // gestion etudiant
    { path: "/gestion-etudiant/compte-etudiant", component: <MyAccount /> },
@@ -328,9 +337,15 @@ const authProtectedRoutes = [
 { path: "/admin/edit-admin", component: <EditAdmin /> },
 { path: "/admin/history-admin", component: <HistoryAdmin /> },
 
+//template Body
+{ path: "/template/liste-template-body", component: <TemplateBody /> },
+{ path: "/template/ajouter-template-body", component: <NewTemplateBody /> },
 
-
-
+//short code
+{ path: "/shortCode/liste-short-code", component: <ShortCode /> },
+{ path: "/shortCode/ajouter-short-code", component: <NewShortCode /> },
+// variable globale
+{ path: "/variable/ajouter-variables-globales", component: <AjouterVariablesGlobales /> },
 
 
     //Product

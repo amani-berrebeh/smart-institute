@@ -69,17 +69,17 @@ const SingleReclamationEtudiant = () => {
                       <Row className="justify-content-between gy-4">
                         <Col xl={3} md={5}>
                           <h5 className="fs-20"> 
-                            {location.state?.studentId.nom_fr!} {location.state?.studentId.prenom_fr!}
+                            {location.state?.studentId?.nom_fr!} {location.state?.studentId?.prenom_fr!}
                           </h5>
                           <div className="mb-3 text-muted">
                             <i className="bi bi-geo-alt"></i>{" "}
-                            {location.state?.studentId.groupe_classe!}
+                            {location.state?.studentId?.groupe_classe!}
                           </div>
                           <h6 className="fs-16">
-                            CIN: <span className="text-muted">{location.state?.studentId.num_CIN!}</span>
+                            CIN: <span className="text-muted">{location.state?.studentId?.num_CIN!}</span>
                           </h6>
                           <h6 className="fs-16">
-                            Tél: <span className="text-muted">{location.state?.studentId.num_phone!}</span>
+                            Tél: <span className="text-muted">{location.state?.studentId?.num_phone!}</span>
                           </h6>
 
                           {/* <div className="hstack gap-2">

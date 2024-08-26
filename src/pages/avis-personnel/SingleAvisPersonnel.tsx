@@ -1,97 +1,58 @@
+
 import React from "react";
-import { Button, Card, Col, Container, Nav, Row, Tab } from "react-bootstrap";
-import { Link, useLocation } from "react-router-dom";
-import { Carousel, Image } from "react-bootstrap";
+import { Button, Col, Container, Row, Carousel, Image } from "react-bootstrap";
+import { useLocation } from "react-router-dom";
 import Breadcrumb from "Common/BreadCrumb";
+import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
-// Import images
-import img1 from "assets/images/small/img-1.jpg";
-import img2 from "assets/images/small/img-2.jpg";
-import img3 from "assets/images/small/img-3.jpg";
-import img4 from "assets/images/small/img-4.jpg";
-import img5 from "assets/images/small/img-5.jpg";
-import img6 from "assets/images/small/img-6.jpg";
+const SingleAvisEnseignant = () => {
+  document.title = "Avis Enseignant | Smart University";
+  const location = useLocation();
+  const { title, gallery, description, auteurId, date_avis, createdAt, lien } = location.state;
 
-const SingleAvisPersonnel = () => {
-  document.title = "Avis Personnel | Smart Institute";
-  const state = useLocation();
-  console.log("state", state);
+    // Format the createdAt timestamp
+    const formattedDate = formatDistanceToNow(new Date(createdAt), { addSuffix: true, locale: fr });
 
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          <Breadcrumb title="Avis Personnel" pageTitle="Avis Personnel" />
-         
-          <Row className="align-items-center">
-            <Col lg={7} className="mt-2">
-              <div>
-                <Carousel controls={true} indicators={true}>
-                  <Carousel.Item>
-                    <Image
-                      className="rounded-start img-fluid h-100 object-cover"
-                      src={img1}
-                      alt="First slide"
-                    />
-                  </Carousel.Item>
-                  <Carousel.Item>
-                    <Image
-                      className="rounded-start img-fluid h-100 object-cover"
-                      src={img2}
-                      alt="Second slide"
-                    />
-                  </Carousel.Item>
-                  <Carousel.Item>
-                    <Image
-                      className="rounded-start img-fluid h-100 object-cover"
-                      src={img3}
-                      alt="Third slide"
-                    />
-                  </Carousel.Item>
-                </Carousel>
-              </div>
-            </Col>
-            <Col lg={5}>
-              <div className="mt-4 mt-lg-0 ml-0">
-                <p className="text-uppercase fw-medium text-muted">
-                  Best Products Sales
-                </p>
-                <h2 className="lh-base fw-semibold mb-3">
-                  {state.state.title}
-                </h2>
-                <p className="text-muted fs-16">
-                  A physical office space will promote collaboration and
-                  understanding. Having a physical location for your business
-                  allows you to put together the company that you want in an
-                  environment where employees can communicate with each other
-                  without having to go through any extra steps.
-                </p>
-               
-              </div>
-              <Row className="text-center">
-                 <Col lg={3} className="mt-2 d-flex justify-content-start">
-                 <Button type="button" className="btn btn-soft-primary btn-label btn-lg">
-                    <i className="bi bi-link-45deg label-icon align-middle fs-24 me-2"></i>{" "}
-                    Lien  
-                  </Button>
-                 </Col>
-                  
-                </Row>
+          <Breadcrumb title="Avis Enseignant" pageTitle="Avis Enseignant" />
 
-                <Row >
-                  <Col lg={3} className="mt-2 d-flex justify-content-start">
-                  <Button type="button" className="btn btn-soft-danger btn-label btn-lg">
-                    <i className="bi bi-filetype-pdf label-icon align-middle fs-24 me-2"></i>{" "}
-                    Fichier
-                  </Button>{" "}
-                  
-                  </Col>
-                 
-               
-                </Row>
-            
+          <Row className="justify-content-center">
+            <Col lg={8} className="mt-4">
+              <h5 className="display-4  mb-4">{title}</h5>
+              <Carousel controls={true} indicators={true} className="mb-4">
+                {gallery.map((photo:any, index:any) => (
+                  <Carousel.Item key={index}>
+                    <Image
+                      className="d-block w-100"
+                      src={`http://localhost:5000/files/avisPersonnelFiles/photo/${photo}`}
+                      alt={`Slide ${index + 1}`}
+                      style={{ maxHeight: '500px', objectFit: 'cover' }}
+                    />
+                  </Carousel.Item>
+                ))}
+              </Carousel>
+              <p className="text-muted mb-2">
+  <span className="fw-bold">Publié</span> <span className="text-secondary fw-bold">{formattedDate}</span>
+  <br />
+  <span className="fw-bold">par</span> <span className="fw-semibold text-primary fw-bold">{auteurId?.name}</span>
+</p>              <div className="mb-4" dangerouslySetInnerHTML={{ __html: description }}></div>
+
             </Col>
-            
+          </Row>
+
+          <Row className="justify-content-center">
+            <Col lg={8} className="text-center">
+              <Button variant="soft-primary" className="btn-sm mb-3 me-2">
+                <i className="bi bi-link-45deg fs-20 me-2"></i> Lien
+              </Button>
+              <Button variant="soft-danger" className="btn-sm mb-3">
+                <i className="bi bi-filetype-pdf fs-20 me-2"></i> Fichier
+              </Button>
+            </Col>
           </Row>
         </Container>
       </div>
@@ -99,4 +60,5 @@ const SingleAvisPersonnel = () => {
   );
 };
 
-export default SingleAvisPersonnel;
+export default SingleAvisEnseignant;
+

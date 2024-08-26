@@ -5,3 +5,5 @@ declare module 'lodash';
 declare module '@ckeditor/ckeditor5-react';
 declare module '@ckeditor/ckeditor5-build-classic';
 declare module 'file-saver';
+declare module 'react-html-parser';
+declare module 'dompurify';

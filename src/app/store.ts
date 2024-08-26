@@ -37,6 +37,12 @@ import { demandeEtudiantSlice } from "features/demandeEtudiant/demandeEtudiantSl
 import { demandePersonnelSlice } from "features/demandePersonnel/demandePersonnelSlice";
 import { demandeEnseignantSlice } from "features/demandeEnseignant/demandeEnseignantSlice"
 import { avisEtudiantSlice } from "features/avisEtudiant/avisEtudiantSlice";
+import { avisEnseignantSlice } from "features/avisEnseignant/avisEnseignantSlice";
+import { avisPersonnelSlice } from "features/avisPersonnel/avisPersonnelSlice";
+import { actualiteSlice } from "features/actualite/actualiteSlice";
+import { templateBodySlice } from "features/templateBody/templateBodySlice";
+import { shortCodeSlice } from "features/shortCode/shortCodeSlice";
+import { varibaleGlobaleSlice } from "features/variableGlobale/variableGlobaleSlice";
 
 export const store = configureStore({
     reducer: { 
@@ -69,6 +75,12 @@ export const store = configureStore({
     [enseignantSlice.reducerPath]: enseignantSlice.reducer,
     [personnelSlice.reducerPath]: personnelSlice.reducer,
     [avisEtudiantSlice.reducerPath]: avisEtudiantSlice.reducer,
+    [avisEnseignantSlice.reducerPath]: avisEnseignantSlice.reducer,
+    [avisPersonnelSlice.reducerPath]: avisPersonnelSlice.reducer,
+    [actualiteSlice.reducerPath]: actualiteSlice.reducer,
+    [templateBodySlice.reducerPath]: templateBodySlice.reducer,
+    [shortCodeSlice.reducerPath]: shortCodeSlice.reducer,
+    [varibaleGlobaleSlice.reducerPath]: varibaleGlobaleSlice.reducer,
 
       auth: authSlice,
       Layout: LayoutReducer,
@@ -106,7 +118,13 @@ export const store = configureStore({
         demandePersonnelSlice.middleware,
         demandeEtudiantSlice.middleware,
         demandeEnseignantSlice.middleware,
-        avisEtudiantSlice.middleware
+        avisEtudiantSlice.middleware,
+        avisEnseignantSlice.middleware,
+        avisPersonnelSlice.middleware,
+        actualiteSlice.middleware,
+        templateBodySlice.middleware,
+        shortCodeSlice.middleware,
+        varibaleGlobaleSlice.middleware
       ]
         
       );

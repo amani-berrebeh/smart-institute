@@ -1,70 +1,84 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export interface Actualite {
-id:number,
-titre:String,
-adresse:String,
-description:String,
-link:String,
-date:String
+  _id?: string;
+  title: string;
+  auteurId: string;
+  description: string;
+  category: string;
+  address: string;
+  date_actualite:  Date | null;
+  lien: string;
+  pdf: string;
+  pdfBase64String: string;
+  pdfExtension: string;
+  gallery: string[];
+  galleryBase64Strings: string[];
+  galleryExtensions: string[];
+  createdAt: string
 }
-export const ActualiteSlice = createApi({
-    reducerPath: "Actualite",
+  export const actualiteSlice = createApi({
+    reducerPath: 'actualiteApi',
     baseQuery: fetchBaseQuery({
-      baseUrl: "http://localhost:500/api/",
+      baseUrl: `${process.env.REACT_APP_API_URL}/actualite/`, // Adjust endpoint base URL
     }),
-    tagTypes: ["Actualite"],
+    tagTypes: ['Actualite'],
     endpoints(builder) {
       return {
-        fetchActualite: builder.query<Actualite[], number | void>({
+        fetchActualite: builder.query<Actualite, void>({
           query() {
-            return `/getAllActualite`;
+            return 'get-all-actualites';
           },
-          providesTags: ["Actualite"],
+          providesTags: ['Actualite'],
         }),
-        // fetchActualitesByCompany: builder.query<Actualite[], { id_corporate: string }>({
-        //   query({ id_corporate }) {
-        //     return {
-        //       url: `/getActualitesByIdCompany`,
-        //       method: "POST", 
-        //       body: { id_corporate }, 
-        //     };
-        //   },
-        //   providesTags: ["Actualite"],
-        // }),
-        addActualite: builder.mutation<void, Actualite>({
-          query(payload) {
+        fetchActualiteById: builder.query<Actualite, { _id: string }>({
+          query({ _id }) {
             return {
-              url: "/newActualite",
-              method: "POST",
-              body: payload,
+              url: 'get-actualite',
+              method: 'POST',
+              body: { _id },
             };
           },
-          invalidatesTags: ["Actualite"],
+          providesTags: ['Actualite'],
         }),
-        // updateActualite: builder.mutation<void, Actualite>({
-        //   query: ({ _id, ...rest }) => ({
-        //     url: `/updateActualite/${_id}`,
-        //     method: "PUT",
-        //     body: rest,
-        //   }),
-        //   invalidatesTags: ["Actualite"],
-        // }),
-        deleteActualite: builder.mutation<void, number>({
-          query: (_id) => ({
-            url: `deleteActualite/${_id}`,
-            method: "DELETE",
-          }),
-          invalidatesTags: ["Actualite"],
+        addActualite: builder.mutation<void, Partial<Actualite>>({
+          query(actualite) {
+            return {
+              url: 'add-actualite',
+              method: 'POST',
+              body: actualite,
+            };
+          },
+          invalidatesTags: ['Actualite'],
+        }),
+        updateActualite: builder.mutation<void, Actualite>({
+          query(actualite) {
+            return {
+              url: `edit-actualite`,
+              method: 'PUT',
+              body: actualite,  // Send the entire Actualite object
+            };
+          },
+          invalidatesTags: ['Actualite'],
+        }),
+        deleteActualite: builder.mutation<Actualite, { _id: string }>({
+          query(_id) {
+            return {
+              url: `delete-actualite`,
+              method: 'DELETE',
+              body:{ _id }
+            };
+          },
+          invalidatesTags: ['Actualite'],
         }),
       };
     },
   });
   
   export const {
-    useAddActualiteMutation,
     useFetchActualiteQuery,
+    useFetchActualiteByIdQuery,
+    useAddActualiteMutation,
+    useUpdateActualiteMutation,
     useDeleteActualiteMutation,
-    // useUpdateActualiteMutation,
-    // useFetchActualitesByCompanyQuery
-  } = ActualiteSlice;
+  } = actualiteSlice;

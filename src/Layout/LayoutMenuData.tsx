@@ -22,7 +22,6 @@ const Navdata = () => {
       // console.log('User permissions:', userPermissions);
     }
   }, [userPermissions, error, isLoading]);
-  console.log(userPermissions)
  
     const [isEcommerce, setIsEcommerce] = useState(false);
     const [isOrder, setIsOrder] = useState(false);
@@ -44,6 +43,7 @@ const Navdata = () => {
     const [isEnseignant, setIsEnseignant] = useState(false);
     const [isPersonnel, setIsPersonnel] = useState(false);
     const [isDeaprtement, setIsDeaprtement] = useState(false);
+    const [isModele, setIsModele] = useState(false);
     const [isLevel1, setIsLevel1] = useState(false);
     const [isLevel2, setIsLevel2] = useState(false);
     const [isLevel3, setIsLevel3] = useState(false);
@@ -132,6 +132,9 @@ const Navdata = () => {
           }
           if (iscurrentState !== "Departement") {
             setIsDeaprtement(false);
+          }
+          if (iscurrentState !== "Modele") {
+            setIsModele(false);
           }
           if (iscurrentState !== "ParametreEtudiant") {
             setIsParametreEtudiant(false);
@@ -882,6 +885,77 @@ const Navdata = () => {
               },
             ],
           },
+          //modele
+          {
+            id: "modele",
+            label: "Gestion des modèles",
+            icon: "bi bi-house-gear-fill",
+            link: "/#",
+            click: function (e: any) {
+              e.preventDefault();
+              setIsModele(!isModele);
+              setIscurrentState("Modele");
+              updateIconSidebar(e);
+            },
+            stateVariables: isModele,
+            subItems: [
+              {
+                id: "modele-liste",
+                label: "Corps du modèle",
+                icon: "bi bi-journals",
+                link: "/template/liste-template-body",
+                isChildItem: true,
+                click: function (e: any) {
+                  e.preventDefault();
+                  setIsLevel1(!isLevel1);
+                },
+                stateVariables: isLevel1,
+                childItems: [
+                  {
+                    id: 1,
+                    label: "Liste Des modeles",
+                    link: "/template/liste-template-body",
+                    icon: "bi bi-journal-text",
+                  },
+                  {
+                    id: 1,
+                    label: "Ajouter modele",
+                    link: "/template/ajouter-template-body",
+                    icon: "bi bi-journal-text",
+                  },
+                ],
+              },
+              {
+                id: "short-code",
+                label: "Code court",
+                icon: "bi bi-door-closed-fill",
+                link: "/shortCode/liste-short-code",
+                isChildItem: true,
+                click: function (e: any) {
+                  e.preventDefault();
+                  setIsLevel2(!isLevel2);
+                },
+                stateVariables: isLevel2,
+                childItems: [
+                  {
+                    id: 1,
+                    label: "Liste Des codes courts",
+                    link: "/shortCode/liste-short-code",
+                    icon: "bi bi-person-fill-exclamation",
+                  },
+                  {
+                    id: 1,
+                    label: "Ajouter Code Court",
+                    link: "/shortCode/ajouter-short-code",
+                    icon: "bi bi-person-fill-exclamation",
+                  },
+                ],
+              },
+            
+             
+            ],
+          },
+        
 
           {
             id: "telechargement",
@@ -894,6 +968,12 @@ const Navdata = () => {
             label: "Liens Utils",
             icon: "bi bi-link-45deg",
             link: "/liens-utils",
+          },
+          {
+            id: "variable-globales",
+            label: "Variables Globales",
+            icon: "bi bi-cloud-arrow-down-fill",
+            link: "/variable/ajouter-variables-globales",
           },
           // gestion des admins
           {

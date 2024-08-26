@@ -3,8 +3,9 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export interface Avis {
   _id: string;
   title: string;
+  auteurId: string;
   description: string;
-  groupe_classe: string;
+  groupe_classe: string[];
   date_avis: string;
   lien: string;
   pdf: string;
@@ -12,7 +13,8 @@ export interface Avis {
   pdfExtension: string;
   gallery: string[];
   galleryBase64Strings: string[];
-  galleryExtension: string[];
+  galleryExtensions: string[];
+  createdAt: string
 }
   export const avisEtudiantSlice = createApi({
     reducerPath: 'avisEtudiantApi',
@@ -48,7 +50,7 @@ export interface Avis {
           query(avisEtudiant) {
             const { _id, ...rest } = avisEtudiant;
             return {
-              url: `edit-demande-etudiant/${_id}`,
+              url: `edit-avis-etudiant/${_id}`,
               method: 'PUT',
               body: rest,
             };
@@ -58,7 +60,7 @@ export interface Avis {
         deleteAvisEtudiant: builder.mutation<void, string>({
           query(_id) {
             return {
-              url: `delete-demande-etudiant/${_id}`,
+              url: `delete-avis-etudiant/${_id}`,
               method: 'DELETE',
             };
           },

@@ -14,7 +14,7 @@ export interface Departement {
 export const departementSlice = createApi({
   reducerPath: "Departement",
   baseQuery: fetchBaseQuery({
-    baseUrl: `${process.env.REACT_APP_API_URL}/departement/`,
+    baseUrl: `${process.env.REACT_APP_API_URL}/department/`,
   }),
   tagTypes: ["Departement"],
   endpoints(builder) {

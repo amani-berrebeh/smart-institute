@@ -18,12 +18,16 @@ import Select from "react-select";
 import { useAddAvisEtudiantMutation, Avis } from "features/avisEtudiant/avisEtudiantSlice";
 import { Classe, useFetchClassesQuery } from "features/classe/classe";
 import { useNavigate } from "react-router-dom";
+import { RootState } from 'app/store';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from 'features/account/authSlice'; 
+
 
 const AjouterAvisEtudiant = () => {
-  document.title = "Ajouter Avis Etudiant | Smart Institute";
+  document.title = "Ajouter Avis Etudiant | Smart University";
   const navigate = useNavigate();
 
-  const [editor, setEditor] = useState(false);
+  const user = useSelector((state: RootState) => selectCurrentUser(state));
   const [addAvisEtudiant] = useAddAvisEtudiantMutation();
   const { data: classes } = useFetchClassesQuery();
   const classe: Classe[] = Array.isArray(classes) ? classes : [];
@@ -33,7 +37,8 @@ const AjouterAvisEtudiant = () => {
     _id: "",
     title: "",
     description: "",
-    groupe_classe: "",
+    auteurId:user?._id,
+    groupe_classe: [],
     date_avis: "",
     lien: "",
     pdf: "",
@@ -41,7 +46,8 @@ const AjouterAvisEtudiant = () => {
     pdfExtension: "",
     gallery: [],
     galleryBase64Strings: [],
-    galleryExtension: []
+    galleryExtensions: [],
+    createdAt:""
   });
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -80,7 +86,7 @@ const AjouterAvisEtudiant = () => {
     e.preventDefault();
     addAvisEtudiant(formData).then(() => setFormData(formData));
     notify();
-    // navigate("/dashboard");
+    navigate("/avis-etudiant/liste-avis-etudiant");
   };
 
   const notify = () => {
@@ -126,7 +132,7 @@ const AjouterAvisEtudiant = () => {
       ...prevState,
       gallery: base64Images.map(img => img.base64Data + "." + img.extension),
       galleryBase64Strings: base64Images.map(img => img.base64Data),
-      galleryExtension: base64Images.map(img => img.extension)
+      galleryExtensions: base64Images.map(img => img.extension)
     }));
   };
   console.log("galleryExtension", formData)
@@ -134,37 +140,18 @@ const AjouterAvisEtudiant = () => {
     setFormData((prevData) => {
       const newGallery = prevData.gallery?.filter((_, index) => index !== indexToRemove);
       const newGalleryBase64Strings = prevData.galleryBase64Strings?.filter((_, index) => index !== indexToRemove);
-      const newGalleryExtension = prevData.galleryExtension?.filter((_, index) => index !== indexToRemove);
+      const newGalleryExtension = prevData.galleryExtensions?.filter((_, index) => index !== indexToRemove);
 
       return {
         ...prevData,
         gallery: newGallery,
         galleryBase64Strings: newGalleryBase64Strings,
-        galleryExtension: newGalleryExtension
+        galleryExtensions: newGalleryExtension
       };
     });
   };
 
-  const customStyles = {
-    multiValue: (styles: any, { data }: any) => ({
-      ...styles,
-      backgroundColor: "#4b93ff",
-    }),
-    multiValueLabel: (styles: any, { data }: any) => ({
-      ...styles,
-      backgroundColor: "#4b93ff",
-      color: "white",
-    }),
-    multiValueRemove: (styles: any, { data }: any) => ({
-      ...styles,
-      color: "white",
-      backgroundColor: "#4b93ff",
-      ":hover": {
-        backgroundColor: "#4b93ff",
-        color: "white",
-      },
-    }),
-  };
+
 
   return (
     <React.Fragment>
@@ -218,6 +205,7 @@ const AjouterAvisEtudiant = () => {
                         <Select
                           options={classe.map(c => ({ value: c._id, label: c.nom_classe_fr }))}
                           onChange={onSelectChange}
+                          isMulti
                         />
                       </Form.Group>
 
